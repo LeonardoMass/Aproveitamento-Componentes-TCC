@@ -20,7 +20,6 @@ const UsersList = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [visibility, setVisibility] = useState({}); // Tracks visibility state for each user
 
   console.log(user);
   // Move the useUserFilters hook above any conditional returns
@@ -46,11 +45,6 @@ const UsersList = () => {
         handleApiResponse(data);
         setUsers(data);
         setFilteredUsers(data);
-        const initialVisibility = data.reduce((acc, user) => {
-          acc[user.id] = false;
-          return acc;
-        }, {});
-        setVisibility(initialVisibility);
       } catch (err) {
         console.log(err);
         setError(err.message || "An error occurred while fetching users.");
@@ -62,9 +56,6 @@ const UsersList = () => {
     fetchUsers();
   }, []);
 
-  const toggleVisibility = (id) => {
-    setVisibility((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   const handleEdit = (user) => setEditingUser(user);
 
@@ -182,10 +173,10 @@ const UsersList = () => {
                 <tr key={u.id}>
                   <td>{u.name ?? "N/A"}</td>
                   <td>{u.type ?? "N/A"}</td>
-                  <td>{visibility[u.id] ? u.email : "-"}</td>
-                  <td>{visibility[u.id] ? u.course : "-"}</td>
-                  <td>{visibility[u.id] ? u.matricula : "-"}</td>
-                  <td>{visibility[u.id] ? u.siape : "-"}</td>
+                  <td>{u.email ?? "N/A"}</td>
+                  <td>{u.course ?? "N/A"}</td>
+                  <td>{u.matricula ?? "N/A"}</td>
+                  <td>{u.siape ?? "N/A"}</td>
                   <td>{u.is_active ? "Ativo" : "Inativo"}</td>
                   <td className="ver-column">
                     {u.is_verified ? (
@@ -195,11 +186,6 @@ const UsersList = () => {
                     )}
                   </td>
                   <td>
-                    <FontAwesomeIcon
-                      icon={faEye}
-                      style={{ marginRight: "10px", cursor: "pointer" }}
-                      onClick={() => toggleVisibility(u.id)}
-                    />
                     {user?.type === 'Ensino' && (
                         <>
                           <FontAwesomeIcon

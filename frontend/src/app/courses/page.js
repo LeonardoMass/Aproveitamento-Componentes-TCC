@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faEye, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faEye, faSearch, faEdit } from "@fortawesome/free-solid-svg-icons";
 import styles from "./course.module.css";
 import ModalCourse from "@/components/Modal/ModalCourse/modal";
 import ModalDisciplineList from "@/components/Modal/ModalCourse/disciplineList/modal";
@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 const Course = () => {
   const [courses, setCourses] = useState([]);
   const [filteredCourses, setFilteredCourses] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // Estado para armazenar o termo de busca
+  const [searchTerm, setSearchTerm] = useState("");
   const [modal, setModal] = useState(false);
   const [editData, setEditData] = useState(null);
   const [disciplineModal, setDisciplineModal] = useState(false);
@@ -23,7 +23,7 @@ const Course = () => {
       try {
         const data = await courseList();
         setCourses(data.courses);
-        setFilteredCourses(data.courses); // Inicialmente, todos os cursos são exibidos
+        setFilteredCourses(data.courses);
       } catch (err) {
         console.log(err);
       }
@@ -34,8 +34,6 @@ const Course = () => {
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-
-    // Filtra os cursos com base no nome do curso (ou qualquer outro campo desejado)
     const filtered = courses.filter((course) =>
       course.name.toLowerCase().includes(value.toLowerCase())
     );
@@ -64,20 +62,20 @@ const Course = () => {
 
   return (
     <div className={styles.contentWrapper}>
-      <h1 className={styles.pageTitle}>Cursos</h1> {/* Título adicionado */}
-      <div className={styles.topSection}>
+      <div className={styles.headerContainer}>
+        <h1 className={styles.pageTitle}>Cursos</h1>
         <div className={styles.searchContainer}>
           <div className={styles.searchWrapper}>
             <FontAwesomeIcon
               icon={faSearch}
               size="lg"
-              className={styles.searchIcon} // Classe para a lupa
+              className={styles.searchIcon}
             />
             <input
               type="text"
               placeholder="Buscar..."
               value={searchTerm}
-              onChange={handleSearch} // Evento de busca enquanto digita
+              onChange={handleSearch}
               className={styles.searchInput}
             />
           </div>
@@ -90,21 +88,12 @@ const Course = () => {
               <th>Curso</th>
               <th>Coordenador</th>
               <th>Ver disciplinas</th>
+              <th>Editar</th>
             </tr>
           </thead>
           <tbody>
             {filteredCourses.map((course) => (
-              <tr key={course.id} onClick={() => {
-                  if (user.user.type === "Ensino") {
-                      openModalForEdit(course); // Ensino pode editar todos os cursos
-                    } else if (
-                      user.user.type === "Coordenador" &&
-                      course.coordinator?.id === user.user.id
-                    ) {
-                      openModalForEdit(course);
-                    }
-                  }
-              }>
+              <tr key={course.id}>
                 <td>{course.name ?? "N/A"}</td>
                 <td>
                   {course.coordinator
@@ -115,23 +104,39 @@ const Course = () => {
                   <button
                     className={styles.linkButton}
                     onClick={(e) => {
-                      e.stopPropagation(); // Evita conflito com `onClick` da linha
+                      e.stopPropagation();
                       openDisciplineModal(course);
                     }}
                   >
                     <FontAwesomeIcon icon={faEye} size="lg" />
                   </button>
                 </td>
+                <td>
+                  {user.user.type === "Ensino" ||
+                    (user.user.type === "Coordenador" && course.coordinator?.id === user.user.id) ? (
+                    <button
+                      className={styles.editButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openModalForEdit(course);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faEdit} size="lg" />
+                    </button>
+                  ) : null}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {(user.user.type === "Ensino") && (
+
+      {user.user.type === "Ensino" && (
         <button onClick={() => setModal(true)} className={styles.addButton}>
           <FontAwesomeIcon icon={faPlus} size="2x" />
         </button>
       )}
+
       {modal && <ModalCourse onClose={closeModal} editData={editData} />}
       {disciplineModal && (
         <ModalDisciplineList
