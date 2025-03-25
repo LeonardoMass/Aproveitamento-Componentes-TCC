@@ -6,14 +6,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from django.urls import reverse
-from django.test import Client  # Simula uma requisição interna para chamar o endpoint
-from django.core.mail import send_mail
-
-from django.urls import reverse
-from django.test import Client  # Simula uma requisição interna para chamar o endpoint
-from django.core.mail import send_mail
-
 from .models import Notice, FAILED_STATUS
 from .models import RecognitionOfPriorLearning, KnowledgeCertification, RequestStatus, Attachment, Step
 from .serializers import (
@@ -89,17 +81,6 @@ class RecognitionOfPriorLearningListCreateView(generics.ListCreateAPIView):
         if serializer.is_valid():
             # Salva o objeto no banco
             serializer.save()
-
-            # Envia o e-mail diretamente
-            send_mail(
-                "Assunto",
-                "Email que estou mandando",
-                "teste@teste.com.br",
-                ["2019010480@restinga.ifrs.edu.br"]
-            )
-
-            print("Email enviado com sucesso!")
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -158,17 +139,6 @@ class KnowledgeCertificationListCreateView(generics.ListCreateAPIView):
         if serializer.is_valid():
             # Salva o objeto no banco
             serializer.save()
-
-            # Envia o e-mail diretamente
-            send_mail(
-                "Assunto",
-                "Email que estou mandando",
-                "teste@teste.com.br",
-                ["2019010480@restinga.ifrs.edu.br"]
-            )
-
-            print("Email enviado com sucesso!")
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

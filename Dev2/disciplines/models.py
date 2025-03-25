@@ -31,7 +31,7 @@ class Disciplines(models.Model):
         help_text="Select the disciplines that are prerequisites:"
     )
     professors = models.TextField(
-        max_length=50,
+        max_length=500,
         blank=True,
         verbose_name="Professors",
         help_text="Select the professors for this discipline:"
