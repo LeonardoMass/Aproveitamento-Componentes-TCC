@@ -87,8 +87,7 @@ const Course = () => {
             <tr>
               <th>Curso</th>
               <th>Coordenador</th>
-              <th>Ver disciplinas</th>
-              <th>Editar</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -101,29 +100,29 @@ const Course = () => {
                     : "Coordenador não cadastrado"}
                 </td>
                 <td>
-                  <button
-                    className={styles.linkButton}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDisciplineModal(course);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faEye} size="lg" />
-                  </button>
-                </td>
-                <td>
-                  {user.user.type === "Ensino" ||
-                    (user.user.type === "Coordenador" && course.coordinator?.id === user.user.id) ? (
+                  <div className={styles.actions}>
                     <button
-                      className={styles.editButton}
+                      className={styles.actionButton}
                       onClick={(e) => {
                         e.stopPropagation();
-                        openModalForEdit(course);
+                        openDisciplineModal(course);
                       }}
                     >
-                      <FontAwesomeIcon icon={faEdit} size="lg" />
+                      <FontAwesomeIcon icon={faEye} size="lg" />
                     </button>
-                  ) : null}
+                    {(user.user.type === "Ensino" ||
+                      (user.user.type === "Coordenador" && course.coordinator?.id === user.user.id)) && (
+                        <button
+                          className={styles.editButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openModalForEdit(course);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faEdit} size="lg" />
+                        </button>
+                      )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -132,9 +131,11 @@ const Course = () => {
       </div>
 
       {user.user.type === "Ensino" && (
-        <button onClick={() => setModal(true)} className={styles.addButton}>
-          <FontAwesomeIcon icon={faPlus} size="2x" />
-        </button>
+        <div className={styles.addButtonContainer}>
+          <button onClick={() => setModal(true)} className={styles.addButton}>
+            <FontAwesomeIcon icon={faPlus} size="2x" />
+          </button>
+        </div>
       )}
 
       {modal && <ModalCourse onClose={closeModal} editData={editData} />}

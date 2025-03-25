@@ -1,0 +1,315 @@
+.contentWrapper {
+  min-height: 50vh;
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin: 0 0 20px 0;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: bold;
+  text-decoration: underline;
+  margin: 0;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: auto;
+}
+
+.searchInput {
+  width: 500px;
+  max-width: 500px;
+  padding: 10px 10px 10px 40px;
+  border: 1px solid #000;
+  border-radius: 5px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+}
+
+.scrollableTable {
+  height: auto;
+  overflow-y: auto;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.table {
+  border: 1px solid rgb(178, 178, 178);
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  table-layout: auto;
+}
+
+.table thead {
+  position: sticky;
+  background-color: #2f9e41;
+}
+
+.table thead th {
+  padding: 16px;
+  border-bottom: 1px solid rgb(178, 178, 178);
+  text-align: left;
+  color: white;
+}
+
+.table th:nth-child(1) { /* Disciplina */
+  width: 35%;
+}
+
+.table th:nth-child(2) { /* Carga Horária */
+  width: 15%;
+}
+
+.table th:nth-child(3) { /* Ementa */
+  width: 40%;
+}
+
+.table th:nth-child(4) { /* Ações */
+  width: 10%;
+  min-width: 120px;
+}
+
+.table td, .table th {
+  border: 1px solid rgb(178, 178, 178);
+  padding: 8px;
+}
+
+.table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.table tbody tr:hover {
+  background-color: #ddd;
+}
+
+.addButtonContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.addButton {
+  background: #2f9e41;
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.addButton:hover {
+  transform: scale(1.05);
+  color: white;
+}
+
+.actions {
+  display: flex;
+  gap: 0.2rem;
+  justify-content: start;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2f9e41;
+  padding: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s;
+  font-size: 1.1rem;
+}
+
+.actionButton:hover {
+  color: #268a34;
+  transform: scale(1.1);
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #af0a0a;
+  padding: 0.4rem;
+  transition: all 0.3s;
+  font-size: 1.1rem;
+}
+
+.deleteButton:hover {
+  color: #980909;
+  transform: scale(1.1);
+}
+
+.editButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #051408;
+  padding: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s;
+  font-size: 1.1rem;
+}
+
+.editButton:hover {
+  color: #031404;
+  transform: scale(1.1);
+}
+
+.modalBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 600px;
+  max-width: 90%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.modalContent h2 {
+  color: #2f9e41;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.modalBody p {
+  margin: 1rem 0;
+  font-size: 1.1rem;
+}
+
+.modalBody strong {
+  color: #333;
+  min-width: 120px;
+  display: inline-block;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formGroup label {
+  font-weight: bold;
+  color: #333;
+}
+
+.formGroup input,
+.formGroup textarea {
+  padding: 0.8rem;
+  border: 1px solid #b1b1b1;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.formGroup textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+.modalFooter {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.saveButton {
+  background: #2f9e41;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.saveButton:hover {
+  background: #268a34;
+}
+
+.cancelButton {
+  background: #ddd;
+  color: #333;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  background: #ccc;
+}
+
+.closeButton {
+  background: #af0a0a;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background: #980909;
+}
