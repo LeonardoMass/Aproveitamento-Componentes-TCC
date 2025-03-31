@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
 
-from courses.models import Course
+from users.models import Course
 from users.models.notice import Notice
 from users.models import Servant, AbstractUser
 from users.models import Student

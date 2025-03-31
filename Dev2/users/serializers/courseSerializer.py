@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from users.models import Servant
 from users.serializers import ServantSerializer
-from ..models import Course
+from users.models import Course
 
 
 class CourseSerializer(serializers.ModelSerializer):

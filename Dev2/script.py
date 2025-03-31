@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 
-from courses.models import Course
+from users.models import Course
 from users.models.notice import Notice
 from users.models import Student, Servant
 from users.models.discipline import Disciplines

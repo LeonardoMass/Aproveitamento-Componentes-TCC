@@ -9,6 +9,5 @@ urlpatterns = [
     path('oauth2callback', GoogleAuthCallbackView.as_view(), name='google_callback'),
     path('', include('users.urls')),
     path('forms/', include('forms.urls')),
-    path('courses/', include('courses.urls')),
     path('emails/', include('emails.urls')),
 ]
