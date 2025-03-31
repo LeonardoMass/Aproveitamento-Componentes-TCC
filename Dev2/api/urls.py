@@ -7,10 +7,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth-google', GoogleAuthView.as_view(), name='auth_google'),
     path('oauth2callback', GoogleAuthCallbackView.as_view(), name='google_callback'),
-    path('users/', include('users.urls')),
+    path('', include('users.urls')),
     path('forms/', include('forms.urls')),
     path('notices/', include('notices.urls')),
     path('courses/', include('courses.urls')),
-    path('api/disciplines/', include('disciplines.urls')),
     path('emails/', include('emails.urls')),
 ]

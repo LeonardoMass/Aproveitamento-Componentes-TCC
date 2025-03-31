@@ -2,7 +2,7 @@ import uuid
 
 from django.db import models
 
-from disciplines.models import Disciplines
+from users.models.discipline import Disciplines
 from users.models.servant import Servant
 
 

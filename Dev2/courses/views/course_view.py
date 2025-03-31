@@ -8,7 +8,7 @@ from django.db.models import Q
 from users.serializers import ServantSerializer
 from ..models import Course
 from ..serializers.CourseSerializer import CourseSerializer
-from disciplines.models import Disciplines
+from users.models.discipline import Disciplines
 from users.models import Servant
 from users.services.user import UserService
 

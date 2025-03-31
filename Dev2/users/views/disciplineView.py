@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Disciplines
-from .serializers import DisciplineSerializer
+from ..models.discipline import Disciplines
+from ..serializers.disciplineSerializer import DisciplineSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.services.user import UserService
 
