@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from notices.models import Notice
+from users.models.notice import Notice
 from .models import AbstractUser, Servant, Student, Disciplines
 from forms.models import RecognitionOfPriorLearning, KnowledgeCertification, Attachment
 

@@ -3,6 +3,7 @@ from .views.user_list_view import ListUsersAPIView
 from .views.user import CreateUserView, UpdateActiveByIdView, UpdateUserByIdView
 from .views.user_details import UserDetails
 from .views.disciplineView import discipline_detail , discipline_list_create
+from .views.noticeView import NoticeListCreateView, NoticeDetailView
 urlpatterns = [
     path('users/list/', ListUsersAPIView.as_view(), name='list_users'),
     path('users/create/', CreateUserView.as_view(), name='create_user'),
@@ -11,4 +12,6 @@ urlpatterns = [
     path('users/details/', UserDetails.as_view(), name='user-details'),
     path('api/disciplines/', discipline_list_create, name='discipline_list_create'),
     path('api/disciplines/<uuid:pk>/', discipline_detail, name='discipline_detail'),
+    path('notices/', NoticeListCreateView.as_view(), name='notice-list-create'),
+    path('notices/<uuid:id>/', NoticeDetailView.as_view(), name='notice-detail'),
 ]

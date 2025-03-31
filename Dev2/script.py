@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 
 from courses.models import Course
-from notices.models import Notice
+from users.models.notice import Notice
 from users.models import Student, Servant
 from users.models.discipline import Disciplines
 from users.enum.servant_type_enum import ServantTypeEnum

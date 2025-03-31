@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from django.utils import timezone
 
-from notices.models import Notice
+from users.models.notice import Notice
 from users.models import Servant
 
 

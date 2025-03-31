@@ -1,7 +1,7 @@
 import json
 
 from rest_framework import serializers
-from .models import Notice
+from ..models.notice import Notice
 
 class NoticeSerializer(serializers.ModelSerializer):
     extra_fields = serializers.JSONField(required=False)

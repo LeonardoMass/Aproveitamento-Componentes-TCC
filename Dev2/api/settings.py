@@ -33,7 +33,6 @@ INSTALLED_APPS = [
     'api',
     'corsheaders',
     'forms',
-    'notices',
     'emails',
     'polymorphic'
 ]

@@ -1,8 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from .models import Notice
-from .serializers import NoticeSerializer
+from ..models.notice import Notice
+from ..serializers.noticeSerializer import NoticeSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.services.user import UserService
 

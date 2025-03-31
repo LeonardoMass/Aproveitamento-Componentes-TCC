@@ -7,7 +7,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from courses.models import Course
-from notices.models import Notice
+from users.models.notice import Notice
 from users.models import Servant, AbstractUser
 from users.models import Student
 from users.serializers import ServantSerializer
