@@ -126,9 +126,6 @@ class Attachment(models.Model):
         blank=True
     )
 
-    def __str__(self):
-        return self.file.name
-
 
 # Model abstrato RequisitionForm
 class RequisitionForm(models.Model):

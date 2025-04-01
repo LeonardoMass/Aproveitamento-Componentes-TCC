@@ -46,7 +46,7 @@ Student.objects.create(
 
 teacher = User.objects.create_user(username='ricardo@hotmail.com', first_name='ricardo', email='ricardo@hotmail.com',
                                    password=None)
-servant = Servant.objects.create(
+ricardo = Servant.objects.create(
     user=teacher,
     name='ricardo',
     email='ricardo@hotmail.com',
@@ -55,16 +55,26 @@ servant = Servant.objects.create(
 )
 teacher2 = User.objects.create_user(username='eliana@hotmail.com', first_name='eliana', email='eliana@hotmail.com',
                                    password=None)
-servant = Servant.objects.create(
+eliana = Servant.objects.create(
     user=teacher2,
     name='eliana',
     email='elinana@hotmail.com',
     siape="32323",
     servant_type=ServantTypeEnum.TEACHER.value,
 )
+
+teacher3 = User.objects.create_user(username='yuri@hotmail.com', first_name='Yuri', email='yuri@hotmail.com',
+                                   password=None)
+yuri = Servant.objects.create(
+    user=teacher3,
+    name='Yuri ',
+    email='yuri@hotmail.com',
+    siape="32323223",
+    servant_type=ServantTypeEnum.TEACHER.value,
+)
 coordenador = User.objects.create_user(username='roben@hotmail.com', first_name='roben', email='roben@hotmail.com',
                                        password=None)
-Servant.objects.create(
+roben = Servant.objects.create(
     user=coordenador,
     name='roben',
     email='roben@hotmail.com',
@@ -105,7 +115,7 @@ notice = Notice.objects.create(
     link="https://dev2.com"
 )
 
-discipline = Disciplines.objects.create(
+discipline1 = Disciplines.objects.create(
     id="fc40c88d-65ae-41ca-bd19-89075f9b4ea3",
     name="Redes de Computadores",
     workload=123,
@@ -113,31 +123,39 @@ discipline = Disciplines.objects.create(
     professors= "Habilitar o aluno a compreender request-response"
 )
 
-Disciplines.objects.create(
+discipline2 = Disciplines.objects.create(
     name= "Banco de Dados",
     workload= "66h",
     syllabus= "Consultas de dados",
     professors= "Habilitar o estudante a realizar consultas em bancado de dados",
 )
 
-Disciplines.objects.create(
+discipline3 = Disciplines.objects.create(
     name= "Programacao",
     workload= "66h",
     syllabus= "Conceitos fundamentais da progracao",
     professors= "Incentivar o pensamento abstrato para programar e utilizar conceitos fundamentais",
 )
 
+discipline4 = Disciplines.objects.create(
+    name= "Gestao de Projetos",
+    workload= "66h",
+    syllabus= "Conceitos fundamentais da gestão de projetos",
+    professors= "Incentivar a adaptação de conceitos fundamentais para a gestão de projetos",
+)
+
 
 course1 = Course.objects.create(name="Processos Gerenciais")
-course1.professors.add(Servant.objects.get(name='ricardo'))
-course1.disciplines.add(Disciplines.objects.filter(name="test").first())  # Usa o primeiro registro encontrado
+course1.professors.add(yuri)
+course1.disciplines.add(discipline4)
 
-course2 = Course.objects.create(name="Eletrônica Industrial")
-course2.professors.add(Servant.objects.get(user__username='ricardo@hotmail.com'))
-course2.disciplines.add(Disciplines.objects.filter(name="Dev3").first())  # Usa o primeiro registro encontrado
+course2 = Course.objects.create(name="Eletronica Industrial")
 
-course3 = Course.objects.create(name="Análise e Desenvolvimento de Sistemas")
-course3.professors.add(Servant.objects.get(user__email='roben@hotmail.com'))
-course3.disciplines.add(Disciplines.objects.filter(name="Dev4").first())  # Usa o primeiro registro encontrado
+course3 = Course.objects.create(
+    name="Analise e Desenvolvimento de Sistemas",
+    coordinator = roben
+)
+course3.professors.add(eliana, ricardo, yuri)
+course3.disciplines.add(discipline1, discipline2, discipline3)
 
 print("Cursos criados com sucesso!")

@@ -7,6 +7,10 @@ from .views.noticeView import NoticeListCreateView, NoticeDetailView
 from .views.courseView import (ListCoursesAPIView, CreateCourseAPIView,
                                 RetrieveCourseByIdAPIView, UpdateCourseAPIView,
                                 DeleteCourseAPIView, SearchCourseByNameAPIView, CourseProfessorsView)
+from .views.formsView import (
+    RecognitionOfPriorLearningListCreateView, RecognitionOfPriorLearningDetailView,
+    KnowledgeCertificationListCreateView, KnowledgeCertificationDetailView, AttachmentDownloadView, StepCreateView, check_notice_open
+)
 urlpatterns = [
     path('users/list/', ListUsersAPIView.as_view(), name='list_users'),
     path('users/create/', CreateUserView.as_view(), name='create_user'),
@@ -23,5 +27,13 @@ urlpatterns = [
     path('courses/update/<uuid:course_id>', UpdateCourseAPIView.as_view(), name='update_course'),
     path('courses/delete/<uuid:course_id>', DeleteCourseAPIView.as_view(), name='delete_course'),
     path('courses/search/', SearchCourseByNameAPIView.as_view(), name='search_course_by_name'),
-    path('courses/professors/<int:coordinator_id>', CourseProfessorsView.as_view(), name='professors')
+    path('courses/professors/<int:coordinator_id>', CourseProfessorsView.as_view(), name='professors'),
+    path('forms/steps/', StepCreateView.as_view(), name='step-create'),
+    path('forms/recognition-forms/', RecognitionOfPriorLearningListCreateView.as_view(), name='recognition-forms-list-create'),
+    path('forms/recognition-forms/<uuid:id>/', RecognitionOfPriorLearningDetailView.as_view(), name='recognition-form-detail'),
+    path('forms/knowledge-certifications/', KnowledgeCertificationListCreateView.as_view(), name='knowledge-certifications-list-create'),
+    path('forms/knowledge-certifications/<uuid:id>/', KnowledgeCertificationDetailView.as_view(), name='knowledge-certification-detail'),
+    path('forms/attachments/<uuid:attachment_id>/', AttachmentDownloadView.as_view(), name='download_attachment'),
+    path('forms/check-notice-open/', check_notice_open, name='check-notice-open'),  # URL específica de verificação
+    
 ]

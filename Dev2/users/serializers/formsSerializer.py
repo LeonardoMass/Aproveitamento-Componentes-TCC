@@ -11,7 +11,7 @@ from users.models.notice import Notice
 from users.models import Servant, AbstractUser
 from users.models import Student
 from users.serializers import ServantSerializer
-from .models import Step, Attachment, RecognitionOfPriorLearning, KnowledgeCertification, \
+from users.models import Step, Attachment, RecognitionOfPriorLearning, KnowledgeCertification, \
     RequestStatus, FAILED_STATUS, ANALYSIS_STATUS, STUDENT_STATUS, CRE_STATUS, COORD_STATUS, PROF_STATUS
 
 

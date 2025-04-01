@@ -6,9 +6,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Notice, FAILED_STATUS
-from .models import RecognitionOfPriorLearning, KnowledgeCertification, RequestStatus, Attachment, Step
-from .serializers import (
+from ..models.forms import Notice, FAILED_STATUS
+from ..models.forms import RecognitionOfPriorLearning, KnowledgeCertification, RequestStatus, Attachment, Step
+from ..serializers.formsSerializer import (
     RecognitionOfPriorLearningSerializer, KnowledgeCertificationSerializer, StepSerializer
 )
 

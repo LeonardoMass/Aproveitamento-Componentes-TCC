@@ -31,8 +31,6 @@ INSTALLED_APPS = [
     'users',
     'api',
     'corsheaders',
-    'forms',
-    'emails',
     'polymorphic'
 ]
 

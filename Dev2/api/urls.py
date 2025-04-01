@@ -8,6 +8,4 @@ urlpatterns = [
     path('auth-google', GoogleAuthView.as_view(), name='auth_google'),
     path('oauth2callback', GoogleAuthCallbackView.as_view(), name='google_callback'),
     path('', include('users.urls')),
-    path('forms/', include('forms.urls')),
-    path('emails/', include('emails.urls')),
 ]
