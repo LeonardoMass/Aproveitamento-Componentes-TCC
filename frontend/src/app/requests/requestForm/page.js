@@ -129,6 +129,7 @@ const CertificationRequestForm = () => {
     // Crie um objeto FormData para enviar arquivos e outros dados
     const formData = new FormData();
     formData.append("discipline", disciplineId);
+    formData.append("course", selectedCourse);
     formData.append("notice", selectedNotice.id);
     formData.append("course_workload", courseWorkload);
     formData.append("course_studied_workload", courseStudiedWorkload);

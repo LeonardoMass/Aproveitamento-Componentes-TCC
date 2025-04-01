@@ -104,14 +104,14 @@ Servant.objects.create(
 )
 notice = Notice.objects.create(
     id="1f7755ade0b341299ee00c46a12dc467",
-    number="001-2023",
+    number="001-2025",
     publication_date="2023-10-01T09:00:00Z",
-    documentation_submission_start="2023-10-05T09:00:00Z",
-    documentation_submission_end="2023-10-10T17:00:00Z",
-    proposal_analysis_start="2023-10-11T09:00:00Z",
-    proposal_analysis_end="2023-10-20T17:00:00Z",
-    result_publication="2023-10-21T09:00:00Z",
-    result_homologation="2023-10-23T09:00:00Z",
+    documentation_submission_start="2025-04-01T00:00:00Z",
+    documentation_submission_end="2025-10-01T17:00:00Z",
+    proposal_analysis_start="2025-10-12T09:00:00Z",
+    proposal_analysis_end="2025-10-20T17:00:00Z",
+    result_publication="2025-10-21T09:00:00Z",
+    result_homologation="2025-10-23T09:00:00Z",
     link="https://dev2.com"
 )
 

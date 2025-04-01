@@ -132,6 +132,7 @@ class RequisitionForm(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey('users.Student', on_delete=models.CASCADE)
     discipline = models.ForeignKey('users.Disciplines', on_delete=models.CASCADE)
+    course = models.ForeignKey('users.Course', on_delete=models.CASCADE)
     create_date = models.DateTimeField(default=timezone.now)
 
     class Meta:

@@ -76,7 +76,9 @@ class StepSerializer(serializers.ModelSerializer):
         # Verifica quem é o coordenador do curso da disciplina da solicitação e o atribui como responsável pelos steps da coordenação
         elif status == RequestStatus.IN_ANALYSIS_BY_COORDINATOR or status == RequestStatus.IN_APPROVAL_BY_COORDINATOR or status == RequestStatus.RETURNED_BY_CRE:
             discipline_id = form.discipline_id
-            course = Course.objects.filter(disciplines__id=discipline_id).first()
+            course_id = form.course_id
+            course = Course.objects.filter(id=course_id).first()
+            print(course.__dict__)
             if course and course.coordinator_id:
                 data['responsible_id'] = course.coordinator_id
             else:
@@ -177,7 +179,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecognitionOfPriorLearning
         fields = [
-            'id', 'course_workload', 'course_studied_workload', 'notice', 'discipline',
+            'id', 'course_workload', 'course_studied_workload', 'notice', 'discipline', 'course',
             'discipline_name', 'create_date', 'status_display', 'attachments', 'student_id', 'student', 'student',
             'student_name', 'student_email', 'student_matricula', 'student_course', 'steps'
         ]
@@ -299,7 +301,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = KnowledgeCertification
         fields = [
-            'id', 'previous_knowledge', 'scheduling_date', 'test_score', 'notice', 'discipline',
+            'id', 'previous_knowledge', 'scheduling_date', 'test_score', 'notice', 'discipline', 'course',
             'discipline_name', 'create_date', 'status_display', 'attachments', 'student_id', 'student',
             'student_name', 'student_email', 'student_matricula', 'student_course', 'steps', 'test_attachment'
         ]
