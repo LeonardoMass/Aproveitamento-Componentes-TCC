@@ -12,6 +12,7 @@ import FormProfile from "@/components/Forms/Profile/ProfileForm";
 import { handleApiResponse } from "@/libs/apiResponseHandler";
 import { InputText } from "primereact/inputtext";
 import { useAuth } from "@/context/AuthContext";
+import Toast from "@/utils/toast";
 
 const UsersList = () => {
   const { user } = useAuth();
@@ -20,9 +21,8 @@ const UsersList = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  console.log(user);
-  // Move the useUserFilters hook above any conditional returns
+  const [toast, setToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState({});
   const {
     search,
     setSearch,
@@ -42,7 +42,6 @@ const UsersList = () => {
       try {
         const data = await AuthService.UserList();
         console.log(data);
-        handleApiResponse(data);
         setUsers(data);
         setFilteredUsers(data);
       } catch (err) {
@@ -59,15 +58,23 @@ const UsersList = () => {
 
   const handleEdit = (user) => setEditingUser(user);
 
-  const saveEdit = (updatedUser) => {
-    const updatedUsers = users.map((user) =>
-      user.id === updatedUser.id ? updatedUser : user
-    );
-    setUsers(updatedUsers);
-    setFilteredUsers(updatedUsers);
-    setEditingUser(null);
+
+  const refreshUserList = async () => {
+    try {
+      const data = await AuthService.UserList();
+      setUsers(data);
+      setFilteredUsers(data);
+    } catch (err) {
+      console.error("Erro ao atualizar lista:", err);
+      setError(err.message || "Erro ao atualizar lista de usuários.");
+    }
   };
 
+  const handleToast = (type, text) => {
+    setToast(true);
+    setToastMessage({ type, text });
+    setTimeout(() => setToast(false), 10000);
+  };
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -93,13 +100,8 @@ const UsersList = () => {
 
   const updateActivity = async (email) => {
     let response = await AuthService.UpdateActivity(email);
-    if (response.status !== 201) return;
-    const updatedUsers = users.map((user) =>
-      user.email === email ? { ...user, user_active: !user.user_active } : user
-    );
-    setUsers(updatedUsers);
-    setFilteredUsers(updatedUsers);
-    window.location.reload();
+    if (response.status !== 200) return;
+    await refreshUserList();
   };
 
   return (
@@ -187,19 +189,19 @@ const UsersList = () => {
                   </td>
                   <td>
                     {user?.type === 'Ensino' && (
-                        <>
-                          <FontAwesomeIcon
-                            icon={faPenToSquare}
-                            style={{ marginRight: "10px", cursor: "pointer" }}
-                            onClick={() => handleEdit(u)}
-                          />
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            style={{ cursor: "pointer" }}
-                            onClick={() => updateActivity(u.id)}
-                          />
+                      <>
+                        <FontAwesomeIcon
+                          icon={faPenToSquare}
+                          style={{ marginRight: "10px", cursor: "pointer" }}
+                          onClick={() => handleEdit(u)}
+                        />
+                        <FontAwesomeIcon
+                          icon={faTrash}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => updateActivity(u.id)}
+                        />
                       </>
-                      )}
+                    )}
                   </td>
                 </tr>
               ))}
@@ -212,13 +214,23 @@ const UsersList = () => {
           <h2>Editar Usuário</h2>
           <FormProfile
             user={editingUser}
-            onSave={(updatedUser) => saveEdit(updatedUser)}
+            onSave={() => {
+              refreshUserList();
+              setEditingUser(null);
+              handleToast('success', 'Usuário atualizado com sucesso!');
+            }}
             onCancel={() => setEditingUser(null)}
             admEditing={true}
           />
         </div>
       )}
+      {toast && (
+        <div className={styles.globalToast}>
+          <Toast type={toastMessage.type}>{toastMessage.text}</Toast>
+        </div>
+      )}
     </div>
+
   );
 };
 

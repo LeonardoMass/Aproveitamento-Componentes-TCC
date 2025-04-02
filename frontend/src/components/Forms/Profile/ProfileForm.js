@@ -9,9 +9,7 @@ import { handleApiResponse } from '@/libs/apiResponseHandler';
 import { courseList } from '@/services/CourseService';
 import Toast from '@/utils/toast';
 
-const FormProfile = ({ user = false, onCancel, admEditing = false }) => {
-    const [toast, setToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState({});
+const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => {
     const [courses, setCourses] = useState([]);
     const [errors, setErrors] = useState({});
     const [userData, setUserData] = useState({
@@ -45,33 +43,47 @@ const FormProfile = ({ user = false, onCancel, admEditing = false }) => {
         }
     }, []);
 
-    const submitForm = async () => {
+    const submitForm = async (e) => {
+        e.preventDefault();
         if (errors.matricula) {
             // alert('Por favor, corrija os erros antes de enviar o formulário.');
             setToast(true);
             setToastMessage({
-              type: "warning",
-              text: "Por favor, corrija os erros antes de enviar o formulário.",
+                type: "warning",
+                text: "Por favor, corrija os erros antes de enviar o formulário.",
             });
             return;
         }
-        let response;
-        console.log('Dados enviados:', userData);
+        try {
 
-        const formData = new FormData();
-        formData.append('name', userData.name);
-        formData.append('email', userData.email);
-        formData.append('is_student', userData.isStudent);
-        if (userData.matricula) formData.append('matricula', userData.matricula);
-        if (userData.course) formData.append('course', userData.course);
-        if (userData.siape) formData.append('siape', userData.siape);
-        if (userData.servant_type) formData.append('servant_type', userData.servant_type);
-        if (userData.id !== '') {
-            response = await AuthService.UpdateUser(userData.id, formData)
-        } else {
-            response = await AuthService.CreateUser(formData)
-        };
-        handleApiResponse(response);
+            console.log('Dados enviados:', userData);
+
+            const formData = new FormData();
+            formData.append('name', userData.name);
+            formData.append('email', userData.email);
+            formData.append('is_student', userData.isStudent);
+            if (userData.matricula) formData.append('matricula', userData.matricula);
+            if (userData.course) formData.append('course', userData.course);
+            if (userData.siape) formData.append('siape', userData.siape);
+            if (userData.servant_type) formData.append('servant_type', userData.servant_type);
+            const response = userData.id == ''
+                ? await AuthService.CreateUser(formData)
+                : await AuthService.UpdateUser(userData.id, formData);
+            console.log('Resposta da API:', response);
+            //const result = handleApiResponse(response);
+
+            if (response.status === 200 || response.status === 201) {
+                if (typeof onSave === 'function') {
+                    onSave();
+                }
+                onCancel();
+            }
+        } catch (error) {
+            handleApiResponse({
+                success: false,
+                message: 'Erro ao processar a solicitação'
+            });
+        }
     }
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -95,21 +107,21 @@ const FormProfile = ({ user = false, onCancel, admEditing = false }) => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-            const data = await courseList();
-            setCourses(data.courses);
+                const data = await courseList();
+                setCourses(data.courses);
             } catch (err) {
-            console.log(err);
+                console.log(err);
             }
         };
         fetchCourses();
-        }, [userData.isStudent]);
-    
+    }, [userData.isStudent]);
 
-        const courseOptions = courses.map(course => ({
-            label: course.name,
-            value: course.name,
-        }));
-    
+
+    const courseOptions = courses.map(course => ({
+        label: course.name,
+        value: course.name,
+    }));
+
     const servantTypeOptions = [
         { label: 'Professor', value: 'Professor' },
         { label: 'Coordenador', value: 'Coordenador' },
@@ -117,13 +129,13 @@ const FormProfile = ({ user = false, onCancel, admEditing = false }) => {
     ];
 
     const shouldShowAllOptions =
-    admEditing || (userData.servant_type !== 'Professor' &&
-        userData.servant_type !== '' &&
-        userData.servant_type !== null);
+        admEditing || (userData.servant_type !== 'Professor' &&
+            userData.servant_type !== '' &&
+            userData.servant_type !== null);
 
-const filteredServantTypeOptions = shouldShowAllOptions
-    ? servantTypeOptions
-    : servantTypeOptions.filter((option) => option.value === 'Professor');
+    const filteredServantTypeOptions = shouldShowAllOptions
+        ? servantTypeOptions
+        : servantTypeOptions.filter((option) => option.value === 'Professor');
 
     return (
         <form onSubmit={submitForm} className={styles.formContainer}>
@@ -217,16 +229,9 @@ const filteredServantTypeOptions = shouldShowAllOptions
                 </>
             )}
             <div className="flex space-x-36">
-            <Button className={styles.submitButton} label="Voltar" type= "button" onClick={onCancel}/>
-            <Button className={styles.submitButton} label="Salvar" type="submit" />
+                <Button className={styles.submitButton} label="Voltar" type="button" onClick={onCancel} />
+                <Button className={styles.submitButton} label="Salvar" type="submit" />
             </div>
-            {toast ? (
-                <Toast type={toastMessage.type} close={closeToast}>
-                {toastMessage.text}
-                </Toast>
-            ) : (
-                ""
-            )}
         </form>
     );
 }

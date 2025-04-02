@@ -38,7 +38,7 @@ class UpdateActiveByIdView(APIView):
             return Response({'not ok'}, status=status.HTTP_400_BAD_REQUEST)
         user.is_active = not user.is_active
         user.save()
-        return Response({'ok'},status=status.HTTP_201_CREATED)
+        return Response({'ok'},status=status.HTTP_200_OK)
    
 class UpdateUserByIdView(APIView):
 
@@ -47,13 +47,29 @@ class UpdateUserByIdView(APIView):
     user_service = UserService()
 
     def put(self, request, id):
-        usuario = request.user
-        user_autorized = self.user_service.userAutorized(usuario)
+        
+        user_autorized = self.user_service.userAutorized(request.user)
         serializer = CreateUserSerializer(data=request.data)
         if serializer.is_valid():
-            updated = self.user_service.updateUserById(id, serializer, usuario, user_autorized)
-            if updated is None:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            updated = UserPolymorphicSerializer(updated)
-            return Response({"id": updated.data}, status=status.HTTP_201_CREATED)
+            is_student = serializer.validated_data["is_student"]
+            try:
+                usuario = AbstractUser.objects.get(id=id)
+            except AbstractUser.DoesNotExist:
+                return Response(
+                {"detail": "Usuário não encontrado"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+            if (user_autorized): usuario.is_verified = True
+            if (usuario.user == request.user) or (user_autorized):
+                usuario.name = serializer.validated_data["name"]
+                if is_student:
+                    usuario.matricula = serializer.validated_data["matricula"]
+                    usuario.course = serializer.validated_data["course"]
+                else:
+                    usuario.siape = serializer.validated_data["siape"]
+                    usuario.servant_type = serializer.validated_data["servant_type"]
+                usuario.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"detail": "Usuário não autorizado"},status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

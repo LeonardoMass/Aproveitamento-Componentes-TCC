@@ -50,27 +50,6 @@ class UserService:
         emailsStudent = ["@restinga.ifrs.edu.br", "@aluno.restinga.ifrs.edu.br"]
         return any(email.endswith(emails) for emails in emailsStudent)
 
-    def updateUserById(self, id, serializer, user, user_autorized):
-
-            is_student = serializer.validated_data["is_student"]
-
-            try:
-                usuario = AbstractUser.objects.get(id=id)
-            except AbstractUser.DoesNotExist:
-                return "User not found"
-
-            if (user_autorized): usuario.is_verified = True
-            if (usuario.user == user) or (user_autorized):
-                usuario.name = serializer.validated_data["name"]
-                if is_student:
-                    usuario.matricula = serializer.validated_data["matricula"]
-                    usuario.course = serializer.validated_data["course"]
-                else:
-                    usuario.siape = serializer.validated_data["siape"]
-                    usuario.servant_type = serializer.validated_data["servant_type"]
-                usuario.save()
-                return usuario
-            return print("User not autorized")
 
     def userAutorized(self, user):
 

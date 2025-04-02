@@ -3,12 +3,13 @@ import Image from "next/image";
 import { Button } from 'primereact/button';
 import styles from './auth.module.css';
 import React from 'react';
+import { baseURL } from "@/libs/api";
 
 
 const AuthPage = () => {
 
     const handleLoginClick = () => {
-        window.location.href = 'http://localhost:8000/auth-google';
+        window.location.href = `${baseURL}/auth-google`;
     };
 
     const AuthCallback = async () => {
