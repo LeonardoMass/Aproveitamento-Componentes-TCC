@@ -277,6 +277,7 @@ const ModalCourse = ({ onClose, editData = null }) => {
             className={styles.select}
             disabled={isSubmitting || fetchError}
           >
+            <option value="" disabled>Nenhum Coordenador</option>
             {availableCoordinators.map((coord) => (
               <option key={coord.id} value={coord.id}>
                 {coord.name} {editData?.coordinator?.id === coord.id ? "(Atual)" : ""}
