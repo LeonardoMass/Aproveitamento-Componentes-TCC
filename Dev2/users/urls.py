@@ -1,5 +1,5 @@
 from django.urls import path
-from .views.user_list_view import ListUsersAPIView
+from .views.user_list_view import ListUsersAPIView, RetrieveUserByIdView
 from .views.user import CreateUserView, UpdateActiveByIdView, UpdateUserByIdView
 from .views.user_details import UserDetails
 from .views.disciplineView import discipline_detail , discipline_list_create
@@ -11,12 +11,14 @@ from .views.formsView import (
     RecognitionOfPriorLearningListCreateView, RecognitionOfPriorLearningDetailView,
     KnowledgeCertificationListCreateView, KnowledgeCertificationDetailView, AttachmentDownloadView, StepCreateView, check_notice_open
 )
+from .views.ppcView import ListCreatePpcAPIView, RetrieveUpdateDestroyPpcAPIView
 urlpatterns = [
     path('users/list/', ListUsersAPIView.as_view(), name='list_users'),
     path('users/create/', CreateUserView.as_view(), name='create_user'),
     path('users/update-activity/<int:id>/', UpdateActiveByIdView.as_view(), name='update_active_user'),
     path('users/update/<int:id>/', UpdateUserByIdView.as_view(), name='update_user'),
     path('users/details/', UserDetails.as_view(), name='user-details'),
+    path('users/retrieve/<int:id>/', RetrieveUserByIdView.as_view(), name='retrieve_user_by_id'),
     path('api/disciplines/', discipline_list_create, name='discipline_list_create'),
     path('api/disciplines/<uuid:pk>/', discipline_detail, name='discipline_detail'),
     path('notices/', NoticeListCreateView.as_view(), name='notice-list-create'),
@@ -35,5 +37,6 @@ urlpatterns = [
     path('forms/knowledge-certifications/<uuid:id>/', KnowledgeCertificationDetailView.as_view(), name='knowledge-certification-detail'),
     path('forms/attachments/<uuid:attachment_id>/', AttachmentDownloadView.as_view(), name='download_attachment'),
     path('forms/check-notice-open/', check_notice_open, name='check-notice-open'),  # URL específica de verificação
-    
+    path('ppc/', ListCreatePpcAPIView.as_view(), name='ppc-list-create'),
+    path('ppc/<uuid:id>/', RetrieveUpdateDestroyPpcAPIView.as_view(), name='ppc-detail'),
 ]

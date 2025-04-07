@@ -1,0 +1,73 @@
+.modalOverlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); display: flex;
+    justify-content: center; align-items: center; z-index: 1050;
+  }
+  
+  .modalContent {
+    background-color: #fff; padding: 25px; border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); width: 90%;
+    max-width: 500px; max-height: 70vh; overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+  
+  .modalContent h2 {
+    margin-top: 0; margin-bottom: 20px; color: #333;
+    text-align: center; font-size: 1.4rem;
+  }
+  
+  .infoText {
+    text-align: center; color: #666; margin: 20px 0; font-style: italic;
+  }
+  
+  .ppcList {
+    list-style: none; padding: 0; margin: 0 0 20px 0;
+  }
+  
+  .ppcItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .ppcItem:last-child {
+    border-bottom: none;
+  }
+  
+  .ppcItem span {
+    color: #444;
+    font-weight: 500;
+  }
+  
+  .editLink {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border: 1px solid #3498db;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  
+  .editLink:hover {
+    background-color: #3498db;
+    color: #fff;
+  }
+  
+  .addAction {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px dashed #ccc;
+      text-align: center;
+  }
+  
+  /* .addAction button { ... } */
+  
+  .closeButton {
+    padding: 10px 20px; background-color: #6c757d; color: white;
+    border: none; border-radius: 5px; cursor: pointer;
+    transition: background-color 0.2s ease; align-self: flex-end; margin-top: 15px;
+  }
+  .closeButton:hover { background-color: #5a6268; }

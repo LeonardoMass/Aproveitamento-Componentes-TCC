@@ -5,6 +5,7 @@ from users.models.notice import Notice
 from users.models import Student, Servant
 from users.models.discipline import Disciplines
 from users.enum.servant_type_enum import ServantTypeEnum
+from users.models.ppc import Ppc
 superuser = User.objects.create_superuser("admin", "admin@admin.com", "123")
 
 student1 = User.objects.create_user(username='murilo@hotmail.com', first_name='murilo', email='murilo@hotmail.com',
@@ -147,7 +148,8 @@ discipline4 = Disciplines.objects.create(
 
 course1 = Course.objects.create(name="Processos Gerenciais")
 course1.professors.add(yuri)
-course1.disciplines.add(discipline4)
+ppc_course1 = Ppc.objects.create(course=course1, name="PPC Processos 2021 PG")
+ppc_course1.disciplines.add(discipline4)
 
 course2 = Course.objects.create(name="Eletronica Industrial")
 
@@ -156,6 +158,6 @@ course3 = Course.objects.create(
     coordinator = roben
 )
 course3.professors.add(eliana, ricardo, yuri)
-course3.disciplines.add(discipline1, discipline2, discipline3)
-
+ppc_course3 = Ppc.objects.create(course=course3, name="PPC 2023 ADS")
+ppc_course3.disciplines.add(discipline1, discipline2, discipline3)
 print("Cursos criados com sucesso!")

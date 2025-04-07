@@ -188,8 +188,7 @@ const NavBar = ({ data = false }) => {
             Realizar Solicitação
           </li>
         )}
-        {(user?.type === "Coordenador" || user?.type === "Ensino") &&
-          user?.is_verified && (
+        {(user?.type === "Coordenador" || user?.type === "Ensino") && (
             <>
               <li
                 onClick={() => (window.location.href = `/usersList`)}

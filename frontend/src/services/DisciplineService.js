@@ -54,12 +54,25 @@ async function DeleteDiscipline(uuid) {
       });
   }
 
+  export const getDisciplineDetailsBatch = async (disciplineIds) => {
+    if (!disciplineIds || disciplineIds.length === 0) {
+      return [];
+    }
+    try {
+      const disciplinePromises = disciplineIds.map(id => GetDiscipline(id));
+      const disciplines = await Promise.all(disciplinePromises);
+      return disciplines.filter(discipline => discipline !== null);
+    } catch (error) {
+      console.error("Erro inesperado no batch de busca de disciplinas:", error);
+      return [];
+    }
+  };
 
-export default {
-    DisciplineList,
-    CreateDiscipline,
-    GetDiscipline,
-    UpdateDiscipline,
-    DeleteDiscipline
-}
-
+  export default {
+      DisciplineList,
+      CreateDiscipline,
+      GetDiscipline,
+      UpdateDiscipline,
+      DeleteDiscipline,
+      getDisciplineDetailsBatch
+  };

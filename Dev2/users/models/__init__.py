@@ -5,3 +5,4 @@ from .discipline import *
 from .notice import *
 from .course import *
 from .forms import *
+from .ppc import *

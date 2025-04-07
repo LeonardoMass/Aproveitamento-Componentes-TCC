@@ -56,7 +56,7 @@ class UserService:
         user_autorized = False
         try:
             staff = Servant.objects.get(user=user)
-            if ((staff.servant_type == "Coordenador") or (staff.servant_type == "Ensino")) and (staff.is_verified):
+            if ((staff.servant_type == "Coordenador") or (staff.servant_type == "Ensino")):
                 user_autorized = True
         except Servant.DoesNotExist:
             pass
@@ -67,7 +67,7 @@ class UserService:
         user_autorized = False
         try:
             staff = Servant.objects.get(user=user)
-            if staff.servant_type == "Ensino" and (staff.is_verified):
+            if staff.servant_type == "Ensino":
                 user_autorized = True
         except Servant.DoesNotExist:
             pass

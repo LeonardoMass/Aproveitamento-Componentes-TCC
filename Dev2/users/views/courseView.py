@@ -63,23 +63,14 @@ class CreateCourseAPIView(APIView):
         usuario = request.user
 
         if not self.user_service.userAutorizedEnsino(usuario):
-            return Response(
-                {"detail": "Usuário não autorizado"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+            return Response({"detail": "Usuário não autorizado"}, status=status.HTTP_403_FORBIDDEN)
 
         if serializer.is_valid():
             course_data = serializer.validated_data
             coordinator = None
-
-            if course_data.get('coordinator_id', None) is not None:
-                # Verificar coordenador
-                coordinator_id = course_data.get('coordinator_id', None).id
-
-                if coordinator_id:
-                    coordinator = Servant.objects.get(id=coordinator_id)
-
-            # Cria o objeto Course e salva as relações ManyToMany de forma simplificada
+            coordinator_id_data = course_data.get('coordinator_id', None)
+            if coordinator_id_data is not None:
+                 coordinator = coordinator_id_data
             course = Course.objects.create(
                 name=course_data['name'],
                 coordinator=coordinator,
@@ -89,8 +80,14 @@ class CreateCourseAPIView(APIView):
             if 'professors' in course_data:
                 course.professors.set(course_data['professors'])
 
-            if 'disciplines' in course_data:
-                course.disciplines.set(course_data['disciplines'])
+            professor_ids_data = request.data.get('professor_ids')
+            if professor_ids_data and isinstance(professor_ids_data, list):
+                 try:
+                     professors_queryset = Servant.objects.filter(id__in=professor_ids_data)
+                     course.professors.set(professors_queryset)
+                 except Exception as e:
+                     print(f"Erro ao definir professores: {e}")
+                     pass
 
             # Serializa novamente para devolver a resposta
             response_serializer = CourseSerializer(course)
@@ -135,68 +132,53 @@ class UpdateCourseAPIView(APIView):
 
     def put(self, request, course_id, *args, **kwargs):
         usuario = request.user
-
-        if not self.user_service.userAutorized(usuario):
-            return Response(
-                {"detail": "Usuário não autorizado"},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
         try:
-            # Busca o curso pelo ID
             course = Course.objects.get(id=course_id)
-            # Serializa os dados recebidos
-            serializer = CourseSerializer(course, data=request.data, partial=True)
-
-            # Verifica a validade dos dados
-            if serializer.is_valid():
-                # Verifica o coordenador se fornecido
-                coordinator_id = serializer.validated_data.get('coordinator_id', None)
-                if coordinator_id:
-                    # Verifica se o coordenador já está associado a outro curso
-                    if Course.objects.filter(coordinator_id=coordinator_id).exclude(id=course.id).exists():
-                        return Response(
-                            {"detail": "Este coordenador já está associado a outro curso."},
-                            status=status.HTTP_400_BAD_REQUEST,
-                        )
-                    # Atualiza o coordenador no objeto `course`
-                    course.coordinator_id = coordinator_id
-
-                # Salva o curso sem atualizar ManyToMany ainda
-                course.name = serializer.validated_data.get('name', course.name)
-                course.save()
-
-                # Atualiza relações ManyToMany se passadas na requisição
-                professors_data = request.data.get('professors')
-                disciplines_data = request.data.get('disciplines')
-
-                if professors_data:
-                    if isinstance(professors_data, list):
-                        # Verifica se é uma lista de IDs (ou objetos com campo 'id')
-                        if isinstance(professors_data[0], dict):
-                            professor_ids = [prof['id'] for prof in professors_data]
-                        else:
-                            professor_ids = professors_data  # Lista direta de IDs
-                        course.professors.set(Servant.objects.filter(id__in=professor_ids))
-
-                if disciplines_data:
-                    if isinstance(disciplines_data, list):
-                        # Verifica se é uma lista de IDs (ou objetos com campo 'id')
-                        if isinstance(disciplines_data[0], dict):
-                            discipline_ids = [disc['id'] for disc in disciplines_data]
-                        else:
-                            discipline_ids = disciplines_data  # Lista direta de IDs
-                        course.disciplines.set(Disciplines.objects.filter(id__in=discipline_ids))
-
-                # Retorna o curso atualizado
-                updated_course = CourseSerializer(course)
-                return Response(updated_course.data, status=status.HTTP_200_OK)
-
-            print(serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
         except Course.DoesNotExist:
             return Response({"error": "Course not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        original_auth = self.user_service.userAutorized(usuario)
+
+        is_course_coordinator = False
+        if not original_auth:
+            try:
+                requesting_servant = Servant.objects.get(user=usuario)
+                if course.coordinator == requesting_servant:
+                    is_course_coordinator = True
+            except Servant.DoesNotExist:
+                pass
+
+        if not original_auth and not is_course_coordinator:
+            return Response({"detail": "Usuário não autorizado."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = CourseSerializer(course, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+
+            coordinator_data = validated_data.get('coordinator_id')
+            if coordinator_data is not None:
+                if Course.objects.filter(coordinator=coordinator_data).exclude(id=course.id).exists():
+                     return Response(
+                         {"coordinator_id": ["Este coordenador já está associado a outro curso."]},
+                         status=status.HTTP_400_BAD_REQUEST,
+                     )
+                course.coordinator = coordinator_data
+
+            course.name = validated_data.get('name', course.name)
+            course.save(update_fields=['name', 'coordinator'])
+            if 'professor_ids' in request.data:
+                professors_id_list = request.data.get('professor_ids')
+                if isinstance(professors_id_list, list):
+                     professors_queryset = Servant.objects.filter(id__in=professors_id_list)
+                     course.professors.set(professors_queryset)
+                else:
+                     return Response({"professor_ids": ["Formato inválido."]}, status=status.HTTP_400_BAD_REQUEST)
+
+            updated_course_serializer = CourseSerializer(course)
+            return Response(updated_course_serializer.data, status=status.HTTP_200_OK)
+
+        print(serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DeleteCourseAPIView(APIView):

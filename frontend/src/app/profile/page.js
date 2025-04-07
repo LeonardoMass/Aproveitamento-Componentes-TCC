@@ -35,7 +35,7 @@ const profilePage = () => {
       <div className={styles.right}>
         {!isStudent && (
           <>
-            {((user?.type === 'Coordenador' || user?.type === 'Ensino') && user?.is_verified) && (
+            {(user?.type === 'Coordenador' || user?.type === 'Ensino') && (
               <>
                 <Button className={styles.Button} label="Lista de usuários" onClick={() => window.location.href = `/usersList`} />
                 <Button className={styles.Button} label="Edital" onClick={() => window.location.href = `/notice`} />

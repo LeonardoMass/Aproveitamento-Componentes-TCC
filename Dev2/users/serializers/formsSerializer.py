@@ -75,10 +75,8 @@ class StepSerializer(serializers.ModelSerializer):
 
         # Verifica quem é o coordenador do curso da disciplina da solicitação e o atribui como responsável pelos steps da coordenação
         elif status == RequestStatus.IN_ANALYSIS_BY_COORDINATOR or status == RequestStatus.IN_APPROVAL_BY_COORDINATOR or status == RequestStatus.RETURNED_BY_CRE:
-            discipline_id = form.discipline_id
             course_id = form.course_id
             course = Course.objects.filter(id=course_id).first()
-            print(course.__dict__)
             if course and course.coordinator_id:
                 data['responsible_id'] = course.coordinator_id
             else:

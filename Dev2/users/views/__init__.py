@@ -5,3 +5,4 @@ from .courseView import *
 from .noticeView import *
 from .disciplineView import *
 from .formsView import *
+from .ppcView import *
