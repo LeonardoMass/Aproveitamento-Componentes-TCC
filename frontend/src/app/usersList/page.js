@@ -1,15 +1,13 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./usersList.module.css";
 import { Button as Btn } from "@/components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash, faEye, faSearch, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import Filter from "@/components/FilterField/filterField";
-import FilterCheckbox from "@/components/FilterCheckbox/filterCheckbox";
 import { useUserFilters } from "@/hooks/useUserFilters";
 import AuthService from "@/services/AuthService";
 import FormProfile from "@/components/Forms/Profile/ProfileForm";
-import { handleApiResponse } from "@/libs/apiResponseHandler";
 import { InputText } from "primereact/inputtext";
 import { useAuth } from "@/context/AuthContext";
 import Toast from "@/utils/toast";
@@ -26,6 +24,10 @@ const UsersList = () => {
   const {
     search,
     setSearch,
+    showActive,
+    setShowActive,
+    showInactive,
+    setShowInactive,
     selectedStatus,
     setSelectedStatus,
     selectedVerifieds,
@@ -37,44 +39,60 @@ const UsersList = () => {
     applyFilters,
   } = useUserFilters(users, setFilteredUsers);
 
+  const handleFilterKeyDown = useCallback((event) => {
+    if (event.key === 'Enter') {
+      applyFilters();
+    }
+  }, [applyFilters]);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const data = await AuthService.UserList();
-        console.log(data);
         setUsers(data);
-        setFilteredUsers(data);
+        applyFilters(data);
       } catch (err) {
-        console.log(err);
         setError(err.message || "An error occurred while fetching users.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchUsers();
-  }, []);
-
+  }, [applyFilters]);
 
   const handleEdit = (user) => setEditingUser(user);
 
-
-  const refreshUserList = async () => {
+  const refreshUserList = useCallback(async () => {
     try {
       const data = await AuthService.UserList();
       setUsers(data);
-      setFilteredUsers(data);
+      applyFilters(data);
     } catch (err) {
-      console.error("Erro ao atualizar lista:", err);
       setError(err.message || "Erro ao atualizar lista de usuários.");
     }
-  };
+  }, [applyFilters]);
 
   const handleToast = (type, text) => {
     setToast(true);
     setToastMessage({ type, text });
     setTimeout(() => setToast(false), 10000);
   };
+
+  const updateActivity = useCallback(async (userId) => {
+    try {
+      let response = await AuthService.UpdateActivity(userId);
+      if (response.status !== 200) {
+        handleToast('error', 'Falha ao atualizar status.');
+        return;
+      }
+      handleToast('success', 'Status do usuário atualizado.');
+      await refreshUserList();
+    } catch (err) {
+      setError(err.message || "Erro ao tentar atualizar status do usuário.");
+      handleToast('error', 'Erro ao atualizar status.');
+    }
+  }, [refreshUserList]);
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -83,7 +101,6 @@ const UsersList = () => {
     return <p>{error}</p>;
   }
 
-  // Adjust the filter arrays based on the loaded data
   const coursesArray = [
     ...new Set(users.map((user) => user.course).filter(Boolean)),
   ].map((course) => ({
@@ -98,19 +115,11 @@ const UsersList = () => {
     title: role,
   }));
 
-  const updateActivity = async (email) => {
-    let response = await AuthService.UpdateActivity(email);
-    if (response.status !== 200) return;
-    await refreshUserList();
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <h1 className={styles.title}>Usuários</h1>
-
         <div className={styles.filters}>
-          {/* Barra de busca acima dos filtros */}
           <div className={styles.searchWrapper}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
             <InputText
@@ -119,20 +128,21 @@ const UsersList = () => {
               value={search}
               placeholder="Buscar nome..."
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleFilterKeyDown}
             />
           </div>
-
-          {/* Filtros abaixo da barra de busca, alinhados horizontalmente */}
           <div className={styles.filtersContainer}>
             <Filter
               optionList={coursesArray}
               label="Cursos"
               onChange={(event, value) => setSelectedCourse(value)}
+              onKeyDown={handleFilterKeyDown}
             />
             <Filter
               optionList={rolesArray}
               label="Tipo"
               onChange={(event, value) => setSelectedRole(value)}
+              onKeyDown={handleFilterKeyDown}
             />
             <Filter
               optionList={[
@@ -141,6 +151,7 @@ const UsersList = () => {
               ]}
               label="Estado"
               onChange={(event, value) => setSelectedStatus(value)}
+              onKeyDown={handleFilterKeyDown}
             />
             <Filter
               optionList={[
@@ -149,6 +160,7 @@ const UsersList = () => {
               ]}
               label="Verificado"
               onChange={(event, value) => setSelectedVerifieds(value)}
+              onKeyDown={handleFilterKeyDown}
             />
             <Btn className="btnFiltrar" onClick={applyFilters}>
               Filtrar
@@ -161,10 +173,9 @@ const UsersList = () => {
               <tr>
                 <th>Nome</th>
                 <th>Tipo</th>
+                <th>Matricula/Siape</th>
                 <th>Email</th>
                 <th>Curso</th>
-                <th>Matrícula</th>
-                <th>SIAPE</th>
                 <th>Estado</th>
                 <th>Verificado</th>
                 <th>Ações</th>
@@ -175,10 +186,9 @@ const UsersList = () => {
                 <tr key={u.id}>
                   <td>{u.name ?? "N/A"}</td>
                   <td>{u.type ?? "N/A"}</td>
+                  <td>{u.matricula ?? u.siape ?? "N/A"}</td>
                   <td>{u.email ?? "N/A"}</td>
                   <td>{u.course ?? "N/A"}</td>
-                  <td>{u.matricula ?? "N/A"}</td>
-                  <td>{u.siape ?? "N/A"}</td>
                   <td>{u.is_active ? "Ativo" : "Inativo"}</td>
                   <td className="ver-column">
                     {u.is_verified ? (
@@ -196,8 +206,8 @@ const UsersList = () => {
                           onClick={() => handleEdit(u)}
                         />
                         <FontAwesomeIcon
-                          icon={faTrash}
-                          style={{ cursor: "pointer" }}
+                          icon={u.is_active ? faTrash : faEye}
+                          style={{ cursor: "pointer", color: u.is_active ? "#dc3545" : "#6c757d" }}
                           onClick={() => updateActivity(u.id)}
                         />
                       </>
@@ -214,8 +224,8 @@ const UsersList = () => {
           <h2>Editar Usuário</h2>
           <FormProfile
             user={editingUser}
-            onSave={() => {
-              refreshUserList();
+            onSave={async () => {
+              await refreshUserList();
               setEditingUser(null);
               handleToast('success', 'Usuário atualizado com sucesso!');
             }}
@@ -230,7 +240,6 @@ const UsersList = () => {
         </div>
       )}
     </div>
-
   );
 };
 

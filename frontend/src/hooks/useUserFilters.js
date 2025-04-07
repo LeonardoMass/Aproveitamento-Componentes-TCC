@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export const useUserFilters = (users, setFilteredUsers) => {
   const [search, setSearch] = useState("");
@@ -9,8 +9,8 @@ export const useUserFilters = (users, setFilteredUsers) => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedVerifieds, setSelectedVerifieds] = useState(null);
 
-  const applyFilters = () => {
-    let result = users;
+  const applyFilters = useCallback((currentUsers = users) => {
+    let result = currentUsers;
 
     if (search) {
       result = result.filter((user) =>
@@ -21,19 +21,6 @@ export const useUserFilters = (users, setFilteredUsers) => {
     if (selectedCourse) {
       result = result.filter((user) => user.course === selectedCourse.title);
     }
-
-    // Since 'admission' doesn't exist in your data, you might need to remove this filter
-    // or adjust it according to your actual data structure.
-    // If you have an 'entry_date' or similar field, you can modify accordingly.
-
-    // Remove or comment out the admission filter if it's not applicable
-    /*
-    if (selectedAdmission) {
-      result = result.filter(
-        (user) => user.admission === selectedAdmission.title
-      );
-    }
-    */
 
     if (selectedRole) {
       result = result.filter((user) => user.type === selectedRole.title);
@@ -53,9 +40,8 @@ export const useUserFilters = (users, setFilteredUsers) => {
       }
     }
 
-
     setFilteredUsers(result);
-  };
+  }, [search, showActive, showInactive, selectedCourse, selectedRole, selectedStatus, selectedVerifieds, setFilteredUsers]);
 
   return {
     search,

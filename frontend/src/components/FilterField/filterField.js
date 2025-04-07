@@ -7,7 +7,7 @@ const filterOptions = createFilterOptions({
   stringify: (option) => option.title,
 });
 
-export default function Filter({ optionList, label, onChange }) {
+export default function Filter({ optionList, label, onChange, onKeyDown }) {
   return (
     <Autocomplete
       options={optionList}
@@ -22,6 +22,7 @@ export default function Filter({ optionList, label, onChange }) {
           inputProps={{
             ...params.inputProps,
             sx: { padding: "4px" },
+            onKeyDown: onKeyDown,
           }}
         />
       )}
