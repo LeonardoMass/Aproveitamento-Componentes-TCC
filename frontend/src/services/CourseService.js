@@ -4,6 +4,16 @@ const courseList = async () => {
   return await apiClient.get("courses/list").then((response) => response.data);
 };
 
+const courseListByName = async (params = {}) => {
+  try {
+    const response = await apiClient.get("courses/list/", { params });
+    return response.data[0] || [];
+  } catch (error) {
+    console.error("Erro ao listar PPCs:", error);
+    return [];
+  }
+};
+
 const getCourseById = async (courseId) => {
   return await apiClient
     .get(`courses/read/${courseId}/`)
@@ -17,7 +27,7 @@ const getCourseById = async (courseId) => {
 
 const courseCreate = async (data) => {
   return await apiClient
-    .post(`courses/create`, data)
+    .post(`courses/create/`, data)
     .then((response) => response.data)
     .catch((error) => {
       console.error("Erro ao criar curso:", error);
@@ -35,4 +45,4 @@ const courseEdit = async (id, data) => {
     });
 };
 
-export { courseList, courseCreate, courseEdit, getCourseById  };
+export { courseList, courseCreate, courseEdit, getCourseById, courseListByName };

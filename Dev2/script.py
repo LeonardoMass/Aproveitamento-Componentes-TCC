@@ -132,7 +132,7 @@ discipline2 = Disciplines.objects.create(
 )
 
 discipline3 = Disciplines.objects.create(
-    name= "Programacao",
+    name= "Programacão I",
     workload= "66h",
     syllabus= "Conceitos fundamentais da progracao",
     professors= "Incentivar o pensamento abstrato para programar e utilizar conceitos fundamentais",
@@ -142,10 +142,37 @@ discipline4 = Disciplines.objects.create(
     name= "Gestao de Projetos",
     workload= "66h",
     syllabus= "Conceitos fundamentais da gestão de projetos",
-    professors= "Incentivar a adaptação de conceitos fundamentais para a gestão de projetos",
+    professors= "Incentivar a adaptacão de conceitos fundamentais para a gestão de projetos",
 )
 
+discipline5 = Disciplines.objects.create(
+    name= "Introducão à Engenharia de Software",
+    workload= "33h",
+    syllabus= "Introduzir os principais conceitos de engenharia de software relacionando estes conceitos ao ciclo de vida do desenvolvimento de software",
+    professors= "Histórico e conceituacão da Engenharia de Software. Princípios da Engenharia de Software."+
+"Conceito e apresentacão dos principais ciclos de vida: Cascata, Prototipacão, Espiral, Iterativo e"+
+"Incremental. Conceituacão sobre Processos de Software. Processo de Software Tradicional x Métodos"+
+"Ágeis. Manifesto Ágil. Introducão aos métodos ágeis: Metodologia Extreme Programming e SCRUM."+
+"Conceitos de Gerência de configuracão. Introducão a ferramenta de gerência de configuracão (Github)",
+)
 
+discipline6 = Disciplines.objects.create(
+    name= "Programacão II",
+    workload= "66h",
+    syllabus= "Familiarizar o(a) estudante com conceitos do paradigma de programacão orientada a objetos. ",
+    professors= "Classes e Objetos conceitos avancados. Encapsulamento de Dados. Heranca."+
+"Interfaces e Polimorfismo. Sobrecarga e Sobrescrita de Métodos. Tratamento de Excecões."+
+"Linguagem de Programacão Orientada a Objeto.",
+)
+
+discipline7 = Disciplines.objects.create(
+    name= "Interfaces Web",
+    workload= "33h",
+    syllabus= "Apresentar tecnologias e ferramentas para desenvolvimento de páginas web (lado cliente) de acordo com os padrões consolidados no mercado",
+    professors= "Linguagem de marcacão HTML (HyperText Markup Language): principais tags, construcão de layouts, elementos multimídia, listas, tabelas, formulários e validacão de formulários. Estilizacão com"+
+"CSS (Cascading Style Sheets): regras, seletores, classes, pseudo classes, pseudo elementos, heranca,"+
+"propriedades, dimensionamento, posicionamento. I",
+)
 course1 = Course.objects.create(name="Processos Gerenciais")
 course1.professors.add(yuri)
 ppc_course1 = Ppc.objects.create(course=course1, name="PPC Processos 2021 PG")

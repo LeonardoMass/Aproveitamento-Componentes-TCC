@@ -9,6 +9,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { noticeListAll } from "@/services/NoticeService";
+import { ToastContainer, toast } from 'react-toastify';
+import { Toaster } from "react-hot-toast";
+import 'react-toastify/dist/ReactToastify.css';
 
 const NavBar = ({ data = false }) => {
   const { user } = useAuth();
@@ -40,10 +43,6 @@ const NavBar = ({ data = false }) => {
             new Date(a.documentation_submission_start),
         )
         .slice(0, 1)[0];
-
-      console.log(value);
-      console.log('currentNotice:');
-      console.log(currentNotice);
       setNotice(currentNotice);
       return currentNotice;
     } catch (error) {
@@ -189,21 +188,21 @@ const NavBar = ({ data = false }) => {
           </li>
         )}
         {(user?.type === "Coordenador" || user?.type === "Ensino") && (
-            <>
-              <li
-                onClick={() => (window.location.href = `/usersList`)}
-                className={path === "/usersList" ? styles.active : ""}
-              >
-                Usuários
-              </li>
-              <li
-                onClick={() => (window.location.href = `/discipline`)}
-                className={path === "/discipline" ? styles.active : ""}
-              >
-                Cadastrar Disciplina
-              </li>
-            </>
-          )}
+          <>
+            <li
+              onClick={() => (window.location.href = `/usersList`)}
+              className={path === "/usersList" ? styles.active : ""}
+            >
+              Usuários
+            </li>
+            <li
+              onClick={() => (window.location.href = `/discipline`)}
+              className={path === "/discipline" ? styles.active : ""}
+            >
+              Cadastrar Disciplina
+            </li>
+          </>
+        )}
       </ul>
     </>
   );
@@ -223,6 +222,22 @@ const NavBar = ({ data = false }) => {
 
   return (
     <div style={{ backgroundColor: "#2f9e41" }}>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+      />
       <div className="flex items-center justify-between max-w-screen-xlg pl-20 pt-8 pb-8 pr-20 mx-auto">
         <Link href={isUserAuth ? "/profile" : "/auth"} className="pl-12">
           <Image

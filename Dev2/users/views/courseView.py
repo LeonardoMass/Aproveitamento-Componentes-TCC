@@ -30,7 +30,7 @@ class ListCoursesAPIView(APIView):
         # Serializando os resultados
         courses_serialized = CourseSerializer(courses, many=True)
 
-        return Response({'courses': courses_serialized.data})
+        return Response(courses_serialized.data)
 
 
 class SearchCourseByNameAPIView(APIView):

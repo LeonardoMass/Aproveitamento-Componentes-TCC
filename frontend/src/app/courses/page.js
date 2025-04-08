@@ -26,7 +26,7 @@ const Course = () => {
     const fetchCourses = async () => {
       try {
         const data = await courseList();
-        const coursesArray = Array.isArray(data?.courses) ? data.courses : ['Cursos não encontrados'];
+        const coursesArray = Array.isArray(data) ? data : ['Cursos não encontrados'];
         setCourses(coursesArray);
         setFilteredCourses(coursesArray);
       } catch (err) {

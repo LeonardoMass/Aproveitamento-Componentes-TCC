@@ -1,5 +1,5 @@
 "use client";
-
+import { toast } from 'react-toastify';
 import moment from "moment-timezone";
 import { apiClient, baseURL } from "@/libs/api";
 import { useEffect, useRef, useState } from "react";
@@ -144,6 +144,7 @@ const Details = () => {
 
       if (step2Feedback) setCoordinatorFeedback(step2Feedback.feedback);
       if (step3Feedback) setProfessorFeedback(step3Feedback.feedback);
+      if (step3Feedback) setProfessor(step3Feedback.responsible.name);
       if (step4Feedback) setCoordinatorSecondFeedback(step4Feedback.feedback);
       if (step5Feedback) setCreFeedback(step5Feedback.feedback);
 
@@ -356,7 +357,6 @@ const Details = () => {
           `${baseURL}/forms/${type}/${id}/`,
           updatedData,
         );
-
         if (response.status !== 200) throw new Error("Erro ao salvar alterações");
   
         setDetails((prevDetails) => ({
@@ -400,7 +400,8 @@ const Details = () => {
       setEditedCourseStudiedWorkload("");
       setEditedTestScore("");
     } catch (error) {
-      setError("Erro ao salvar alterações");
+      let erro = Object.values(error.response.data) 
+      toast.error(erro[0][0]);
     }
   };
 

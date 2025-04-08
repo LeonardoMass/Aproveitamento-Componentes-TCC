@@ -7,10 +7,11 @@ import { Button } from "primereact/button";
 import { noticeListAll } from "@/services/NoticeService";
 import { FileUpload } from "primereact/fileupload";
 import RequestService from "@/services/RequestService";
-import { courseList } from "@/services/CourseService";
-import { GetDiscipline } from "@/services/DisciplineService";
+import { courseList, courseListByName } from "@/services/CourseService";
+import { GetDiscipline, getDisciplineDetailsBatch } from "@/services/DisciplineService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { ppcList } from "@/services/PpcService";
 
 const CertificationRequestForm = () => {
   const [requestType, setRequestType] = useState("");
@@ -18,6 +19,8 @@ const CertificationRequestForm = () => {
   const [courseWorkload, setCourseWorkload] = useState("");
   const [courseStudiedWorkload, setCourseStudiedWorkload] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedPpc, setSelectedPpc] = useState("");
+  const [ppc, setPpc] = useState([]);
   const [disciplineId, setDisciplineId] = useState("");
   const [disciplines, setDisciplines] = useState([]);
   const [notices, setNotices] = useState([]);
@@ -26,19 +29,18 @@ const CertificationRequestForm = () => {
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
 
-  // Usaremos um contador para gerar IDs incrementais.
   const idCounterRef = useRef(1);
-
-  // Estado para gerenciar as linhas de upload (cada linha com um FileUpload básico)
-  const [uploadLines, setUploadLines] = useState([
-    { id: idCounterRef.current, file: null },
-  ]);
+  const [uploadLines, setUploadLines] = useState([{ id: idCounterRef.current, file: null }]);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const data = await courseList();
-        setCourses(data.courses);
+        const course = await courseListByName({ course_name: user.course });
+        console.log(course);
+        setSelectedCourse(course);
+        const ppcsData = await ppcList({ course_id: course.id });
+        console.log("PPCs:", ppcsData);
+        setPpc(ppcsData);
       } catch (err) {
         console.log(err);
       }
@@ -60,8 +62,7 @@ const CertificationRequestForm = () => {
           )
           .sort(
             (a, b) =>
-              new Date(b.documentation_submission_start) -
-              new Date(a.documentation_submission_start)
+              new Date(b.documentation_submission_start) - new Date(a.documentation_submission_start)
           )
           .slice(0, 1)[0];
         setSelectedNotice(currentNotice || null);
@@ -73,51 +74,33 @@ const CertificationRequestForm = () => {
     fetchNotices();
   }, []);
 
-  const handleCourseChange = async (e) => {
-    const courseId = e.target.value;
-    setSelectedCourse(courseId);
-    setDisciplineId(""); // Reseta a disciplina ao mudar o curso
+  const handlePpcChange = async (e) => {
+    const selectedPpcId = e.target.value;
+    setSelectedPpc(selectedPpcId);
 
-    if (courseId) {
-      try {
-        const course = courses.find((course) => course.id === courseId);
-        const disciplinePromises = course.disciplines.map((id) =>
-          GetDiscipline(id)
-        );
-
-        const disciplineResults = await Promise.all(disciplinePromises);
-        setDisciplines(disciplineResults);
-      } catch (error) {
-        console.error("Erro ao carregar as disciplinas:", error);
-        setDisciplines([]);
-      }
+    const selectedPpcObj = ppc.find((item) => item.id === selectedPpcId);
+    if (selectedPpcObj && selectedPpcObj.disciplines && selectedPpcObj.disciplines.length > 0) {
+      const disciplineDetails = await getDisciplineDetailsBatch(selectedPpcObj.disciplines);
+      setDisciplines(disciplineDetails);
     } else {
       setDisciplines([]);
     }
   };
 
-  // Função para atualizar o arquivo escolhido em uma linha específica
   const handleFileSelect = (lineId, event) => {
     const file = event.files && event.files.length > 0 ? event.files[0] : null;
     setUploadLines((prevLines) =>
-      prevLines.map((line) =>
-        line.id === lineId ? { ...line, file: file } : line
-      )
+      prevLines.map((line) => (line.id === lineId ? { ...line, file: file } : line))
     );
     console.log("Linhas de upload após seleção de arquivo:", uploadLines);
   };
 
-  // Função para adicionar uma nova linha de upload
   const addUploadLine = () => {
     idCounterRef.current += 1;
-    setUploadLines((prevLines) => [
-      ...prevLines,
-      { id: idCounterRef.current, file: null },
-    ]);
+    setUploadLines((prevLines) => [...prevLines, { id: idCounterRef.current, file: null }]);
     console.log("Linhas de upload após adição:", uploadLines);
   };
 
-  // Função para remover uma linha de upload
   const removeUploadLine = (lineId) => {
     setUploadLines((prevLines) => prevLines.filter((line) => line.id !== lineId));
     console.log("Linhas de upload após remoção:", uploadLines);
@@ -126,10 +109,9 @@ const CertificationRequestForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Crie um objeto FormData para enviar arquivos e outros dados
     const formData = new FormData();
     formData.append("discipline", disciplineId);
-    formData.append("course", selectedCourse);
+    formData.append("course", selectedCourse.id);
     formData.append("notice", selectedNotice.id);
     formData.append("course_workload", courseWorkload);
     formData.append("course_studied_workload", courseStudiedWorkload);
@@ -180,15 +162,8 @@ const CertificationRequestForm = () => {
         <div>
           {selectedNotice ? (
             <span key={selectedNotice.id}>
-              {" "}
-              {selectedNotice.number} -{" "}
-              {new Date(
-                selectedNotice.documentation_submission_start
-              ).toLocaleDateString()}{" "}
-              a{" "}
-              {new Date(
-                selectedNotice.documentation_submission_end
-              ).toLocaleDateString()}{" "}
+              {selectedNotice.number} - {new Date(selectedNotice.documentation_submission_start).toLocaleDateString()}{" "}
+              a {new Date(selectedNotice.documentation_submission_end).toLocaleDateString()}{" "}
             </span>
           ) : (
             <span>Nenhum edital vigente no momento.</span>
@@ -197,36 +172,47 @@ const CertificationRequestForm = () => {
       </div>
       <div className={styles.typeContainer}>
         <label className={styles.textForm}>Tipo:</label>
-        <select
-          value={requestType}
-          onChange={(e) => setRequestType(e.target.value)}
-          className={styles.selectForm}
-        >
+        <select value={requestType} onChange={(e) => setRequestType(e.target.value)} className={styles.selectForm}>
           <option value="">Selecione</option>
           <option value="certificacao">Certificação de Conhecimento</option>
           <option value="aproveitamento">Aproveitamento de Estudos</option>
         </select>
       </div>
+      {requestType === "certificacao" && (
+        <div className={styles.typeContainer}>
+          <span> Preencha e envie sua documentacao, de acordo com o item 3.2 do Edital. Preencher com a
+            nomenclatura correta das componente curricular.</span>
+        </div>
+      )}
+      {requestType === "aproveitamento" && (
+        <div className={styles.typeContainer}>
+          <span> Preencha e envie sua documentacao, de acordo com o item 2.2 do Edital. Preencher com a
+            nomenclatura correta das componente curricular.</span>
+        </div>
+      )}
       <div className={styles.typeContainer}>
         <label className={styles.textForm}>Curso</label>
-        <select
-          value={selectedCourse}
-          onChange={handleCourseChange}
-          className={styles.selectForm}
-          required
-        >
-          <option value="">Selecione um curso</option>
-          {courses
+        <span key={selectedCourse.id}> {selectedCourse.name}</span>
+      </div>
+      <div className={styles.typeContainer}>
+        <label className={styles.textForm}>PPC</label>
+        <select value={selectedPpc} onChange={handlePpcChange} className={styles.selectForm} required>
+          <option value="">Selecione um PPC</option>
+          {ppc
             .sort((a, b) => a.name.localeCompare(b.name))
-            .map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.name}
+            .map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
               </option>
             ))}
         </select>
       </div>
       <div className={styles.typeContainer}>
-        <label className={styles.textForm}>Disciplina</label>
+        {requestType === "certificacao" ? (
+          <label className={styles.textForm}>Componente curricular em que solicita certificação.</label>
+        ) : (
+          <label className={styles.textForm}>Componente curricular do IFRS em que solicita aproveitamento.</label>
+        )}
         <select
           value={disciplineId}
           onChange={(e) => setDisciplineId(e.target.value)}
@@ -246,7 +232,7 @@ const CertificationRequestForm = () => {
       </div>
       {requestType === "certificacao" && (
         <div className={styles.typeContainer}>
-          <label className={styles.textForm}>Conhecimento Anterior</label>
+          <label className={styles.textForm}>Experiência (s), Formação, Atividade(s) anteriores.</label>
           <textarea
             value={previousKnowledge}
             onChange={(e) => setPreviousKnowledge(e.target.value)}
@@ -258,37 +244,35 @@ const CertificationRequestForm = () => {
       )}
       {requestType === "aproveitamento" && (
         <div className={styles.typeContainer}>
-          <label className={styles.textForm}>Carga Horária</label>
-          <input
-            type="number"
-            value={courseWorkload}
-            onChange={(e) => setCourseWorkload(e.target.value)}
-            placeholder="Carga horária em horas"
-            className={styles.selectForm}
-            required
-          />
-          <label className={styles.textForm}>Carga Horária Estudada</label>
+          <label className={styles.textForm}>Carga Horaria do componente cursado anteriormente</label>
           <input
             type="number"
             value={courseStudiedWorkload}
             onChange={(e) => setCourseStudiedWorkload(e.target.value)}
-            placeholder="Carga horária estudada em horas"
+            placeholder="Carga horária em horas"
+            className={styles.selectForm}
+            required
+          />
+          <label className={styles.textForm}>Nota obtida no componente cursado anteriormente</label>
+          <input
+            type="number"
+            value={courseWorkload}
+            onChange={(e) => setCourseWorkload(e.target.value)}
+            placeholder="Nota obtida"
             className={styles.selectForm}
             required
           />
         </div>
       )}
-
       {/* Linhas de upload */}
       <div className={styles.typeContainer}>
-        <label htmlFor="anexos" className={styles.textForm}>
-          Anexar arquivos:
-        </label>
+        {requestType === "certificacao" ? (
+          <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 3.2.1, alinea "b" do Edital.</label>
+        ) : (
+          <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 2.2.1, alinea "b" do Edital.</label>
+        )}
         {uploadLines.map((line) => (
-          <div
-            key={line.id}
-            style={{ display: "flex", alignItems: "center" }}
-          >
+          <div key={line.id} style={{ display: "flex", alignItems: "center" }}>
             <FileUpload
               name="singleAttachment"
               mode="basic"
@@ -312,26 +296,18 @@ const CertificationRequestForm = () => {
         ))}
         <div className={styles.addButtonContainer}>
           <button type="button" onClick={addUploadLine} className={styles.addButton}>
-
-            <i className="pi pi-plus" style={{ fontSize: '1.5rem', color: '#ffff' }}></i>
+            <i className="pi pi-plus" style={{ fontSize: "1.5rem", color: "#ffff" }}></i>
           </button>
         </div>
       </div>
-
       <div className={styles.formBtnContainer}>
-        <Button
-          type="button"
-          className={styles.cancelButton}
-          onClick={handleCancel}
-        >
+        <Button type="button" className={styles.cancelButton} onClick={handleCancel}>
           Cancelar
         </Button>
         <Button
           type="button"
           disabled={!selectedNotice}
-          className={
-            !selectedNotice ? styles.btnDisabled : styles.confirmButton
-          }
+          className={!selectedNotice ? styles.btnDisabled : styles.confirmButton}
           onClick={handleSubmit}
         >
           Enviar

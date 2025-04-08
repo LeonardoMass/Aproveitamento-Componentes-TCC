@@ -351,7 +351,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     def validate_scheduling_date(self, value):
         try:
             user_role = self.abstract_user.type.value
-            if user_role != 'Professor':
+            if (user_role != 'Professor') and (user_role != 'Coordenador'):
                 raise serializers.ValidationError("Apenas o professor pode agendar a prova")
             sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
             value = value.replace(tzinfo=None)
@@ -365,7 +365,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
 
     def validate_test_score(self, value):
         user_role = self.abstract_user.type.value
-        if user_role != 'Professor':
+        if (user_role != 'Professor') and (user_role != 'Coordenador'):
             raise serializers.ValidationError("Apenas o professor pode alterar a nota")
         if not isinstance(value, Decimal):
             raise serializers.ValidationError("test_score deve ser um número válido.")
