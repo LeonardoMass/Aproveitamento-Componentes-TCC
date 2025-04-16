@@ -4,4 +4,4 @@ from ..models.discipline import Disciplines
 class DisciplineSerializer(serializers.ModelSerializer):
     class Meta:
         model = Disciplines
-        fields = ['id', 'name', 'workload', 'syllabus', 'prerequisites', 'professors']
+        fields = ['id', 'name', 'workload', 'syllabus', 'prerequisites', 'professors', 'is_active']

@@ -20,12 +20,10 @@ export function handleApiResponse(response) {
         toast.error("Erro inesperado na resposta da API.");
         return;
     }
-
     const status = response.status;
     const data = response.data;
-
     if (status >= 200 && status < 300) {
-        const customSuccessMessage = (typeof data === 'object' && data !== null && data.message) ? data.message : null;
+        const customSuccessMessage = (typeof data === 'object' && data !== null && data.detail) ? data.detail : null;
         let defaultMessage = "Operação realizada com sucesso!";
 
         switch (status) {

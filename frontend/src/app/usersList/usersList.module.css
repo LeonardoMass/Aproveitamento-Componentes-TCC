@@ -5,22 +5,18 @@
   justify-content: center;
   align-items: center;
   padding: 0;
-  margin: 0;
+  margin-bottom: 50px;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  padding: 5rem;
+  padding: 0.5rem;
 }
 
-.title {
-  font-size: 35px;
-  text-decoration: underline;
-}
 
 .filters {
-  margin-top: 20px;
+  margin-top: 60px;
   display: flex;
   flex-direction: column;  /* Filtros e botão alinhados na horizontal */
   gap: 15px; /* Espaço entre os filtros */
@@ -107,6 +103,7 @@
   padding: 16px;
   border-bottom: 1px solid #c7c7c7e1;
   text-align: left;
+  color: white;
 }
 
 .table td,
@@ -180,46 +177,39 @@
   min-width: 100px;
 }
 
-/* Coluna 3: Email */
+/* Coluna 3: Matrícula */
 .table td:nth-child(3), .table th:nth-child(3) {
-  width: 350px;
+  width: 100px;
   text-align: left;
-  min-width: 250px;
+  min-width: 100px;
 }
 
-/* Coluna 4: Curso */
+/* Coluna 4: Email */
 .table td:nth-child(4), .table th:nth-child(4) {
-  width: 50px;
+  width: 100px;
   text-align: left;
-  min-width: 50px;
+  min-width: 100px;
 }
 
-/* Coluna 5: Matrícula */
+/* Coluna 5: Curso */
 .table td:nth-child(5), .table th:nth-child(5) {
-  width: 180px;
+  width: 230px;
   text-align: left;
   min-width: 180px;
 }
 
-/* Coluna 6: SIAPE */
+/* Coluna 6: Estado */
 .table td:nth-child(6), .table th:nth-child(6) {
-  width: 180px;
+  width: 100px;
   text-align: left;
-  min-width: 180px;
+  min-width: 100px;
 }
 
-/* Coluna 7: Estado */
+/* Coluna 7: Ações */
 .table td:nth-child(7), .table th:nth-child(7) {
   width: 120px;
   text-align: left;
   min-width: 120px;
-}
-
-/* Coluna 8: Ver */
-.table td:nth-child(8), .table th:nth-child(8) {
-  width: 100px;
-  text-align: left;  /* Centraliza o conteúdo da coluna "Ver" */
-  min-width: 100px;
 }
 
 .btnFiltrar {

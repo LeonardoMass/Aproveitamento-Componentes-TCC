@@ -36,6 +36,12 @@ class Disciplines(models.Model):
         verbose_name="Professors",
         help_text="Select the professors for this discipline:"
     )
+    
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Is Active",
+        help_text="Indicates if the discipline is active and can be used."
+    )
 
     def __str__(self):
         return f"{self.name}"
@@ -43,4 +49,4 @@ class Disciplines(models.Model):
     class Meta:
         verbose_name = "Discipline"
         verbose_name_plural = "Disciplines"
-        ordering = ['name']
+        ordering = ['name', 'is_active']

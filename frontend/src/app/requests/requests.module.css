@@ -1,5 +1,7 @@
 .contentWrapper {
     padding: 20px;
+    margin-left: 10%;
+    margin-right: 10%;
 }
 
 .topSection {
@@ -67,6 +69,47 @@
     padding: 10px;
     border: 1px solid black;
 }
+  /* Coluna 1: Estudante */
+.table td:nth-child(1), .table th:nth-child(1) {
+    width: 270px;
+    text-align: left;
+  }
+  
+  /* Coluna 2: Tipo */
+  .table td:nth-child(2), .table th:nth-child(2) {
+    width: 150px;
+    text-align: left;
+  }
+  
+  /* Coluna 3: Disciplina */
+  .table td:nth-child(3), .table th:nth-child(3) {
+    width: 200px;
+    text-align: left;
+  }
+
+  /* Coluna 4: Criação */
+  .table td:nth-child(4), .table th:nth-child(4) {
+    width: 100px;
+    text-align: left;
+  }
+  
+  /* Coluna 5: Responsável */
+  .table td:nth-child(5), .table th:nth-child(5) {
+    width: 250px;
+    text-align: left;
+  }
+
+  /* Coluna 6: Status */
+  .table td:nth-child(6), .table th:nth-child(6) {
+    width: 100px;
+    text-align: left;
+  }
+
+  /* Coluna 7: Ações */
+  .table td:nth-child(7), .table th:nth-child(7) {
+    width: 30px;
+    text-align: left;
+  }
 
 .button {
     padding: 10px 20px;

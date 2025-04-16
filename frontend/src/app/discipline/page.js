@@ -12,6 +12,7 @@ import { faPenToSquare, faTrash, faEye, faSearch, faPlus, faSave } from "@fortaw
 import DisciplineService from "@/services/DisciplineService";
 import Toast from "@/utils/toast";
 import { useAuth } from "@/context/AuthContext";
+import { handleApiResponse } from "@/libs/apiResponseHandler";
 
 const Discipline = () => {
   const [disciplines, setDisciplines] = useState([]);
@@ -19,7 +20,7 @@ const Discipline = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalState, setModalState] = useState({
     open: false,
-    mode: 'view', // 'view', 'edit' or 'new'
+    mode: 'view',
     data: null
   });
   const [formData, setFormData] = useState({
@@ -36,16 +37,23 @@ const Discipline = () => {
     const fetchDisciplines = async () => {
       try {
         const data = await DisciplineService.DisciplineList();
-        console.log(data);
         const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
         setDisciplines(sortedData);
         setFilteredDisciplines(sortedData);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
     fetchDisciplines();
   }, []);
+
+  const applySearchFilter = (data) => {
+    return data.filter(
+      (discipline) =>
+        discipline.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (discipline.professors && discipline.professors.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  };
 
   const handleSearch = (e) => {
     const value = e.target.value;
@@ -95,28 +103,24 @@ const Discipline = () => {
 
   const handleSave = async () => {
     if (!formData.name || !formData.workload || !formData.syllabus || !formData.professors) {
+      setToastMessage({ type: "warning", text: "Preencha todos os campos obrigatórios!" });
       setToast(true);
-      setToastMessage({
-        type: "warning",
-        text: "Preencha todos os campos obrigatórios!"
-      });
       return;
     }
-    console.log(formData);
-    console.log(modalState);
     try {
       if (modalState.mode === 'new') {
         await DisciplineService.CreateDiscipline(formData);
         setToastMessage({ type: "success", text: "Disciplina criada com sucesso!" });
       } else {
-        await DisciplineService.UpdateDiscipline(modalState.data.id, formData);
+        const dataToUpdate = { ...formData, is_active: modalState.data?.is_active };
+        await DisciplineService.UpdateDiscipline(modalState.data.id, dataToUpdate);
         setToastMessage({ type: "success", text: "Disciplina atualizada com sucesso!" });
       }
 
       const updatedData = await DisciplineService.DisciplineList();
       const sortedData = updatedData.sort((a, b) => a.name.localeCompare(b.name));
       setDisciplines(sortedData);
-      setFilteredDisciplines(sortedData);
+      setFilteredDisciplines(applySearchFilter(sortedData));
       closeModal();
     } catch (err) {
       setToastMessage({ type: "error", text: "Erro ao salvar disciplina!" });
@@ -126,15 +130,34 @@ const Discipline = () => {
 
   const handleDelete = async (id) => {
     try {
-      await DisciplineService.DeleteDiscipline(id);
-      const updatedData = disciplines.filter(d => d.id !== id);
-      setDisciplines(updatedData);
-      setFilteredDisciplines(updatedData);
-      setToastMessage({ type: "success", text: "Disciplina excluída com sucesso!" });
+      const response = await DisciplineService.DeleteDiscipline(id);
+      console.log("Delete Response:", response);
+      handleApiResponse(response);
+      let updatedDisciplinesList = [...disciplines];
+
+      if (response.status === 204) {
+        updatedDisciplinesList = disciplines.filter(d => d.id !== id);
+      }
+      if (response.status === 200 && response.data?.detail) {
+        let message = response.data.detail;
+        if (message.includes("inativada")) {
+          updatedDisciplinesList = disciplines.map(d =>
+            d.id === id ? { ...d, is_active: false } : d
+          );
+        }
+        if (message.includes("ativa")) {
+          updatedDisciplinesList = disciplines.map(d =>
+            d.id === id ? { ...d, is_active: true } : d
+          );
+        }
+        const freshData = await DisciplineService.DisciplineList();
+        updatedDisciplinesList = freshData.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      setDisciplines(updatedDisciplinesList);
+      setFilteredDisciplines(applySearchFilter(updatedDisciplinesList));
     } catch (err) {
-      setToastMessage({ type: "error", text: "Erro ao excluir disciplina!" });
+      console.error("Delete Error:", err);
     }
-    setToast(true);
   };
 
   return (
@@ -144,12 +167,12 @@ const Discipline = () => {
         <div className={styles.searchContainer}>
           <div className={styles.searchWrapper}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
-            <input
+            <InputText
+              className={styles.nameFilter}
               type="text"
-              placeholder="Buscar..."
               value={searchTerm}
+              placeholder="Buscar pela disciplina.."
               onChange={handleSearch}
-              className={styles.searchInput}
             />
           </div>
         </div>
@@ -167,7 +190,7 @@ const Discipline = () => {
           </thead>
           <tbody>
             {filteredDisciplines.map((discipline) => (
-              <tr key={discipline.id}>
+              <tr key={discipline.id} className={!discipline.is_active ? styles.inactiveRow : ''}>
                 <td>{discipline.name}</td>
                 <td>{discipline.workload}</td>
                 <td>{discipline.syllabus || "N/A"}</td>
@@ -176,6 +199,7 @@ const Discipline = () => {
                     <button
                       className={styles.actionButton}
                       onClick={() => openModal('view', discipline)}
+                      title="Visualizar"
                     >
                       <FontAwesomeIcon icon={faEye} />
                     </button>
@@ -184,12 +208,15 @@ const Discipline = () => {
                         <button
                           className={styles.editButton}
                           onClick={() => openModal('edit', discipline)}
+                          title="Editar"
+                          disabled={!discipline.is_active}
                         >
                           <FontAwesomeIcon icon={faPenToSquare} />
                         </button>
                         <button
                           className={styles.deleteButton}
                           onClick={() => handleDelete(discipline.id)}
+                          title="Inativar/Excluir"
                         >
                           <FontAwesomeIcon icon={faTrash} />
                         </button>
@@ -208,6 +235,7 @@ const Discipline = () => {
           <button
             onClick={() => openModal('new')}
             className={styles.addButton}
+            title="Adicionar Nova Disciplina"
           >
             <FontAwesomeIcon icon={faPlus} size="2x" />
           </button>
@@ -230,6 +258,7 @@ const Discipline = () => {
                   <p><strong>Carga Horária:</strong> {modalState.data?.workload}</p>
                   <p><strong>Ementa:</strong> {modalState.data?.syllabus}</p>
                   <p><strong>Objetivo Geral:</strong> {modalState.data?.professors || "N/A"}</p>
+                  <p><strong>Status:</strong> {modalState.data?.is_active ? "Ativa" : "Inativa"}</p>
                 </>
               ) : (
                 <div className={styles.form}>

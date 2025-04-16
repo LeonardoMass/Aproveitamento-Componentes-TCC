@@ -69,20 +69,19 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
             const response = userData.id == ''
                 ? await AuthService.CreateUser(formData)
                 : await AuthService.UpdateUser(userData.id, formData);
-            console.log('Resposta da API:', response);
-            //const result = handleApiResponse(response);
-
+            handleApiResponse(response);
+            let text = (response.data.detail) ? response.data.detail : 'Ocorreu um erro.';
             if (response.status === 200 || response.status === 201) {
                 if (typeof onSave === 'function') {
-                    onSave();
+                    onSave('success', text);
                 }
                 onCancel();
             }
         } catch (error) {
-            handleApiResponse({
-                success: false,
-                message: 'Erro ao processar a solicitação'
-            });
+            console.error('Erro ao enviar os dados:', error);
+            if (typeof onSave === 'function') {
+                onSave('error', text);
+            }
         }
     }
     const handleInputChange = (e) => {
