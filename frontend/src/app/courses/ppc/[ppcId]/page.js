@@ -1,14 +1,12 @@
 'use client';
-import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faArrowLeft, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { ppcGet, ppcEdit } from '@/services/PpcService';
 import { DisciplineList, getDisciplineDetailsBatch } from '@/services/DisciplineService';
 import styles from './ppc.module.css';
-import { Button } from '@/components/Button/button';
-import { usePathname } from 'next/navigation';
+import { Button } from "primereact/button";
+import { usePathname, useRouter } from 'next/navigation';
 
 const EditPpcPage = () => {
 
@@ -22,6 +20,7 @@ const EditPpcPage = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const router = useRouter();
 
     const loadData = useCallback(async () => {
         if (!ppcId) return;
@@ -97,9 +96,13 @@ const EditPpcPage = () => {
         }
     };
 
+    const handleBack = () => {
+        router.push("/courses");
+    };
+
     if (loading) return <div className={styles.container}><div className={styles.loadingContainer}><FontAwesomeIcon icon={faSpinner} spin size="2x" /> Carregando Dados do PPC...</div></div>;
-    if (error && !ppcDetails) return <div className={styles.container}><p className={styles.errorText}><FontAwesomeIcon icon={faExclamationCircle} /> {error}</p><Link href="/courses" className={styles.backButtonLink}><FontAwesomeIcon icon={faArrowLeft} /> Voltar para Cursos</Link></div>;
-    if (!ppcDetails) return <div className={styles.container}><p>PPC não encontrado.</p><Link href="/courses" className={styles.backButtonLink}><FontAwesomeIcon icon={faArrowLeft} /> Voltar para Cursos</Link></div>;
+    if (error && !ppcDetails) return <Button label="Voltar" icon="pi pi-arrow-left" onClick={handleBack} className={styles.backButton} />
+    if (!ppcDetails) return <div className={styles.container}><p>PPC não encontrado.</p><Button label="Voltar" icon="pi pi-arrow-left" onClick={handleBack} className={styles.backButton} /></div>;
 
     const disciplinesToAdd = availableDisciplines.filter(ad =>
         !selectedDisciplines.some(sd => sd.id === ad.id)
@@ -107,11 +110,9 @@ const EditPpcPage = () => {
 
     return (
         <div className={styles.container}>
-            <Link href="/courses" className={styles.backButtonLink}>
-                <FontAwesomeIcon icon={faArrowLeft} /> Voltar para Cursos
-            </Link>
+            <Button label="Voltar" icon="pi pi-arrow-left" onClick={handleBack} className={styles.backButton} />
 
-            <h1 className={styles.title}>Editar Disciplinas do PPC: {ppcDetails.name}</h1>
+            <h1 className={styles.title}>{ppcDetails.name}</h1>
             <p className={styles.courseInfo}>Curso: {ppcDetails.course}</p>
 
             <div className={styles.disciplinesSection}>
@@ -157,8 +158,8 @@ const EditPpcPage = () => {
             <div className={styles.feedbackAndSave}>
                 {error && <p className={styles.errorTextSubmit}><FontAwesomeIcon icon={faExclamationCircle} /> {error}</p>}
                 {saveSuccess && <p className={styles.successText}>Alterações salvas com sucesso!</p>}
-                <Button onClick={handleSaveChanges} disabled={isSaving || loading}>
-                    {isSaving ? <><FontAwesomeIcon icon={faSpinner} spin /> Salvando...</> : "Salvar Alterações nas Disciplinas"}
+                <Button style={{backgroundColor: '#28a745'}}onClick={handleSaveChanges} disabled={isSaving || loading}>
+                    {isSaving ? <><FontAwesomeIcon icon={faSpinner} spin /> Salvando...</> : "Salvar alterações nas disciplinas"}
                 </Button>
             </div>
         </div>

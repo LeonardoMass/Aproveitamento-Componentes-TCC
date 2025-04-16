@@ -75,7 +75,7 @@ const ModalPpcDisciplineList = ({ course, onClose }) => {
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
-        <h2>Disciplinas do Curso: {course.name}</h2>
+        <h2>Disciplinas de {course.name}</h2>
 
         {error && <p className={styles.errorText}>{error}</p>}
         {loading && <p className={styles.loadingText}>Carregando...</p>}
@@ -88,7 +88,7 @@ const ModalPpcDisciplineList = ({ course, onClose }) => {
           <>
             {ppcs.length >= 1 && (
               <div className={styles.ppcSelector}>
-                 <label htmlFor="ppcSelect">Visualizando PPC: </label>
+                 <label htmlFor="ppcSelect">PPC: </label>
                  <select id="ppcSelect" value={selectedPpc?.id || ''} onChange={handlePpcChange}>
                    {ppcs.map(ppc => (
                      <option key={ppc.id} value={ppc.id}>{ppc.name || `PPC ${ppc.id.substring(0, 8)}`}</option>

@@ -28,14 +28,13 @@
 .title {
     color: #2c3e50;
     margin-top: 0;
-    margin-bottom: 5px;
     text-align: center;
 }
 
 .courseInfo {
     color: #7f8c8d;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 70px;
     font-size: 1.1rem;
 }
 
@@ -140,4 +139,18 @@
 .saveButtonContainer Button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.backButton {
+    background-color: #28a745;
+    border-color: #28a745;
+    color:white;
+    position: fixed;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    top: 40%;
+    left: 5%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
 }

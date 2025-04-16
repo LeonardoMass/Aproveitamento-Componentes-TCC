@@ -27,7 +27,6 @@ export const ppcCreate = async (ppcData) => {
     handleApiResponse(response); 
     return response.data;
   } catch (error) {
-    console.error("Erro ao criar PPC:", error);
     handleApiResponse(error.response);
     throw error;
   }

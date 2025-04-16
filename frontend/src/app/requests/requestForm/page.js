@@ -156,164 +156,165 @@ const CertificationRequestForm = () => {
   };
 
   return (
-    <form className={styles.formContainer} onSubmit={handleSubmit}>
-      <div className={styles.typeContainer}>
-        <label className={styles.textForm}>Edital</label>
-        <div>
-          {selectedNotice ? (
-            <span key={selectedNotice.id}>
-              {selectedNotice.number} - {new Date(selectedNotice.documentation_submission_start).toLocaleDateString()}{" "}
-              a {new Date(selectedNotice.documentation_submission_end).toLocaleDateString()}{" "}
-            </span>
-          ) : (
-            <span>Nenhum edital vigente no momento.</span>
-          )}
-        </div>
-      </div>
-      <div className={styles.typeContainer}>
-        <label className={styles.textForm}>Tipo:</label>
-        <select value={requestType} onChange={(e) => setRequestType(e.target.value)} className={styles.selectForm}>
-          <option value="">Selecione</option>
-          <option value="certificacao">Certificação de Conhecimento</option>
-          <option value="aproveitamento">Aproveitamento de Estudos</option>
-        </select>
-      </div>
-      {requestType === "certificacao" && (
+    <div className={styles.container}>
+      <form className={styles.formContainer} onSubmit={handleSubmit}>
         <div className={styles.typeContainer}>
-          <span> Preencha e envie sua documentacao, de acordo com o item 3.2 do Edital. Preencher com a
-            nomenclatura correta das componente curricular.</span>
-        </div>
-      )}
-      {requestType === "aproveitamento" && (
-        <div className={styles.typeContainer}>
-          <span> Preencha e envie sua documentacao, de acordo com o item 2.2 do Edital. Preencher com a
-            nomenclatura correta das componente curricular.</span>
-        </div>
-      )}
-      <div className={styles.typeContainer}>
-        <label className={styles.textForm}>Curso</label>
-        <span key={selectedCourse.id}> {selectedCourse.name}</span>
-      </div>
-      <div className={styles.typeContainer}>
-        <label className={styles.textForm}>PPC</label>
-        <select value={selectedPpc} onChange={handlePpcChange} className={styles.selectForm} required>
-          <option value="">Selecione um PPC</option>
-          {ppc
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-        </select>
-      </div>
-      <div className={styles.typeContainer}>
-        {requestType === "certificacao" ? (
-          <label className={styles.textForm}>Componente curricular em que solicita certificação.</label>
-        ) : (
-          <label className={styles.textForm}>Componente curricular do IFRS em que solicita aproveitamento.</label>
-        )}
-        <select
-          value={disciplineId}
-          onChange={(e) => setDisciplineId(e.target.value)}
-          className={styles.selectForm}
-          disabled={!selectedCourse}
-          required
-        >
-          <option value="">Selecione uma disciplina</option>
-          {disciplines
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((discipline) => (
-              <option key={discipline.id} value={discipline.id}>
-                {discipline.name}
-              </option>
-            ))}
-        </select>
-      </div>
-      {requestType === "certificacao" && (
-        <div className={styles.typeContainer}>
-          <label className={styles.textForm}>Experiência (s), Formação, Atividade(s) anteriores.</label>
-          <textarea
-            value={previousKnowledge}
-            onChange={(e) => setPreviousKnowledge(e.target.value)}
-            placeholder="Descreva seu conhecimento anterior..."
-            className={styles.selectForm}
-            required
-          />
-        </div>
-      )}
-      {requestType === "aproveitamento" && (
-        <div className={styles.typeContainer}>
-          <label className={styles.textForm}>Carga Horaria do componente cursado anteriormente</label>
-          <input
-            type="number"
-            value={courseStudiedWorkload}
-            onChange={(e) => setCourseStudiedWorkload(e.target.value)}
-            placeholder="Carga horária em horas"
-            className={styles.selectForm}
-            required
-          />
-          <label className={styles.textForm}>Nota obtida no componente cursado anteriormente</label>
-          <input
-            type="number"
-            value={courseWorkload}
-            onChange={(e) => setCourseWorkload(e.target.value)}
-            placeholder="Nota obtida"
-            className={styles.selectForm}
-            required
-          />
-        </div>
-      )}
-      {/* Linhas de upload */}
-      <div className={styles.typeContainer}>
-        {requestType === "certificacao" ? (
-          <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 3.2.1, alinea "b" do Edital.</label>
-        ) : (
-          <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 2.2.1, alinea "b" do Edital.</label>
-        )}
-        {uploadLines.map((line) => (
-          <div key={line.id} style={{ display: "flex", alignItems: "center" }}>
-            <FileUpload
-              name="singleAttachment"
-              mode="basic"
-              accept="application/pdf,image/png,image/jpeg"
-              maxFileSize={5000000}
-              chooseLabel="Selecionar arquivo"
-              className={styles.selectForm}
-              onSelect={(e) => handleFileSelect(line.id, e)}
-              auto={false}
-              customUpload={true}
-            />
-            <Button
-              type="button"
-              className={styles.cancelButton}
-              style={{ marginLeft: "0.5rem" }}
-              onClick={() => removeUploadLine(line.id)}
-            >
-              X
-            </Button>
+          <label className={styles.textForm}>Edital</label>
+          <div>
+            {selectedNotice ? (
+              <span key={selectedNotice.id}>
+                {selectedNotice.number} - {new Date(selectedNotice.documentation_submission_start).toLocaleDateString()}{" "}
+                a {new Date(selectedNotice.documentation_submission_end).toLocaleDateString()}{" "}
+              </span>
+            ) : (
+              <span>Nenhum edital vigente no momento.</span>
+            )}
           </div>
-        ))}
-        <div className={styles.addButtonContainer}>
-          <button type="button" onClick={addUploadLine} className={styles.addButton}>
-            <i className="pi pi-plus" style={{ fontSize: "1.5rem", color: "#ffff" }}></i>
-          </button>
         </div>
-      </div>
-      <div className={styles.formBtnContainer}>
-        <Button type="button" className={styles.cancelButton} onClick={handleCancel}>
-          Cancelar
-        </Button>
-        <Button
-          type="button"
-          disabled={!selectedNotice}
-          className={!selectedNotice ? styles.btnDisabled : styles.confirmButton}
-          onClick={handleSubmit}
-        >
-          Enviar
-        </Button>
-      </div>
-    </form>
+        <div className={styles.typeContainer}>
+          <label className={styles.textForm}>Tipo:</label>
+          <select value={requestType} onChange={(e) => setRequestType(e.target.value)} className={styles.selectForm}>
+            <option value="">Selecione</option>
+            <option value="certificacao">Certificação de Conhecimento</option>
+            <option value="aproveitamento">Aproveitamento de Estudos</option>
+          </select>
+        </div>
+        {requestType === "certificacao" && (
+          <div className={styles.typeContainer}>
+            <span> Preencha e envie sua documentacao, de acordo com o item 3.2 do Edital. Preencher com a
+              nomenclatura correta das componente curricular.</span>
+          </div>
+        )}
+        {requestType === "aproveitamento" && (
+          <div className={styles.typeContainer}>
+            <span> Preencha e envie sua documentacao, de acordo com o item 2.2 do Edital. Preencher com a
+              nomenclatura correta das componente curricular.</span>
+          </div>
+        )}
+        <div className={styles.typeContainer}>
+          <label className={styles.textForm}>Curso</label>
+          <span key={selectedCourse.id}> {selectedCourse.name}</span>
+        </div>
+        <div className={styles.typeContainer}>
+          <label className={styles.textForm}>PPC</label>
+          <select value={selectedPpc} onChange={handlePpcChange} className={styles.selectForm} required>
+            <option value="">Selecione um PPC</option>
+            {ppc
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+          </select>
+        </div>
+        <div className={styles.typeContainer}>
+          {requestType === "certificacao" ? (
+            <label className={styles.textForm}>Componente curricular em que solicita certificação.</label>
+          ) : (
+            <label className={styles.textForm}>Componente curricular do IFRS em que solicita aproveitamento.</label>
+          )}
+          <select
+            value={disciplineId}
+            onChange={(e) => setDisciplineId(e.target.value)}
+            className={styles.selectForm}
+            disabled={!selectedCourse}
+            required
+          >
+            <option value="">Selecione uma disciplina</option>
+            {disciplines
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((discipline) => (
+                <option key={discipline.id} value={discipline.id}>
+                  {discipline.name}
+                </option>
+              ))}
+          </select>
+        </div>
+        {requestType === "certificacao" && (
+          <div className={styles.typeContainer}>
+            <label className={styles.textForm}>Experiência (s), Formação, Atividade(s) anteriores.</label>
+            <textarea
+              value={previousKnowledge}
+              onChange={(e) => setPreviousKnowledge(e.target.value)}
+              placeholder="Descreva seu conhecimento anterior..."
+              className={styles.selectForm}
+              required
+            />
+          </div>
+        )}
+        {requestType === "aproveitamento" && (
+          <div className={styles.typeContainer}>
+            <label className={styles.textForm}>Carga Horaria do componente cursado anteriormente</label>
+            <input
+              type="number"
+              value={courseStudiedWorkload}
+              onChange={(e) => setCourseStudiedWorkload(e.target.value)}
+              placeholder="Carga horária em horas"
+              className={styles.selectForm}
+              required
+            />
+            <label className={styles.textForm}>Nota obtida no componente cursado anteriormente</label>
+            <input
+              type="number"
+              value={courseWorkload}
+              onChange={(e) => setCourseWorkload(e.target.value)}
+              placeholder="Nota obtida"
+              className={styles.selectForm}
+              required
+            />
+          </div>
+        )}
+        <div className={styles.typeContainer}>
+          {requestType === "certificacao" ? (
+            <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 3.2.1, alinea "b" do Edital.</label>
+          ) : (
+            <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 2.2.1, alinea "b" do Edital.</label>
+          )}
+          {uploadLines.map((line) => (
+            <div key={line.id} style={{ display: "flex", alignItems: "center" }}>
+              <FileUpload
+                name="singleAttachment"
+                mode="basic"
+                accept="application/pdf,image/png,image/jpeg"
+                maxFileSize={5000000}
+                chooseLabel="Selecionar arquivo"
+                className={styles.selectForm}
+                onSelect={(e) => handleFileSelect(line.id, e)}
+                auto={false}
+                customUpload={true}
+              />
+              <Button
+                type="button"
+                className={styles.cancelButton}
+                style={{ marginLeft: "0.5rem", marginBottom: "1 rem" }}
+                onClick={() => removeUploadLine(line.id)}
+              >
+                X
+              </Button>
+            </div>
+          ))}
+          <div className={styles.addButtonContainer}>
+            <button type="button" onClick={addUploadLine} className={styles.addButton}>
+              <i className="pi pi-plus" style={{ fontSize: "1.5rem", color: "#ffff" }}></i>
+            </button>
+          </div>
+        </div>
+        <div className={styles.formBtnContainer}>
+          <Button type="button" className={styles.cancelButton} onClick={handleCancel}>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            disabled={!selectedNotice}
+            className={!selectedNotice ? styles.btnDisabled : styles.confirmButton}
+            onClick={handleSubmit}
+          >
+            Enviar
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 

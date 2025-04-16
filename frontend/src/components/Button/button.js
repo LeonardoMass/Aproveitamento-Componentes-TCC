@@ -9,13 +9,13 @@ const BtnContainer = styled.button`
     !props.color
       ? props.type === "cancel"
         ? "#af0a0a"
-        : "#046708"
+        : "#28a745;"
       : props.color};
-  max-height: 50px;
+  max-height: 40px;
   max-width: 200px;
   cursor: pointer;
   border: 0px solid;
-  border-radius: 15px;
+  border-radius: 10px;
   color: white;
   font-size: 15px;
 `;

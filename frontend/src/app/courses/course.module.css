@@ -152,14 +152,15 @@
 /* .deleteButton:hover { background-color: rgba(231, 76, 60, 0.1); } */
 
 .addButtonContainer {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 900;
+  gap: 20px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 30px;
 }
 
 .addButton {
-  background-color: #2ecc71;
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 50%;

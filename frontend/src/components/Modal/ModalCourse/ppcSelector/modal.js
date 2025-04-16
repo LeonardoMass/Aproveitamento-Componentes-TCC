@@ -31,9 +31,6 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
                 onPpcCreated();
             }
         } catch (error) {
-            console.error("Erro ao criar PPC:", error);
-            const errorMsg = error.response?.data?.detail || error.response?.data?.name?.[0] || "Falha ao criar PPC. Verifique se o nome já existe ou tente novamente.";
-            setCreateError(errorMsg);
         } finally {
             setIsCreating(false);
         }
@@ -42,7 +39,7 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
     return (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
-                <h2>Gerenciar PPCs de: {course.name}</h2>
+                <h2>PPCs de {course.name}</h2>
 
                 {/* Seção para Criar Novo PPC */}
                 <div className={styles.createSection}>
@@ -99,9 +96,9 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
 
                 {/* Botão Fechar */}
                 <div className={styles.modalActions}>
-                     <Button color="#6c757d" onClick={onClose} disabled={isCreating}>
+                     <button className={styles.closeButton} onClick={onClose} disabled={isCreating}>
                         Fechar
-                    </Button>
+                    </button>
                 </div>
             </div>
         </div>
