@@ -114,7 +114,6 @@ const ModalCourse = ({ onClose, editData = null }) => {
 
       console.log(`Atualizando usuário ${idProf} para Coordenador...`);
       const response = await AuthService.UpdateUser(idProf, formData);
-      handleApiResponse(response);
     } catch (error) {
       console.error(`Erro ao alterar professor ${idProf} para coordenador:`, error);
       handleApiResponse(error.response || { status: 500, data: { detail: `Erro interno ao atualizar tipo do usuário ${idProf}.` } });

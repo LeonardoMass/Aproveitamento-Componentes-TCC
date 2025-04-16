@@ -47,7 +47,7 @@ async function UpdateDiscipline(uuid, data) {
 // Função para deletar uma disciplina pelo ID
 async function DeleteDiscipline(uuid) {
     return apiClient.delete(`/api/disciplines/${uuid}/`)  // Usando uuid no caminho
-      .then((response) => response.data)
+      .then((response) => response)
       .catch((error) => {
         console.error("Erro ao excluir disciplina:", error);
         throw error;

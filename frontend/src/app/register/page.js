@@ -26,7 +26,7 @@ const RegisterPage = () => {
         if (domain.includes('aluno')) {
             return 'Estudante';
         }
-        if (/^\d+$/.test(localPart)) {
+        if (/^\d+$/.test(localPart) || localPart.includes('aluno')) {
             return 'Estudante';
         }
         return 'Servidor';

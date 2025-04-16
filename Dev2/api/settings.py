@@ -1,5 +1,4 @@
 from pathlib import Path
-from decouple import config
 import os
 from .env_settings import *
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -15,9 +14,21 @@ SECRET_KEY = 'django-insecure-x7wl+2b2uq$u+rz6fjvavi$7p7mv*)k!2t6@%3!4&(rk3wfnuh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["http//localhost:3000", "127.0.0.1", "localhost"]
-CORS_ORIGINS_WHITELIST = ["http//localhost:3000"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "super-spork-49rr5rxx44qhjqrv-8000.app.github.dev",  # Domínio principal
+    "super-spork-49rr5rxx44qhjqrv-3000.app.github.dev",   # Outro domínio (se necessário)
+]
+CORS_ORIGINS_WHITELIST = ["http//localhost:3000", "https://super-spork-49rr5rxx44qhjqrv-3000.app.github.dev"]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://super-spork-49rr5rxx44qhjqrv-8000.app.github.dev/',
+    'https://super-spork-49rr5rxx44qhjqrv-3000.app.github.dev/',
+    'https://*.app.github.dev',  # Wildcard para subdomínios
+]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -49,6 +60,8 @@ ROOT_URLCONF = 'api.urls'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://super-spork-49rr5rxx44qhjqrv-3000.app.github.dev",
+    "https://super-spork-49rr5rxx44qhjqrv-8000.app.github.dev",
 ]
 # CORS_ALLOW_ALL_ORIGINS = True
 # SECURE_CROSS_ORIGIN_OPENER_POLICY = None
@@ -161,7 +174,8 @@ REST_FRAMEWORK = {
 
 if DEBUG:
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
+# Adicione no final do settings.py (antes das configurações de email):
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 #EMAIL
 # DEFAULT_FROM_EMAIL = "murilo.lacerda74@gmail.com"

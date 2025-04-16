@@ -1,4 +1,5 @@
 "use client";
+import { toast } from 'react-toastify';
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./usersList.module.css";
 import { Button as Btn } from "@/components/Button/button";
@@ -10,7 +11,6 @@ import AuthService from "@/services/AuthService";
 import FormProfile from "@/components/Forms/Profile/ProfileForm";
 import { InputText } from "primereact/inputtext";
 import { useAuth } from "@/context/AuthContext";
-import Toast from "@/utils/toast";
 
 const UsersList = () => {
   const { user } = useAuth();
@@ -19,8 +19,6 @@ const UsersList = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [toast, setToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState({});
   const {
     search,
     setSearch,
@@ -30,8 +28,6 @@ const UsersList = () => {
     setShowInactive,
     selectedStatus,
     setSelectedStatus,
-    selectedVerifieds,
-    setSelectedVerifieds,
     selectedCourse,
     setSelectedCourse,
     selectedRole,
@@ -73,9 +69,9 @@ const UsersList = () => {
   }, [applyFilters]);
 
   const handleToast = (type, text) => {
-    setToast(true);
-    setToastMessage({ type, text });
-    setTimeout(() => setToast(false), 10000);
+    console.log(type, text);
+    if (type === 'sucess') toast.success(text);
+    if (type === 'error') toast.error(text);
   };
 
   const updateActivity = useCallback(async (userId) => {
@@ -85,7 +81,7 @@ const UsersList = () => {
         handleToast('error', 'Falha ao atualizar status.');
         return;
       }
-      handleToast('success', 'Status do usuário atualizado.');
+      toast.success('Status do usuário atualizado.');
       await refreshUserList();
     } catch (err) {
       setError(err.message || "Erro ao tentar atualizar status do usuário.");
@@ -118,7 +114,6 @@ const UsersList = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <h1 className={styles.title}>Usuários</h1>
         <div className={styles.filters}>
           <div className={styles.searchWrapper}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
@@ -153,15 +148,6 @@ const UsersList = () => {
               onChange={(event, value) => setSelectedStatus(value)}
               onKeyDown={handleFilterKeyDown}
             />
-            <Filter
-              optionList={[
-                { id: true, title: 'Sim' },
-                { id: false, title: 'Não' },
-              ]}
-              label="Verificado"
-              onChange={(event, value) => setSelectedVerifieds(value)}
-              onKeyDown={handleFilterKeyDown}
-            />
             <Btn className="btnFiltrar" onClick={applyFilters}>
               Filtrar
             </Btn>
@@ -177,7 +163,6 @@ const UsersList = () => {
                 <th>Email</th>
                 <th>Curso</th>
                 <th>Estado</th>
-                <th>Verificado</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -190,13 +175,6 @@ const UsersList = () => {
                   <td>{u.email ?? "N/A"}</td>
                   <td>{u.course ?? "N/A"}</td>
                   <td>{u.is_active ? "Ativo" : "Inativo"}</td>
-                  <td className="ver-column">
-                    {u.is_verified ? (
-                      <span className="p-icon pi pi-fw pi-check-circle ms-9 text-2xl" style={{ color: "#2f9e41" }}></span>
-                    ) : (
-                      <span className="p-icon pi pi-fw pi-exclamation-triangle ms-9 text-2xl" style={{ color: "#f1c40f" }}></span>
-                    )}
-                  </td>
                   <td>
                     {user?.type === 'Ensino' && (
                       <>
@@ -232,11 +210,6 @@ const UsersList = () => {
             onCancel={() => setEditingUser(null)}
             admEditing={true}
           />
-        </div>
-      )}
-      {toast && (
-        <div className={styles.globalToast}>
-          <Toast type={toastMessage.type}>{toastMessage.text}</Toast>
         </div>
       )}
     </div>

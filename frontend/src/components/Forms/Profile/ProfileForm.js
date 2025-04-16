@@ -70,7 +70,7 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
                 ? await AuthService.CreateUser(formData)
                 : await AuthService.UpdateUser(userData.id, formData);
             console.log('Resposta da API:', response);
-            //const result = handleApiResponse(response);
+            handleApiResponse(response);
 
             if (response.status === 200 || response.status === 201) {
                 if (typeof onSave === 'function') {
@@ -79,9 +79,11 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
                 onCancel();
             }
         } catch (error) {
-            handleApiResponse({
-                success: false,
-                message: 'Erro ao processar a solicitação'
+            console.error('Erro ao enviar os dados:', error);
+            setToast(true);
+            setToastMessage({
+                type: "error",
+                text: "Erro ao enviar os dados."
             });
         }
     }
