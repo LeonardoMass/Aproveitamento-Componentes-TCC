@@ -159,7 +159,7 @@ class UpdateCourseAPIView(APIView):
             if coordinator_data is not None:
                 if Course.objects.filter(coordinator=coordinator_data).exclude(id=course.id).exists():
                      return Response(
-                         {"coordinator_id": ["Este coordenador já está associado a outro curso."]},
+                         {"detail":"Este coordenador já está associado a outro curso."},
                          status=status.HTTP_400_BAD_REQUEST,
                      )
                 course.coordinator = coordinator_data
@@ -172,10 +172,10 @@ class UpdateCourseAPIView(APIView):
                      professors_queryset = Servant.objects.filter(id__in=professors_id_list)
                      course.professors.set(professors_queryset)
                 else:
-                     return Response({"professor_ids": ["Formato inválido."]}, status=status.HTTP_400_BAD_REQUEST)
+                     return Response({"detail": "Formato inválido."}, status=status.HTTP_400_BAD_REQUEST)
 
             updated_course_serializer = CourseSerializer(course)
-            return Response(updated_course_serializer.data, status=status.HTTP_200_OK)
+            return Response({'detail':"Curso alterado com sucesso", 'updated':updated_course_serializer.data}, status=status.HTTP_200_OK)
 
         print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

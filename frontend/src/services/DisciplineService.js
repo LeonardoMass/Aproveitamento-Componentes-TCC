@@ -23,14 +23,15 @@ async function CreateDiscipline(data) {
   }
 
 // Função para obter uma disciplina específica pelo ID
-export async function GetDiscipline(id) {
-    try {
-      const response = await apiClient.get(`/api/disciplines/${id}/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Erro ao buscar disciplina com ID ${id}:`, error);
-      throw error;
-    }
+export async function GetDiscipline(id, active = null) {
+  try {
+    const query = active !== null ? `?active=${active}` : '';
+    const response = await apiClient.get(`/api/disciplines/${id}/${query}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Erro ao buscar disciplina com ID ${id}:`, error);
+    return null;
+  }
 }
 
 // Função para atualizar uma disciplina existente pelo ID
@@ -54,12 +55,12 @@ async function DeleteDiscipline(uuid) {
       });
   }
 
-  export const getDisciplineDetailsBatch = async (disciplineIds) => {
+  export const getDisciplineDetailsBatch = async (disciplineIds, active = null) => {
     if (!disciplineIds || disciplineIds.length === 0) {
       return [];
     }
     try {
-      const disciplinePromises = disciplineIds.map(id => GetDiscipline(id));
+      const disciplinePromises = disciplineIds.map(id => GetDiscipline(id, active));
       const disciplines = await Promise.all(disciplinePromises);
       return disciplines.filter(discipline => discipline !== null);
     } catch (error) {

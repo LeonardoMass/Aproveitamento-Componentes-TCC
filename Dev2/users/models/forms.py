@@ -9,7 +9,7 @@ from users.models import Servant
 
 # Enum para status da requisição
 class RequestStatus(models.TextChoices):
-    IN_ANALYSIS_BY_CRE = "CRE", "Em análise do Ensino"
+    IN_ANALYSIS_BY_CRE = "CRE", "Aguardando período de análise"
     CANCELED = "CANCELED", "Cancelado pelo Aluno"
     CANCELED_BY_CRE = "C_CRE", "Cancelado pelo Ensino"
     ANALYZED_BY_CRE = "A_CRE", "Analisado pelo Ensino"

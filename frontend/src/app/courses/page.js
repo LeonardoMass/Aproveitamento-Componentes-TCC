@@ -9,6 +9,7 @@ import ModalPpcSelector from "@/components/Modal/ModalCourse/ppcSelector/modal";
 import { courseList } from "@/services/CourseService";
 import { useAuth } from "@/context/AuthContext";
 import { ppcList } from "@/services/PpcService";
+import { InputText } from 'primereact/inputtext';
 
 const Course = () => {
   const [courses, setCourses] = useState([]);
@@ -97,17 +98,17 @@ const Course = () => {
         <h1 className={styles.pageTitle}>Gerenciamento de Cursos</h1>
         <div className={styles.searchContainer}>
           <div className={styles.searchWrapper}>
+            <InputText
+              className={styles.nameFilter}
+              type="text"
+              value={searchTerm}
+              placeholder="Buscar"
+              onChange={handleSearch}
+            />
             <FontAwesomeIcon
               icon={faSearch}
               size="lg"
               className={styles.searchIcon}
-            />
-            <input
-              type="text"
-              placeholder="Buscar por nome..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className={styles.searchInput}
             />
           </div>
         </div>

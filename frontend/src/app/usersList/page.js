@@ -193,19 +193,22 @@ const UsersList = () => {
         </div>
       </div>
       {editingUser && (
-        <div className={styles.modal}>
-          <h2>Editar Usuário</h2>
-          <FormProfile
-            user={editingUser}
-            onSave={async (type , text) => {
-              await refreshUserList();
-              setEditingUser(null);
-              handleToast(type, text);
-            }}
-            onCancel={() => setEditingUser(null)}
-            admEditing={true}
-          />
-        </div>
+        <>
+          <div className={styles.overlay}></div>
+          <div className={styles.modal}>
+            <h2>Editar Usuário</h2>
+            <FormProfile
+              user={editingUser}
+              onSave={async (type, text) => {
+                await refreshUserList();
+                setEditingUser(null);
+                handleToast(type, text);
+              }}
+              onCancel={() => setEditingUser(null)}
+              admEditing={true}
+            />
+          </div>
+        </>
       )}
     </div>
   );

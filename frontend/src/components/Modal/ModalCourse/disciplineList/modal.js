@@ -27,7 +27,7 @@ const ModalPpcDisciplineList = ({ course, onClose }) => {
           const firstPpc = fetchedPpcs[0];
           setSelectedPpc(firstPpc);
           if (firstPpc.disciplines && firstPpc.disciplines.length > 0) {
-            const disciplineDetails = await getDisciplineDetailsBatch(firstPpc.disciplines);
+            const disciplineDetails = await getDisciplineDetailsBatch(firstPpc.disciplines, true);
             setDisplayDisciplines(disciplineDetails);
           } else {
             setDisplayDisciplines([]);
@@ -57,7 +57,7 @@ const ModalPpcDisciplineList = ({ course, onClose }) => {
       setError('');
       try {
           if (newSelectedPpc.disciplines && newSelectedPpc.disciplines.length > 0) {
-              const disciplineDetails = await getDisciplineDetailsBatch(newSelectedPpc.disciplines);
+              const disciplineDetails = await getDisciplineDetailsBatch(newSelectedPpc.disciplines, true);
               setDisplayDisciplines(disciplineDetails);
           } else {
               setDisplayDisciplines([]);

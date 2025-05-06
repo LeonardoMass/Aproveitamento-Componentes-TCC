@@ -80,7 +80,7 @@ const CertificationRequestForm = () => {
 
     const selectedPpcObj = ppc.find((item) => item.id === selectedPpcId);
     if (selectedPpcObj && selectedPpcObj.disciplines && selectedPpcObj.disciplines.length > 0) {
-      const disciplineDetails = await getDisciplineDetailsBatch(selectedPpcObj.disciplines);
+      const disciplineDetails = await getDisciplineDetailsBatch(selectedPpcObj.disciplines, true);
       setDisciplines(disciplineDetails);
     } else {
       setDisciplines([]);

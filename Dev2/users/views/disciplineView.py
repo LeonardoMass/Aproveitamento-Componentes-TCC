@@ -44,6 +44,16 @@ def discipline_detail(request, pk):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if request.method == 'GET':
+        active_param = request.query_params.get('active')
+        if active_param is not None:
+            active_param = active_param.lower()
+            if active_param == 'true':
+                if not discipline.is_active:
+                    return Response(status=status.HTTP_404_NOT_FOUND)
+            elif active_param == 'false':
+                if discipline.is_active:
+                    return Response(status=status.HTTP_404_NOT_FOUND)
+
         serializer = DisciplineSerializer(discipline)
         return Response(serializer.data)
 
@@ -70,7 +80,7 @@ def discipline_detail(request, pk):
             if discipline.is_active:
                 discipline.is_active = False
                 discipline.save()
-                return Response({"detail": "Disciplina foi inativada pois está associada a requisições."},
+                return Response({"detail": "Disciplina foi inativada pois está associada a solicitações."},
                                 status=status.HTTP_200_OK)
             else:
                 discipline.is_active = True

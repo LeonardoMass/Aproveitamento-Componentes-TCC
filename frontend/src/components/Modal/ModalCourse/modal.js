@@ -114,7 +114,7 @@ const ModalCourse = ({ onClose, editData = null }) => {
 
       console.log(`Atualizando usuário ${idProf} para Coordenador...`);
       const response = await AuthService.UpdateUser(idProf, formData);
-      handleApiResponse(response);
+      return response;
     } catch (error) {
       console.error(`Erro ao alterar professor ${idProf} para coordenador:`, error);
       handleApiResponse(error.response || { status: 500, data: { detail: `Erro interno ao atualizar tipo do usuário ${idProf}.` } });
@@ -144,7 +144,7 @@ const ModalCourse = ({ onClose, editData = null }) => {
 
       console.log(`Revertendo usuário ${coord.id} para Professor...`);
       const response = await AuthService.UpdateUser(coord.id, formData);
-      handleApiResponse(response);
+      return response;
     } catch (error) {
       console.error(`Erro ao alterar coordenador ${coord?.id} para professor:`, error);
       handleApiResponse(error.response || { status: 500, data: { detail: `Erro interno ao atualizar tipo do usuário ${coord?.id}.` } });
@@ -180,7 +180,7 @@ const ModalCourse = ({ onClose, editData = null }) => {
 
           if (userToMakeCoordinator && userToMakeCoordinator.servant_type === 'Professor') {
             console.log(`Promovendo Professor ${newSelectedCoordId} para Coordenador.`);
-            await handleChangeProfessorToCoord(newSelectedCoordId);
+            const coord = await handleChangeProfessorToCoord(newSelectedCoordId);
           } else if (userToMakeCoordinator && userToMakeCoordinator.servant_type === 'Coordenador') {
             if (userToMakeCoordinator.id !== originalCoordId) {
               console.warn(`Usuário ${newSelectedCoordId} selecionado como coordenador já é Coordenador`);
@@ -192,19 +192,19 @@ const ModalCourse = ({ onClose, editData = null }) => {
 
         if (originalCoordId && originalCoordinatorData) {
           console.log(`Revertendo Coordenador original ${originalCoordId} para Professor.`);
-          await handleChangeCoordToProfessor(originalCoordinatorData);
+          const professor = await handleChangeCoordToProfessor(originalCoordinatorData);
         }
       }
       console.log("Enviando dados do curso para API:", courseDataPayload);
       let savedCourse;
       if (editData) {
         console.log(`Editando curso ID: ${editData.id}`);
-        savedCourse = await courseEdit(editData.id, courseDataPayload);
+        const savedCourse = await courseEdit(editData.id, courseDataPayload);
+        handleApiResponse(savedCourse);
       } else {
         console.log("Criando novo curso.");
         savedCourse = await courseCreate(courseDataPayload);
       }
-      console.log("Curso salvo/editado:", savedCourse);
 
       if (!editData && initialPpcName.trim() && savedCourse?.id) {
         console.log(`Tentando criar PPC inicial '${initialPpcName.trim()}' para o curso ID: ${savedCourse.id}`);
@@ -220,14 +220,12 @@ const ModalCourse = ({ onClose, editData = null }) => {
         }
       }
 
-      alert(`Curso ${editData ? 'atualizado' : 'criado'} com sucesso!`);
       onClose();
       window.location.reload();
 
     } catch (error) {
       console.error("Erro GERAL no processo de salvar curso:", error);
-      const errorMsg = error?.response?.data?.detail || error.message || `Erro desconhecido ao ${editData ? 'atualizar' : 'criar'} curso.`;
-      alert(errorMsg);
+      handleApiResponse(error.response);
     } finally {
       setIsSubmitting(false);
     }

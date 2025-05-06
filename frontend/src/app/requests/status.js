@@ -1,5 +1,5 @@
 export const StatusEnum = Object.freeze([
-    "Em análise do Ensino",
+    "Aguardando período de análise",
     "Cancelado pelo Aluno",
     "Cancelado pelo Ensino",
     "Analisado pelo Ensino",
@@ -49,7 +49,7 @@ export function getFailed() {
 }
 
 export function getPending() {
-    return ["Em análise do Ensino", "Em análise do Coordenador", "Em análise do Professor", "Em homologação do Coordenador",
+    return ["Aguardando período de análise", "Em análise do Coordenador", "Em análise do Professor", "Em homologação do Coordenador",
         "Retornado pelo Coordenador", "Em homologação do Ensino", "Retornado pelo Ensino"]
 }
 
@@ -62,7 +62,7 @@ export function getStatusStepIndex(status) {
 }
 
 export function getStep1Status() {
-    return ["Em análise do Ensino", "Cancelado pelo Aluno", "Cancelado pelo Ensino", "Analisado pelo Ensino"];
+    return ["Aguardando período de análise", "Cancelado pelo Aluno", "Cancelado pelo Ensino", "Analisado pelo Ensino"];
 }
 
 export function getStep2Status() {
@@ -83,7 +83,7 @@ export function getStep5Status() {
 
 export function getStatus(status) {
     switch (status) {
-        case "Em análise do Ensino":
+        case "Aguardando período de análise":
             return "CRE";
         case "Cancelado pelo Aluno":
             return "CANCELED";

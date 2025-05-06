@@ -454,7 +454,7 @@ const Details = () => {
               </div>
             )}
             {role === "Estudante" &&
-              details.status_display === "Em análise do Ensino" && (
+              details.status_display === "Aguardando período de análise" && (
                 <div className={styles.centered}>
                   <Button
                     label="Cancelar solicitação"
@@ -513,7 +513,7 @@ const Details = () => {
                     <strong>Componente curricular: </strong>
                     {details.discipline_name}
                   </p>
-                  {role === "Estudante" && details.status_display === "Em análise do Ensino" ? (
+                  {role === "Estudante" && details.status_display === "Aguardando período de análise" ? (
                     <div className={styles.attachmentsSection}>
                       <h3>Anexos</h3>
                       {details.attachments && details.attachments.length > 0 && (
@@ -621,7 +621,7 @@ const Details = () => {
                         {details.previous_knowledge || "Pendente"}
                       </span>
                       {role === "Estudante" &&
-                        details.status_display === "Em análise do Ensino" && (
+                        details.status_display === "Aguardando período de análise" && (
                           <>
                             <FontAwesomeIcon
                               icon={faEdit}
@@ -654,7 +654,7 @@ const Details = () => {
                           {details.course_workload || "Pendente"}
                         </span>
                         {role === "Estudante" &&
-                          details.status_display === "Em análise do Ensino" && (
+                          details.status_display === "Aguardando período de análise" && (
                             <>
                               <FontAwesomeIcon
                                 icon={faEdit}
@@ -690,7 +690,7 @@ const Details = () => {
                           {details.course_studied_workload || "Pendente"}
                         </span>
                         {role === "Estudante" &&
-                          details.status_display === "Em análise do Ensino" && (
+                          details.status_display === "Aguardando período de análise" && (
                             <>
                               <FontAwesomeIcon
                                 icon={faEdit}
@@ -726,7 +726,7 @@ const Details = () => {
                     </div>
 
                     {role === "Ensino" &&
-                      details.status_display === "Em análise do Ensino" && (
+                      details.status_display === "Aguardando período de análise" && (
                         <div className={styles.actionButtons}>
                           <Button
                             label="Aprovar"
