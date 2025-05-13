@@ -225,11 +225,17 @@ const Requests = () => {
                     </tbody>
                 </table>
             </div>
-            <div>
-                <button onClick={handleRequestFormRedirect} className={styles.addButton}>
-                    <FontAwesomeIcon icon={faPlus} size="2x"/>
-                </button>
-            </div>
+            {user.type === "Estudante" && (
+            <div className={styles.addButtonContainer}>
+                      <button
+                        onClick={handleRequestFormRedirect}
+                        className={styles.addButton}
+                        title="Criar nova solicitação"
+                      >
+                        <FontAwesomeIcon icon={faPlus} size="2x" />
+                      </button>
+                    </div>
+            )}
             {toast ? (
                 <Toast type={toastMessage.type} close={closeToast}>
                 {toastMessage.text}

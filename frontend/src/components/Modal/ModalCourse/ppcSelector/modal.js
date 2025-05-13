@@ -4,7 +4,7 @@ import styles from './modalPpcSelector.module.css';
 import { ppcCreate } from '@/services/PpcService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSpinner, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
-import { Button } from '@/components/Button/button';
+import Button from "@/components/ButtonDefault/button";
 
 const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) => {
 
@@ -55,6 +55,7 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
                             aria-label="Nome do novo PPC"
                         />
                         <Button
+                            variant="save"
                             onClick={handleCreatePpc}
                             disabled={isCreating || !newPpcName.trim()}
                             className={styles.createButtonInternal}
@@ -96,9 +97,9 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
 
                 {/* Botão Fechar */}
                 <div className={styles.modalActions}>
-                     <button className={styles.closeButton} onClick={onClose} disabled={isCreating}>
+                     <Button variant="close" onClick={onClose} disabled={isCreating}>
                         Fechar
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

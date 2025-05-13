@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getFailed, getSucceeded } from "@/app/requests/status";
 import styles from './modalRequest.module.css';
+import Button from "@/components/ButtonDefault/button";
 
 const Modal = ({ status, onClose, onConfirm, isOpen }) => {
     const [feedback, setFeedback] = useState("");
@@ -51,12 +52,12 @@ const Modal = ({ status, onClose, onConfirm, isOpen }) => {
                 {!isFeedbackValid && <p style={{ color: "red" }}>*O parecer é obrigatório</p>}
 
                 <div className="modalActions">
-                    <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={onClose}>
+                    <Button variant="cancel" className={`${styles.btn} ${styles.btnSecondary}`} onClick={onClose}>
                         Cancelar
-                    </button>
-                    <button className={`${styles.btn} ${getButtonColor()}`} onClick={handleConfirm}>
+                    </Button>
+                    <Button variant="save" className={`${styles.btn} ${getButtonColor()}`} onClick={handleConfirm}>
                         Confirmar
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

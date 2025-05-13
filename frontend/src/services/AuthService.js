@@ -1,11 +1,11 @@
 import { apiClient } from "@/libs/api";
 
 async function UserDetails() {
-    return apiClient.get('users/details').then((response) => response.data);
+    return apiClient.get('users/details/').then((response) => response.data);
 }
 
 export async function UserList() {
-    return apiClient.get('/users/list').then((response) => response.data);
+    return apiClient.get('/users/list/').then((response) => response.data);
 }
 
 async function CreateUser(data) {

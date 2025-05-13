@@ -20,7 +20,7 @@ export const StatusEnum = Object.freeze([
 ]);
 
 export const steps = [
-    {index: 0, label: 'Análise do Ensino'},
+    {index: 0, label: 'Período de análise'},
     {index: 1, label: 'Análise do Coordenador'},
     {index: 2, label: 'Análise do Professor'},
     {index: 3, label: 'Homologação do Coordenador'},

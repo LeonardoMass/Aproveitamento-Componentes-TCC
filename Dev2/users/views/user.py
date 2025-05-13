@@ -20,7 +20,7 @@ class CreateUserView(APIView):
         if serializer.is_valid():
             criar_usuario = self.user_service.createUser(usuario, serializer)
             if criar_usuario is not None:
-                return Response({"id": usuario.id}, status=status.HTTP_201_CREATED)
+                return Response({"detail": "Usuário criado com sucesso.","id": usuario.id}, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -35,10 +35,11 @@ class UpdateActiveByIdView(APIView):
         user_autorized = self.user_service.userAutorized(usuario)
         user = AbstractUser.objects.get(id=id)
         if not user_autorized:
-            return Response({'not ok'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Não autorizado"}, status=status.HTTP_400_BAD_REQUEST)
         user.is_active = not user.is_active
         user.save()
-        return Response({'ok'},status=status.HTTP_200_OK)
+        message = "Usuário ativado com sucesso" if user.is_active else "Usuário inativado com sucesso"
+        return Response({"detail": message}, status=status.HTTP_200_OK)
    
 class UpdateUserByIdView(APIView):
 
@@ -70,6 +71,9 @@ class UpdateUserByIdView(APIView):
                     usuario.siape = serializer.validated_data["siape"]
                     usuario.servant_type = serializer.validated_data["servant_type"]
                 usuario.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response({
+                    "detail": "Usuário atualizado com sucesso.",
+                    "data": serializer.data
+                },status=status.HTTP_200_OK)
             return Response({"detail": "Usuário não autorizado"},status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

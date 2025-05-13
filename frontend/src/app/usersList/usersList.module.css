@@ -233,26 +233,4 @@
   min-width: 120px;
 }
 
-.btnFiltrar {
-  border: 2px solid green; /* Borda verde */
-  padding: 10px 20px; /* Ajuste do padding */
-  border-radius: 5px; /* Bordas arredondadas */
-  color: white; /* Cor do texto */
-  background-color: #46b5ff; /* Cor de fundo */
-  cursor: pointer; /* Mostra que o botão é clicável */
-}
-
-.btnFiltrar:hover {
-  background-color: #3a9bbd; /* Cor de fundo quando passar o mouse */
-}
-
-.btnFiltrar {
-  padding: 10px 20px;
-  border: 1px solid #46b5ff;
-  background-color: #46b5ff;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
 

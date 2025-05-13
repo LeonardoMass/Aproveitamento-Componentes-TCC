@@ -6,13 +6,13 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import styles from "./discipline.module.css";
-import { Button } from "../../components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash, faEye, faSearch, faPlus, faSave } from "@fortawesome/free-solid-svg-icons";
 import DisciplineService from "@/services/DisciplineService";
 import Toast from "@/utils/toast";
 import { useAuth } from "@/context/AuthContext";
 import { handleApiResponse } from "@/libs/apiResponseHandler";
+import Button from "@/components/ButtonDefault/button";
 
 const Discipline = () => {
   const [disciplines, setDisciplines] = useState([]);
@@ -308,17 +308,17 @@ const Discipline = () => {
 
             <div className={styles.modalFooter}>
               {modalState.mode === 'view' ? (
-                <button className={styles.closeButton} onClick={closeModal}>
+                <Button variant="close" onClick={closeModal}>
                   Fechar
-                </button>
+                </Button>
               ) : (
                 <>
-                  <button className={styles.saveButton} onClick={handleSave}>
-                    <FontAwesomeIcon icon={faSave} /> Salvar
-                  </button>
-                  <button className={styles.cancelButton} onClick={closeModal}>
+                  <Button variant="cancel" onClick={closeModal}>
                     Cancelar
-                  </button>
+                  </Button>
+                  <Button variant="save" onClick={handleSave}>
+                    <FontAwesomeIcon icon={faSave} /> Salvar
+                  </Button>
                 </>
               )}
             </div>

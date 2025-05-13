@@ -279,6 +279,10 @@
     border-color: #dc3545;
 }
 
+.pButtonSuccess:hover { background: #208b39; box-shadow: 0 2px 4px rgba(40, 167, 69, 0.4); }
+.pButtonReturn:hover { background: #a5860c; box-shadow: 0 2px 4px rgba(108, 117, 125, 0.4); }
+.pButtonDanger:hover { background: #c42222; box-shadow: 0 2px 4px rgba(108, 117, 125, 0.4); }
+
 .backButton {
     background-color: #28a745;
     border-color: #28a745;
@@ -335,7 +339,7 @@
   border-radius: 4px;
   cursor: pointer;
 }
->>>>>>> origin/sprint6/modal_confirma_cancelar
+
 .attachmentItemContent {
     display: flex;
     align-items: center;

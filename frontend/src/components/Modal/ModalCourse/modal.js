@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import styles from "./modalCourse.module.css";
-import { Button } from "../../Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { courseCreate, courseEdit } from "@/services/CourseService";
@@ -8,6 +7,7 @@ import AuthService, { UserList } from "@/services/AuthService";
 import { apiClient } from "@/libs/api";
 import { handleApiResponse } from "@/libs/apiResponseHandler";
 import { ppcCreate } from "@/services/PpcService";
+import Button from "@/components/ButtonDefault/button";
 
 const ModalCourse = ({ onClose, editData = null }) => {
   const [courseName, setCourseName] = useState("");
@@ -317,10 +317,10 @@ const ModalCourse = ({ onClose, editData = null }) => {
 
         {/* Ações do Modal */}
         <div className={styles.modalActions}>
-          <Button color="#6c757d" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="cancel" onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !courseName.trim() || fetchError}>
+          <Button variant="save" onClick={handleSubmit} disabled={isSubmitting || !courseName.trim() || fetchError}>
             {isSubmitting ? "Salvando..." : (editData ? "Salvar Alterações" : "Cadastrar Curso")}
           </Button>
         </div>

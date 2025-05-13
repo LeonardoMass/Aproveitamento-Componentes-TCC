@@ -15,7 +15,11 @@ const noticeListAll = async () => {
 const noticeCreate = async (data) => {
   return await apiClient
     .post("notices/", data)
-    .then((response) => response.data);
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error("Erro ao criar edital:", error);
+      throw error;
+    });
 };
 
 const noticeEdit = async (id, data) => {

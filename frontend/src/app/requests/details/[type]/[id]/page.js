@@ -941,9 +941,7 @@ const Details = () => {
                               style={{
                                 marginBottom: "10px",
                                 marginTop: "5px",
-                                border: "1px solid #ccc",
                                 padding: "10px",
-                                borderRadius: "10px",
                               }}
                               onSelect={(e) => onFileSelect(e)}
                             />

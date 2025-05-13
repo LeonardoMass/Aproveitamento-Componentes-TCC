@@ -25,7 +25,7 @@ const NavBar = ({ data = false }) => {
     if (typeof window !== "undefined") {
       setPath(window.location.pathname); // Obtém o caminho da URL
     }
-    getCurrentNotice()
+    if (isUserAuth && user.type === "Estudante") getCurrentNotice();
   }, []);
 
   const getCurrentNotice = async () => {

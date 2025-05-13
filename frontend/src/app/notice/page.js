@@ -46,6 +46,7 @@ const Notice = () => {
     const fetchNotices = async () => {
       try {
         const data = await noticeListAll();
+        setAllNotices(data.results);
         setLastNotice(
           data.results
             .sort(
@@ -65,33 +66,13 @@ const Notice = () => {
     fetchNotices();
   }, []);
 
-  useEffect(() => {
-    const fetchNotices = async () => {
-      try {
-        const data = await noticeListAll();
-        setAllNotices(data.results);
-        console.log(allNotices);
-      } catch (err) {
-        setToast(true);
-        setToastMessage({
-          type: "error",
-          text: "Não fui possivel buscar os editais",
-        });
-      }
-    };
-    fetchNotices();
-  }, []);
-
-  const isNoticeOpen = () => {
-    if (!lastNotice) return false;
-
+  const isNoticeOpen = (notice) => {
+    if (!notice) return false;
     const now = new Date();
-    const startDate = new Date(lastNotice.documentation_submission_start);
-    const endDate = new Date(lastNotice.documentation_submission_end);
-
+    const startDate = new Date(notice.documentation_submission_start);
+    const endDate = new Date(notice.documentation_submission_end);
     return now >= startDate && now <= endDate;
   };
-
   const isOtherNoticeOpen = (notice) => {
     if (!notice) return false;
 
@@ -265,114 +246,68 @@ const Notice = () => {
       )}
     </div>
   ) : (
-    <div style={{ padding: "16px" }}>
-      <div className={styles.noticeInfoContainer}>
+    <div className={styles.contentWrapper}>
+
+      <div className={styles.lastNoticeSection}>
         {lastNotice ? (
-          <>
-            <div className={styles.infoTitle}>
-              <h2 style={{ whiteSpace: "nowrap" }}>Último Edital</h2>-
-              <p>{useDateFormatter(lastNotice.publication_date)}</p>
-              {isNoticeOpen() ? (
-                <span style={{ backgroundColor: "#69d95e" }}>Aberto</span>
-              ) : (
-                <span style={{ backgroundColor: "#f95858" }}>Fechado</span>
-              )}
+          <div
+            className={styles.lastNoticeCard}
+            onClick={() => window.open(lastNotice.link, "_blank")}
+          >
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>
+                Último Edital: {lastNotice.number}
+              </span>
+              <span className={`${styles.statusBadge} ${isNoticeOpen(lastNotice) ? styles.open : styles.closed}`}>
+                {isNoticeOpen(lastNotice) ? "Aberto" : "Fechado"}
+              </span>
             </div>
-            <div className={styles.info}>
-              <div>
-                <strong>Edital:</strong>
-                <span>{lastNotice.number}</span>
-              </div>
-              <div>
-                <strong>Inicio:</strong>
-                <span>
-                  {useDateFormatter(lastNotice.documentation_submission_start)}
-                </span>
-              </div>
-              <div>
-                <strong>Fim:</strong>
-                <span>
-                  {useDateFormatter(lastNotice.documentation_submission_end)}
-                </span>
-              </div>
-              <div>
-                <strong>Link:</strong>
-                <a href={lastNotice.link}>{lastNotice.link}</a>
-              </div>
+            <div className={styles.cardBody}>
+              <p>Publicado em {useDateFormatter(lastNotice.publication_date)}</p>
+              <p>
+                Prazo: {useDateFormatter(lastNotice.documentation_submission_start)} –{" "}
+                {useDateFormatter(lastNotice.documentation_submission_end)}
+              </p>
             </div>
-          </>
+          </div>
         ) : (
           <LoadingSpinner />
         )}
       </div>
-      <div className={styles.otherNotices} style={{ marginTop: "32px" }}>
-        <span
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%"
-          }}
-        >
-          <h2>Todos os Editais</h2>
-          {expand ? (
-            <ExpandLessIcon fontSize="large" cursor="pointer" onClick={() => setExpand(!expand)}/>
-          ) : (
-            <ExpandMoreIcon fontSize="large" cursor="pointer" onClick={() => setExpand(!expand)}/>
-          )}
-        </span>
-        {expand ? (
-          <div style={{ display: "flex", flexFlow: "wrap", gap: "16px", justifyContent: "center" }}>
-            {allNotices.map((notice) => (
-              <div className={styles.otherNotice}>
-                <>
-                  <div className={styles.infoTitle}>
-                    <h2 style={{ whiteSpace: "nowrap" }}>Edital</h2>-
-                    <p>{useDateFormatter(notice.publication_date)}</p>
-                    {isOtherNoticeOpen(notice) ? (
-                      <span style={{ backgroundColor: "#69d95e" }}>Aberto</span>
-                    ) : (
-                      <span style={{ backgroundColor: "#f95858" }}>
-                        Fechado
-                      </span>
-                    )}
-                  </div>
-                  <div className={styles.info}>
-                    <div>
-                      <strong>Edital:</strong>
-                      <span>{notice.number}</span>
-                    </div>
-                    <div>
-                      <strong>Inicio:</strong>
-                      <span>
-                        {useDateFormatter(
-                          notice.documentation_submission_start
-                        )}
-                      </span>
-                    </div>
-                    <div>
-                      <strong>Fim:</strong>
-                      <span>
-                        {useDateFormatter(
-                          notice.documentation_submission_end
-                        )}
-                      </span>
-                    </div>
-                    <div>
-                      <strong>Link:</strong>
-                      <a href={notice.link}>{notice.link}</a>
-                    </div>
-                  </div>
-                </>
+      <div className={styles.collapseHeader} onClick={() => setExpand(!expand)}>
+        <h2>Editais Anteriores</h2>
+        {expand ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+      </div>
+      {expand && (
+        <div className={styles.collapseContent}>
+          {allNotices
+            .filter(n => n.id !== lastNotice?.id)
+            .map(notice => (
+              <div
+                key={notice.id}
+                className={styles.noticeCard}
+                onClick={() => window.open(notice.link, "_blank")}
+              >
+                <div className={styles.cardHeader}>
+                  <span className={styles.cardTitle}>{notice.number}</span>
+                  <span className={`${styles.statusBadge} ${isNoticeOpen(notice) ? styles.open : styles.closed}`}>
+                    {isNoticeOpen(notice) ? "Aberto" : "Fechado"}
+                  </span>
+                </div>
+                <div className={styles.cardBody}>
+                  <p>Publicado em {useDateFormatter(notice.publication_date)}</p>
+                  <p>
+                    Prazo: {useDateFormatter(notice.documentation_submission_start)} –{" "}
+                    {useDateFormatter(notice.documentation_submission_end)}
+                  </p>
+                </div>
               </div>
             ))}
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
+        </div>
+      )}
+
     </div>
-  );
+  )
 };
 
 export default Notice;

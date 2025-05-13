@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./modalDisciplineList.module.css";
 import { ppcList } from '@/services/PpcService';
 import { getDisciplineDetailsBatch } from '@/services/DisciplineService';
+import Button from "@/components/ButtonDefault/button";
 
 const ModalPpcDisciplineList = ({ course, onClose }) => {
   const [ppcs, setPpcs] = useState([]);
@@ -123,9 +124,9 @@ const ModalPpcDisciplineList = ({ course, onClose }) => {
           </>
         )}
 
-        <button className={styles.closeButton} onClick={onClose}>
+        <Button variant="close" className={styles.closeButton} onClick={onClose}>
           Fechar
-        </button>
+        </Button>
       </div>
     </div>
   );

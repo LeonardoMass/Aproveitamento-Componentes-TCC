@@ -2,7 +2,6 @@
 import { toast } from 'react-toastify';
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./usersList.module.css";
-import { Button as Btn } from "@/components/Button/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faTrash, faEye, faSearch, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import Filter from "@/components/FilterField/filterField";
@@ -143,9 +142,6 @@ const UsersList = () => {
               onChange={(event, value) => setSelectedStatus(value)}
               onKeyDown={handleFilterKeyDown}
             />
-            <Btn className="btnFiltrar" onClick={applyFilters}>
-              Filtrar
-            </Btn>
           </div>
         </div>
         <div className={styles.scrollableTable}>
