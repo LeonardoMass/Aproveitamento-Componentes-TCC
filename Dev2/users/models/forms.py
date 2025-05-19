@@ -106,9 +106,8 @@ RETURNED_STATUS = [
 
 
 class Attachment(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.CharField(primary_key=True,max_length=100, editable=False)
     file_name = models.CharField(max_length=255)
-    file_data = models.BinaryField()
     content_type = models.CharField(max_length=50)
     is_test_attachment = models.BooleanField(default=False)
     recognition_form = models.ForeignKey(

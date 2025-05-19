@@ -5,7 +5,7 @@ import pytz
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
-
+from api.services import GoogleDriveService
 from users.models import Course
 from users.models.notice import Notice
 from users.models import Servant, AbstractUser
@@ -146,20 +146,6 @@ class AttachmentSerializer(serializers.ModelSerializer):
         model = Attachment
         fields = ['id', 'file_name', 'content_type', 'certification_form', 'recognition_form', 'is_test_attachment']
 
-    def create(self, validated_data):
-        file = validated_data.pop('file')
-        certification_form = validated_data.pop('certification_form', None)
-        recognition_form = validated_data.pop('recognition_form', None)
-        attachment = Attachment(
-            file_name=file.name,
-            file_data=file.read(),
-            content_type=file.content_type,
-            certification_form=certification_form,
-            recognition_form=recognition_form,
-            **validated_data
-        )
-        attachment.save()
-        return attachment
 
 
 class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
@@ -252,6 +238,8 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
         attachments_files = self.context['request'].FILES.getlist('attachment')
         student_id = validated_data.pop('student_id')
         student = get_object_or_404(Student, id=student_id)
+
+        drive_service = GoogleDriveService()
         requisition = RecognitionOfPriorLearning.objects.create(student=student, **validated_data)
 
         Step.objects.create(
@@ -263,9 +251,12 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
         )
 
         for attachment_file in attachments_files:
+            file_id = drive_service.upload_file(attachment_file)
+            if not file_id:
+                raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
             Attachment.objects.create(
+                id=file_id,
                 file_name=attachment_file.name,
-                file_data=attachment_file.read(),
                 content_type=attachment_file.content_type,
                 recognition_form=requisition
             )
@@ -381,13 +372,11 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             existing_test_attachment = instance.attachments.filter(is_test_attachment=True).first()
             if existing_test_attachment:
                 existing_test_attachment.file_name = value.name
-                existing_test_attachment.file_data = value.read()
                 existing_test_attachment.content_type = value.content_type
                 existing_test_attachment.save()
             else:
                 Attachment.objects.create(
                     file_name=value.name,
-                    file_data=value.read(),
                     content_type=value.content_type,
                     certification_form=instance,
                     is_test_attachment=True
@@ -395,7 +384,6 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
         else:
             Attachment.objects.create(
                 file_name=value.name,
-                file_data=value.read(),
                 content_type=value.content_type,
                 certification_form=instance,
                 is_test_attachment=False
@@ -432,7 +420,6 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
         for attachment_file in attachments_files:
             Attachment.objects.create(
                 file_name=attachment_file.name,
-                file_data=attachment_file.read(),
                 content_type=attachment_file.content_type,
                 certification_form=certification
             )

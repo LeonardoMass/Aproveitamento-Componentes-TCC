@@ -5,7 +5,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from api.services import GoogleDriveService
 from ..models.forms import Notice, FAILED_STATUS
 from ..models.forms import RecognitionOfPriorLearning, KnowledgeCertification, RequestStatus, Attachment, Step
 from ..serializers.formsSerializer import (
@@ -169,19 +169,29 @@ class AttachmentDownloadView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, attachment_id):
+        drive_service = GoogleDriveService()
         try:
             attachment = Attachment.objects.get(id=attachment_id)
         except Attachment.DoesNotExist:
-            raise Http404("Attachment not found")
+            raise Http404("Anexo não encontrado")
 
-        response = HttpResponse(attachment.file_data, content_type=attachment.content_type)
+        try:
+            file_stream, file_name = drive_service.download_file(attachment_id)
+            if not file_stream:
+                raise Http404("Arquivo não encontrado no Google Drive")
+            response = HttpResponse(file_stream.getvalue(), content_type=attachment.content_type)
 
-        response['Content-Disposition'] = f'inline; filename="{attachment.file_name}"'
-        return response
+            response['Content-Disposition'] = f'inline; filename="{file_name}"'
+            return response
+
+        except Exception as e:
+            print(f"Erro ao baixar arquivo: {str(e)}")
+            raise Http404("Erro ao recuperar o arquivo")
 
     def delete(self, request, attachment_id):
-        
+        drive_service = GoogleDriveService()
         try:
+            drive_service.delete_file(attachment_id)
             Attachment.objects.filter(id=attachment_id).delete()
         except Attachment.DoesNotExist:
             return Response(status=status.HTTP_204_NO_CONTENT)
