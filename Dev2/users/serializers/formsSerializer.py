@@ -221,15 +221,25 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Status inválido")
         return value
 
-    def handle_file_uploads(self, instance):
+    def handle_file_uploads(self, instance, student):
         request = self.context.get('request')
         if not request:
             return
 
         drive_service = GoogleDriveService()
+        if not student.drive_folder_id:
+            folder_name = f"{student.name} - {student.matricula}"
+            student_folder_id = drive_service.get_or_create_folder(folder_name)
+            if not student_folder_id:
+                raise serializers.ValidationError("Falha ao criar pasta no Google Drive")
+            student.drive_folder_id = student_folder_id
+            student.save()
+        else:
+            student_folder_id = student.drive_folder_id
+
         attachments_files = request.FILES.getlist('attachment')
         for attachment_file in attachments_files:
-            file_id = drive_service.upload_file(attachment_file)
+            file_id = drive_service.upload_file(attachment_file, student_folder_id)
             if not file_id:
                 raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
             Attachment.objects.create(
@@ -266,7 +276,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             initial_step_date=timezone.now(),
             current=True
         )
-        self.handle_file_uploads(requisition)
+        self.handle_file_uploads(requisition, student)
         return requisition
 
     def update(self, instance, validated_data):
@@ -371,12 +381,21 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("test_score deve estar entre 0 e 10.")
         return value
 
-    def handle_file_uploads(self, instance):
+    def handle_file_uploads(self, instance, student):
         request = self.context.get('request')
         if not request:
             return
 
         drive_service = GoogleDriveService()
+        if not student.drive_folder_id:
+            folder_name = f"{student.name} - {student.matricula}"
+            student_folder_id = drive_service.get_or_create_folder(folder_name)
+            if not student_folder_id:
+                raise serializers.ValidationError("Falha ao criar pasta no Google Drive")
+            student.drive_folder_id = student_folder_id
+            student.save()
+        else:
+            student_folder_id = student.drive_folder_id
 
         attachments_files = request.FILES.getlist('attachment')
         for attachment_file in attachments_files:
@@ -440,7 +459,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             initial_step_date=timezone.now(),
             current=True
         )
-        self.handle_file_uploads(certification)
+        self.handle_file_uploads(certification, student)
 
         return certification
 

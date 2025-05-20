@@ -69,3 +69,32 @@ class GoogleDriveService:
         except Exception as e:
             print(f"Erro ao deletar: {str(e)}")
             return False
+    
+    def get_or_create_folder(self, folder_name, parent_folder_id = '1GQ-Er_MDLIVPa21k9bnAt-7wrubkfFcL'):
+        try:
+            # Verifica se a pasta já existe
+            query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and '{parent_folder_id}' in parents"
+            response = self.service.files().list(
+                q=query,
+                spaces='drive',
+                fields='files(id, name)'
+            ).execute()
+            folders = response.get('files', [])
+
+            if folders:
+                return folders[0]['id']
+            else:
+                # Cria a pasta se não existir
+                file_metadata = {
+                    'name': folder_name,
+                    'mimeType': 'application/vnd.google-apps.folder',
+                    'parents': [parent_folder_id]
+                }
+                folder = self.service.files().create(
+                    body=file_metadata,
+                    fields='id'
+                ).execute()
+                return folder.get('id')
+        except Exception as e:
+            print(f"Erro ao obter/criar pasta: {str(e)}")
+            return None
