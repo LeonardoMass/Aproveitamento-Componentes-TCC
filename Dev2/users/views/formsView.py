@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from api.services import GoogleDriveService
 from ..models.forms import Notice, FAILED_STATUS
 from ..models.forms import RecognitionOfPriorLearning, KnowledgeCertification, RequestStatus, Attachment, Step
+from ..models.servant import Servant
+from ..models.course import Course
 from ..serializers.formsSerializer import (
     RecognitionOfPriorLearningSerializer, KnowledgeCertificationSerializer, StepSerializer
 )
@@ -60,22 +62,21 @@ class RecognitionOfPriorLearningListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        servant_id = self.request.query_params.get('servant_id', None)
+        student = self.request.query_params.get('student')
+        servant_id = self.request.query_params.get('servant_id')
         if servant_id:
             try:
-                steps = Step.objects.filter(current=True, responsible_id=servant_id).exclude(status__in=FAILED_STATUS)
+                servant = Servant.objects.get(id=servant_id)
+                recognition_id = Step.objects.filter(responsible_id=servant_id).values_list('recognition_form_id', flat=True)
+                queryset = queryset.filter(id__in=recognition_id)
 
-                if not steps.exists():
-                    return queryset.none()
-
-                recognition_ids = steps.values_list('recognition_form_id', flat=True)
-                queryset = queryset.filter(id__in=recognition_ids)
-
-            except Step.DoesNotExist:
+            except Servant.DoesNotExist:
                 return queryset.none()
 
+        if student:
+            queryset = queryset.filter(student=student)
+        
         return queryset
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -89,7 +90,6 @@ class RecognitionOfPriorLearningDetailView(generics.RetrieveUpdateAPIView):
     queryset = RecognitionOfPriorLearning.objects.all()
     serializer_class = RecognitionOfPriorLearningSerializer
     lookup_field = 'id'
-
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['user'] = self.request.user
@@ -118,20 +118,21 @@ class KnowledgeCertificationListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        servant_id = self.request.query_params.get('servant_id', None)
+        student = self.request.query_params.get('student')
+        servant_id = self.request.query_params.get('servant_id')
         if servant_id:
             try:
-                steps = Step.objects.filter(current=True, responsible_id=servant_id).exclude(status__in=FAILED_STATUS)
+                servant = Servant.objects.get(id=servant_id)
+                certification_id = Step.objects.filter(responsible_id=servant_id).values_list('certification_form_id', flat=True)
+                queryset = queryset.filter(id__in=certification_id)
 
-                if not steps.exists():
-                    return queryset.none()
 
-                certification_ids = steps.values_list('certification_form_id', flat=True)
-                queryset = queryset.filter(id__in=certification_ids)
-
-            except Step.DoesNotExist:
+            except Servant.DoesNotExist:
                 return queryset.none()
 
+        if student:
+            queryset = queryset.filter(student=student)
+        
         return queryset
 
     def create(self, request, *args, **kwargs):
