@@ -136,15 +136,15 @@ const CertificationRequestForm = () => {
         formData.append("attachment", line.file);
       }
     });
-
+    let formType = requestType === "certificacao" ? "knowledge-certifications" : "recognition-forms";
     const response =
       requestType === "certificacao"
         ? await RequestService.CreateKnowledgeCertification(formData)
         : await RequestService.CreateRecognitionForm(formData);
-
+    console.log("Resposta do servidor:", response);
     if (response.status === 201) {
       console.log("Formulário enviado com sucesso!");
-      window.location.href = "/requests";
+      window.location.href = `/requests/details/${formType}/${response.data.id}`;
     } else {
       console.error("Erro ao enviar o formulário:", response);
     }

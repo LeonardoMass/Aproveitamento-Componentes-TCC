@@ -550,35 +550,6 @@ const Details = () => {
                             ))}
                         </ul>
                       )}
-
-                      {uploadAttachmentLines.map((line) => (
-                        <div key={line.id} style={{ display: "flex", alignItems: "center" }}>
-                          <FileUpload
-                            name="attachment"
-                            mode="basic"
-                            accept="application/pdf,image/png,image/jpeg"
-                            maxFileSize={5000000}
-                            chooseLabel="Selecionar arquivo"
-                            className={styles.selectForm}
-                            onSelect={(e) => handleAttachmentFileSelect(line.id, e)}
-                            auto={false}
-                            customUpload={true}
-                          />
-                          <Button
-                            type="button"
-                            className="p-button-danger p-button-text"
-                            style={{ marginLeft: "0.5rem" }}
-                            onClick={() => removeAttachmentLine(line.id)}
-                          >
-                            X
-                          </Button>
-                        </div>
-                      ))}
-                      <div className={styles.addButtonContainer}>
-                        <button type="button" onClick={addAttachmentLine} className={styles.addButton}>
-                          <i className="pi pi-plus" style={{ fontSize: '1.5rem', color: '#ffff' }}></i>
-                        </button>
-                      </div>
                     </div>
                   ) : (
                     details.attachments &&
@@ -653,7 +624,7 @@ const Details = () => {
                         >
                           {details.course_workload || "Pendente"}
                         </span>
-                        {role === "Estudante" &&
+                        {/*{role === "Estudante" &&
                           details.status_display === "Aguardando período de análise" && (
                             <>
                               <FontAwesomeIcon
@@ -673,6 +644,7 @@ const Details = () => {
                                 )}
                             </>
                           )}
+                          */}
                       </div>
                       <div className={styles.infoField}>
                         <strong className={styles.info}>
@@ -689,7 +661,7 @@ const Details = () => {
                         >
                           {details.course_studied_workload || "Pendente"}
                         </span>
-                        {role === "Estudante" &&
+                        {/*{role === "Estudante" &&
                           details.status_display === "Aguardando período de análise" && (
                             <>
                               <FontAwesomeIcon
@@ -709,6 +681,7 @@ const Details = () => {
                                 )}
                             </>
                           )}
+                          */}
                       </div>
                     </>
                   )}

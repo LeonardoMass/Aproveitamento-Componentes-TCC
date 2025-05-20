@@ -221,6 +221,25 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Status inválido")
         return value
 
+    def handle_file_uploads(self, instance):
+        request = self.context.get('request')
+        if not request:
+            return
+
+        drive_service = GoogleDriveService()
+        attachments_files = request.FILES.getlist('attachment')
+        for attachment_file in attachments_files:
+            file_id = drive_service.upload_file(attachment_file)
+            if not file_id:
+                raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
+            Attachment.objects.create(
+                id=file_id,
+                file_name=attachment_file.name,
+                content_type=attachment_file.content_type,
+                recognition_form=instance,
+                is_test_attachment=False
+            )
+
     def create(self, validated_data):
         # Verifica se existe um Notice (edital) aberto
         current_date = timezone.now()
@@ -235,11 +254,9 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"A solicitação está fora do período do edital. O prazo é de {notice.documentation_submission_start} a {notice.documentation_submission_end}.")
 
-        attachments_files = self.context['request'].FILES.getlist('attachment')
         student_id = validated_data.pop('student_id')
         student = get_object_or_404(Student, id=student_id)
 
-        drive_service = GoogleDriveService()
         requisition = RecognitionOfPriorLearning.objects.create(student=student, **validated_data)
 
         Step.objects.create(
@@ -249,18 +266,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             initial_step_date=timezone.now(),
             current=True
         )
-
-        for attachment_file in attachments_files:
-            file_id = drive_service.upload_file(attachment_file)
-            if not file_id:
-                raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
-            Attachment.objects.create(
-                id=file_id,
-                file_name=attachment_file.name,
-                content_type=attachment_file.content_type,
-                recognition_form=requisition
-            )
-
+        self.handle_file_uploads(requisition)
         return requisition
 
     def update(self, instance, validated_data):
@@ -271,6 +277,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
+        self.handle_file_uploads(instance)
         return instance
 
 
@@ -364,31 +371,49 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("test_score deve estar entre 0 e 10.")
         return value
 
-    def validate_test_attachment(self, value):
-        instance = self.instance
-        user_role = self.abstract_user.type.value
-        
-        if user_role == 'Professor':
-            existing_test_attachment = instance.attachments.filter(is_test_attachment=True).first()
-            if existing_test_attachment:
-                existing_test_attachment.file_name = value.name
-                existing_test_attachment.content_type = value.content_type
-                existing_test_attachment.save()
-            else:
-                Attachment.objects.create(
-                    file_name=value.name,
-                    content_type=value.content_type,
-                    certification_form=instance,
-                    is_test_attachment=True
-                )
-        else:
+    def handle_file_uploads(self, instance):
+        request = self.context.get('request')
+        if not request:
+            return
+
+        drive_service = GoogleDriveService()
+
+        attachments_files = request.FILES.getlist('attachment')
+        for attachment_file in attachments_files:
+            file_id = drive_service.upload_file(attachment_file)
+            if not file_id:
+                raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
             Attachment.objects.create(
-                file_name=value.name,
-                content_type=value.content_type,
+                id=file_id,
+                file_name=attachment_file.name,
+                content_type=attachment_file.content_type,
                 certification_form=instance,
                 is_test_attachment=False
             )
-        return value
+
+        test_attachment_file = request.FILES.get('test_attachment')
+        if test_attachment_file:
+            existing_test_attachment = instance.attachments.filter(is_test_attachment=True).first()
+            if existing_test_attachment:
+                new_file_id = drive_service.upload_file(test_attachment_file)
+                if not new_file_id:
+                    raise serializers.ValidationError("Falha ao atualizar arquivo de teste")
+                drive_service.delete_file(existing_test_attachment.id)
+                existing_test_attachment.id = new_file_id
+                existing_test_attachment.file_name = test_attachment_file.name
+                existing_test_attachment.content_type = test_attachment_file.content_type
+                existing_test_attachment.save()
+            else:
+                file_id = drive_service.upload_file(test_attachment_file)
+                if not file_id:
+                    raise serializers.ValidationError("Falha ao enviar arquivo de teste")
+                Attachment.objects.create(
+                    id=file_id,
+                    file_name=test_attachment_file.name,
+                    content_type=test_attachment_file.content_type,
+                    certification_form=instance,
+                    is_test_attachment=True
+                )
 
     def create(self, validated_data):
         # Verifica se existe um Notice (edital) aberto
@@ -404,7 +429,6 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"A solicitação está fora do período do edital. O prazo é de {notice.documentation_submission_start} a {notice.documentation_submission_end}.")
 
-        attachments_files = self.context['request'].FILES.getlist('attachment')
         student_id = validated_data.pop('student_id')
         student = get_object_or_404(Student, id=student_id)
         certification = KnowledgeCertification.objects.create(student=student, **validated_data)
@@ -416,13 +440,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             initial_step_date=timezone.now(),
             current=True
         )
-
-        for attachment_file in attachments_files:
-            Attachment.objects.create(
-                file_name=attachment_file.name,
-                content_type=attachment_file.content_type,
-                certification_form=certification
-            )
+        self.handle_file_uploads(certification)
 
         return certification
 
@@ -434,4 +452,5 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
+        self.handle_file_uploads(instance)
         return instance
