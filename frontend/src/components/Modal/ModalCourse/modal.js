@@ -9,7 +9,7 @@ import { handleApiResponse } from "@/libs/apiResponseHandler";
 import { ppcCreate } from "@/services/PpcService";
 import Button from "@/components/ButtonDefault/button";
 
-const ModalCourse = ({ onClose, editData = null }) => {
+const ModalCourse = ({ onClose, editData = null, onCourseSaved }) => {
   const [courseName, setCourseName] = useState("");
   const [selectedProfessors, setSelectedProfessors] = useState([]);
   const [selectedCoordinator, setSelectedCoordinator] = useState(null);
@@ -92,8 +92,6 @@ const ModalCourse = ({ onClose, editData = null }) => {
     const idAsNumber = coordinatorId ? Number(coordinatorId) : null;
     setSelectedCoordinator(idAsNumber);
   };
-
-
 
   const handleChangeProfessorToCoord = async (idProf) => {
     try {
@@ -196,22 +194,24 @@ const ModalCourse = ({ onClose, editData = null }) => {
         }
       }
       console.log("Enviando dados do curso para API:", courseDataPayload);
-      let savedCourse;
+      let savedCourseResponse;
       if (editData) {
         console.log(`Editando curso ID: ${editData.id}`);
-        const savedCourse = await courseEdit(editData.id, courseDataPayload);
-        handleApiResponse(savedCourse);
+        savedCourseResponse = await courseEdit(editData.id, courseDataPayload);
+        handleApiResponse(savedCourseResponse);
       } else {
         console.log("Criando novo curso.");
-        savedCourse = await courseCreate(courseDataPayload);
+        savedCourseResponse = await courseCreate(courseDataPayload);
+        handleApiResponse(savedCourseResponse);
       }
+      const actualSavedCourse = savedCourseResponse?.data || savedCourseResponse;
 
-      if (!editData && initialPpcName.trim() && savedCourse?.id) {
-        console.log(`Tentando criar PPC inicial '${initialPpcName.trim()}' para o curso ID: ${savedCourse.id}`);
+      if (!editData && initialPpcName.trim() && actualSavedCourse?.id) {
+        console.log(`Tentando criar PPC inicial '${initialPpcName.trim()}' para o curso ID: ${actualSavedCourse.id}`);
         try {
           await ppcCreate({
             name: initialPpcName.trim(),
-            course_id: savedCourse.id,
+            course_id: actualSavedCourse.id,
           });
           console.log("PPC inicial criado com sucesso.");
         } catch (ppcError) {
@@ -219,9 +219,11 @@ const ModalCourse = ({ onClose, editData = null }) => {
           alert(`Curso ${editData ? 'atualizado' : 'criado'} com sucesso, mas falha ao criar PPC inicial: ${ppcError?.response?.data?.detail || ppcError.message}`);
         }
       }
-
-      onClose();
-      window.location.reload();
+      if (onCourseSaved) {
+        onCourseSaved();
+      } else {
+        onClose(); 
+      }
 
     } catch (error) {
       console.error("Erro GERAL no processo de salvar curso:", error);
@@ -315,7 +317,6 @@ const ModalCourse = ({ onClose, editData = null }) => {
           </select>
         </div>
 
-        {/* Ações do Modal */}
         <div className={styles.modalActions}>
           <Button variant="cancel" onClick={onClose} disabled={isSubmitting}>
             Cancelar

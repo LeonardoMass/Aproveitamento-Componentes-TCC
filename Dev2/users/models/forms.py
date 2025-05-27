@@ -55,7 +55,9 @@ COORD_STATUS = [
     RequestStatus.REJECTED_BY_COORDINATOR,
     RequestStatus.APPROVED_BY_COORDINATOR,
     RequestStatus.IN_ANALYSIS_BY_PROFESSOR,
-    RequestStatus.IN_APPROVAL_BY_CRE
+    RequestStatus.IN_APPROVAL_BY_CRE,
+    RequestStatus.ANALYZED_BY_PROFESSOR,
+    RequestStatus.IN_APPROVAL_BY_COORDINATOR
 ]
 
 PROF_STATUS = [

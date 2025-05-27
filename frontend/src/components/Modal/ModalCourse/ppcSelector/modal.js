@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSpinner, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import Button from "@/components/ButtonDefault/button";
 
-const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) => {
+const ModalPpcSelector = ({ course, ppcs, onClose, onPpcCreated }) => {
 
     const [newPpcName, setNewPpcName] = useState("");
     const [isCreating, setIsCreating] = useState(false);
@@ -31,6 +31,7 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
                 onPpcCreated();
             }
         } catch (error) {
+             console.error("Erro ao criar PPC:", error);
         } finally {
             setIsCreating(false);
         }
@@ -41,7 +42,6 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
             <div className={styles.modalContent}>
                 <h2>PPCs de {course.name}</h2>
 
-                {/* Seção para Criar Novo PPC */}
                 <div className={styles.createSection}>
                     <h3 className={styles.sectionTitle}>Criar Novo PPC</h3>
                     <div className={styles.createForm}>
@@ -68,18 +68,16 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
                             <span>{isCreating ? " Criando" : " Criar"}</span>
                         </Button>
                     </div>
-                     {createError && (
+                    {createError && (
                         <p className={styles.errorText}>
                             <FontAwesomeIcon icon={faExclamationCircle} /> {createError}
-                         </p>
+                        </p>
                     )}
                 </div>
 
                 <h3 className={styles.listTitle}>PPCs Existentes</h3>
-                 <div className={styles.listContainer}>
-                    {isLoading ? (
-                        <div className={styles.loadingContainer}><FontAwesomeIcon icon={faSpinner} spin size="lg"/> Carregando...</div>
-                    ) : ppcs.length === 0 ? (
+                <div className={styles.listContainer}>
+                    {ppcs.length === 0 ? (
                         <p className={styles.infoText}>Nenhum PPC cadastrado.</p>
                     ) : (
                         <ul className={styles.ppcList}>
@@ -95,9 +93,8 @@ const ModalPpcSelector = ({ course, ppcs, onClose, isLoading, onPpcCreated }) =>
                     )}
                 </div>
 
-                {/* Botão Fechar */}
                 <div className={styles.modalActions}>
-                     <Button variant="close" onClick={onClose} disabled={isCreating}>
+                    <Button variant="close" onClick={onClose} disabled={isCreating}>
                         Fechar
                     </Button>
                 </div>

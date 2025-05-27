@@ -23,20 +23,28 @@ const Course = () => {
   const [ppcsForSelector, setPpcsForSelector] = useState([]);
   const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const data = await courseList();
-        const coursesArray = Array.isArray(data) ? data : ['Cursos não encontrados'];
-        setCourses(coursesArray);
+  const fetchCoursesAndSetState = async () => {
+    try {
+      const data = await courseList();
+      const coursesArray = Array.isArray(data) ? data : ['Cursos não encontrados'];
+      setCourses(coursesArray);
+      if (searchTerm) {
+        const filtered = coursesArray.filter((course) =>
+          course.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredCourses(filtered);
+      } else {
         setFilteredCourses(coursesArray);
-      } catch (err) {
-        console.error("Erro ao buscar cursos:", err);
-        setCourses([]);
-        setFilteredCourses([]);
       }
-    };
-    fetchCourses();
+    } catch (err) {
+      console.error("Erro ao buscar cursos:", err);
+      setCourses([]);
+      setFilteredCourses([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoursesAndSetState();
   }, []);
 
   const handleSearch = (e) => {
@@ -58,6 +66,11 @@ const Course = () => {
     setModal(false);
   };
 
+  const handleCourseSaveSuccess = () => {
+    fetchCoursesAndSetState();
+    closeModal();
+  };
+
   const openPpcDisciplineModal = (course) => {
     setSelectedCourse(course);
     setPpcDisciplineModal(true);
@@ -68,16 +81,21 @@ const Course = () => {
     setPpcDisciplineModal(false);
   };
 
-  const openPpcSelectorModal = async (course) => {
-    setSelectedCourse(course);
+  const fetchPpcsForModal = async (currentCourse) => {
+    if (!currentCourse) return;
     try {
-      const fetchedPpcs = await ppcList({ course_id: course.id });
-      console.log("PPCs buscados:", fetchedPpcs);
-      setPpcsForSelector(fetchedPpcs);
-      setPpcSelectorModal(true);
+      const fetchedPpcs = await ppcList({ course_id: currentCourse.id });
+      setPpcsForSelector(Array.isArray(fetchedPpcs) ? fetchedPpcs : []);
     } catch (error) {
       console.error("Erro ao buscar PPCs para seleção:", error);
+      setPpcsForSelector([]);
     }
+  };
+
+  const openPpcSelectorModal = async (course) => {
+    setSelectedCourse(course);
+    await fetchPpcsForModal(course);
+    setPpcSelectorModal(true);
   };
 
   const closePpcSelectorModal = () => {
@@ -86,11 +104,14 @@ const Course = () => {
     setPpcSelectorModal(false);
   };
 
+  const handlePpcCreationSuccessInModal = async () => {
+    if (selectedCourse) {
+      await fetchPpcsForModal(selectedCourse);
+    }
+  };
 
   const userType = user.type;
   const userId = user.id;
-
-
 
   return (
     <div className={styles.contentWrapper}>
@@ -162,7 +183,6 @@ const Course = () => {
                           <span>Editar</span>
                         </button>
                       )}
-                      {/* Excluir Curso */}
                     </div>
                   </td>
                 </tr>
@@ -185,9 +205,9 @@ const Course = () => {
         </div>
       )}
 
-      {modal && <ModalCourse onClose={closeModal} editData={editData} />}
+      {modal && <ModalCourse onClose={closeModal} editData={editData} onCourseSaved={handleCourseSaveSuccess} />}
       {ppcDisciplineModal && <ModalPpcDisciplineList course={selectedCourse} onClose={closePpcDisciplineModal} />}
-      {ppcSelectorModal && <ModalPpcSelector course={selectedCourse} ppcs={ppcsForSelector} onClose={closePpcSelectorModal} />}
+      {ppcSelectorModal && <ModalPpcSelector course={selectedCourse} ppcs={ppcsForSelector} onClose={closePpcSelectorModal} onPpcCreated={handlePpcCreationSuccessInModal} />}
     </div>
   );
 };

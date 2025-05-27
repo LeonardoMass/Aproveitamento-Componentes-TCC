@@ -157,7 +157,6 @@ const EditPpcPage = () => {
 
             <div className={styles.feedbackAndSave}>
                 {error && <p className={styles.errorTextSubmit}><FontAwesomeIcon icon={faExclamationCircle} /> {error}</p>}
-                {saveSuccess && <p className={styles.successText}>Alterações salvas com sucesso!</p>}
                 <Button style={{backgroundColor: '#28a745'}}onClick={handleSaveChanges} disabled={isSaving || loading}>
                     {isSaving ? <><FontAwesomeIcon icon={faSpinner} spin /> Salvando...</> : "Salvar alterações nas disciplinas"}
                 </Button>

@@ -109,12 +109,12 @@ const Discipline = () => {
     }
     try {
       if (modalState.mode === 'new') {
-        await DisciplineService.CreateDiscipline(formData);
-        setToastMessage({ type: "success", text: "Disciplina criada com sucesso!" });
+        const response = await DisciplineService.CreateDiscipline(formData);
+        handleApiResponse(response);
       } else {
         const dataToUpdate = { ...formData, is_active: modalState.data?.is_active };
-        await DisciplineService.UpdateDiscipline(modalState.data.id, dataToUpdate);
-        setToastMessage({ type: "success", text: "Disciplina atualizada com sucesso!" });
+        const response = await DisciplineService.UpdateDiscipline(modalState.data.id, dataToUpdate);
+        handleApiResponse(response);
       }
 
       const updatedData = await DisciplineService.DisciplineList();

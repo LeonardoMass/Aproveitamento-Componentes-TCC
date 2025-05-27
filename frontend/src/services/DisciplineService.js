@@ -12,7 +12,7 @@ async function CreateDiscipline(data) {
   
       // Verifica se a resposta foi bem-sucedida
       if (response.status === 201) {
-        return response.data; // Retorna os dados da disciplina criada
+        return response; // Retorna os dados da disciplina criada
       } else {
         throw new Error('Falha ao criar disciplina'); // Lança erro se status não for 201
       }
@@ -38,7 +38,7 @@ export async function GetDiscipline(id, active = null) {
 async function UpdateDiscipline(uuid, data) {
   try {
     const response = await apiClient.put(`/api/disciplines/${uuid}/`, data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error(`Erro ao atualizar disciplina com UUID ${uuid}:`, error);
     throw error;

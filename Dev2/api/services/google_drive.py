@@ -14,7 +14,7 @@ class GoogleDriveService:
         )
         self.service = build('drive', 'v3', credentials=self.credentials)
 
-    def upload_file(self, file, folder_id='1GQ-Er_MDLIVPa21k9bnAt-7wrubkfFcL'):
+    def upload_file(self, file, folder_id=settings.GOOGLE_DRIVE_FOLDER_ID):
         print(f"Nome do arquivo: {file.name}")
         try:
             file_metadata = {
@@ -70,10 +70,10 @@ class GoogleDriveService:
             print(f"Erro ao deletar: {str(e)}")
             return False
     
-    def get_or_create_folder(self, folder_name, parent_folder_id = '1GQ-Er_MDLIVPa21k9bnAt-7wrubkfFcL'):
+    def get_or_create_folder(self, folder_name):
         try:
             # Verifica se a pasta já existe
-            query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and '{parent_folder_id}' in parents"
+            query = f"name='{folder_name}' and mimeType='application/vnd.google-apps.folder' and '{settings.GOOGLE_DRIVE_FOLDER_ID}' in parents"
             response = self.service.files().list(
                 q=query,
                 spaces='drive',
@@ -88,7 +88,7 @@ class GoogleDriveService:
                 file_metadata = {
                     'name': folder_name,
                     'mimeType': 'application/vnd.google-apps.folder',
-                    'parents': [parent_folder_id]
+                    'parents': [settings.GOOGLE_DRIVE_FOLDER_ID]
                 }
                 folder = self.service.files().create(
                     body=file_metadata,

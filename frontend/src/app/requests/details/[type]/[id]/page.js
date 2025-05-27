@@ -50,6 +50,7 @@ const Details = () => {
   const [editedCourseStudiedWorkload, setEditedCourseStudiedWorkload] =
     useState("");
   const [professor, setProfessor] = useState("");
+  const [currentResponsible, setCurrentResponsible] = useState(false);
   const [selectedProfessor, setSelectedProfessor] = useState("");
   const [availableProfessors, setAvailableProfessors] = useState([]);
   const [coordinatorFeedback, setCoordinatorFeedback] = useState("");
@@ -162,6 +163,16 @@ const Details = () => {
         const professorsData = await professorsResponse.data;
         setAvailableProfessors(professorsData);
         console.log("professors data - " + professorsData);
+      }
+      const stepAtual = data.steps.find(step => step.current === true);
+      if (stepAtual && stepAtual.responsible && stepAtual.responsible.id) {
+        if (stepAtual.responsible.id === user.id) {
+          setCurrentResponsible(true);
+          console.log("Usuário é responsável pela etapa atual");
+        }else {
+          setCurrentResponsible(false);
+          console.log("Usuário não é responsável pela etapa atual");
+        }
       }
     } catch (error) {
       setError(error.message);
@@ -591,7 +602,7 @@ const Details = () => {
                       >
                         {details.previous_knowledge || "Pendente"}
                       </span>
-                      {role === "Estudante" &&
+                      {/*role === "Estudante" &&
                         details.status_display === "Aguardando período de análise" && (
                           <>
                             <FontAwesomeIcon
@@ -607,7 +618,7 @@ const Details = () => {
                               />
                             )}
                           </>
-                        )}
+                        )*/}
                     </div>
                   )}
 
@@ -809,7 +820,7 @@ const Details = () => {
                   <div className={styles.infoColumn}>
                     {type === "knowledge-certifications" &&
                       !details.scheduling_date &&
-                      role === "Professor" && (
+                      currentResponsible && (
                         <div className={styles.date_time_container}>
                           <p className={styles.info}>
                             <strong>Agendar prova: </strong>
@@ -872,7 +883,7 @@ const Details = () => {
                         >
                           {details.test_score || "Pendente"}
                         </span>
-                        {role === "Professor" &&
+                        { currentResponsible &&
                           (details.status_display ===
                             "Em análise do Professor" ||
                             details.status_display ===
@@ -895,50 +906,55 @@ const Details = () => {
                       </p>
                     )}
                     {type === "knowledge-certifications" && testDate && (
-                      <div className={styles.info}>
-                        <strong>Prova: </strong>
-                        {(details.status_display ===
-                          "Em análise do Professor" ||
-                          details.status_display ===
-                            "Retornado pelo Coordenador") &&
-                        role === "Professor" ? (
-                          <>
-                            <FileUpload
-                              name="prova"
-                              mode="basic"
-                              auto={false}
-                              accept="application/pdf,image/png,image/jpeg"
-                              maxFileSize={5000000}
-                              label="Upload da prova"
-                              className="p-button-sm p-button-outlined"
-                              style={{
-                                marginBottom: "10px",
-                                marginTop: "5px",
-                                padding: "10px",
-                              }}
-                              onSelect={(e) => onFileSelect(e)}
-                            />
-                          </>
-                        ) : (
-                          <div
-                            key={testAttachment.id}
-                            className={styles.attachmentItem}
-                          >
-                            <div className={styles.attachmentItemContent}>
-                              <span>{testAttachment.file_name}</span>
-                              <Button
-                                icon="pi pi-download"
+                        <div className={styles.info}>
+                          <strong>Prova: </strong>
+                          {(details.status_display === "Em análise do Professor" ||
+                            details.status_display === "Retornado pelo Coordenador") &&
+                            currentResponsible ? (
+                            <>
+                              <FileUpload
+                                name="prova"
+                                mode="basic"
+                                auto={false}
+                                accept="application/pdf,image/png,image/jpeg"
+                                maxFileSize={5000000}
+                                label="Upload da prova"
                                 className="p-button-sm p-button-outlined"
-                                onClick={() =>
-                                  handleDownloadAttachment(testAttachment.id)
-                                }
-                                tooltip="Visualizar Prova"
+                                style={{
+                                  marginBottom: "10px",
+                                  marginTop: "5px",
+                                  padding: "10px",
+                                }}
+                                onSelect={(e) => onFileSelect(e)}
                               />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                            </>
+                          ) :
+                            testAttachment && testAttachment.id ? (
+                              <div
+                                key={testAttachment.id}
+                                className={styles.attachmentItem}
+                              >
+                                <div className={styles.attachmentItemContent}>
+                                  <span>{testAttachment.file_name}</span>
+                                  <Button
+                                    icon="pi pi-download"
+                                    className="p-button-sm p-button-outlined"
+                                    onClick={() =>
+                                      handleDownloadAttachment(testAttachment.id)
+                                    }
+                                    tooltip="Visualizar Prova"
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className={styles.attachmentItem}>
+                                <div className={styles.attachmentItemContent}>
+                                  <span>Pendente</span>
+                                </div>
+                              </div>
+                            )}
+                        </div>
+                      )}
                     <p className={styles.info}>
                       <strong>Parecer: </strong>
                       {professorFeedback || "Pendente"}
@@ -958,7 +974,7 @@ const Details = () => {
                     )}
                     {(details.status_display === "Em análise do Professor" ||
                       details.status_display === "Retornado pelo Coordenador") &&
-                      role === "Professor" &&
+                      currentResponsible && 
                       (type !== "knowledge-certifications" ||
                         (type === "knowledge-certifications" &&
                           testAttachment &&

@@ -211,7 +211,19 @@ const Requests = () => {
                                         : "Aproveitamento de Estudos"}
                                 </td>
                                 <td>{item.discipline_name || "-"}</td>
-                                <td>{new Date(item.create_date).toLocaleDateString("pt-BR")}</td>
+                                <td>
+                                  {new Date(item.create_date).toLocaleDateString("pt-BR", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric"
+                                  })} -{" "}
+                                  {new Date(item.create_date).toLocaleTimeString("pt-BR", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: false,
+                                    timeZone: "America/Sao_Paulo"
+                                  })}
+                                </td>
                                 <td>{Array.from(item.steps).pop()?.responsible?.name || "-"}</td>
                                 <td>{item.status_display || "-"}</td>
                                 <td>

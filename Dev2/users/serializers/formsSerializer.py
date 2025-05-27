@@ -225,21 +225,20 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request:
             return
-
+        attachments_files = request.FILES.getlist('attachment')
+        if not attachments_files:
+            return
         drive_service = GoogleDriveService()
-        if not student.drive_folder_id:
-            folder_name = f"{student.name} - {student.matricula}"
-            student_folder_id = drive_service.get_or_create_folder(folder_name)
-            if not student_folder_id:
-                raise serializers.ValidationError("Falha ao criar pasta no Google Drive")
+        folder_name = f"{student.name} - {student.matricula}"
+        student_folder_id = drive_service.get_or_create_folder(folder_name)
+        if not student_folder_id:
+            raise serializers.ValidationError("Falha ao criar pasta no Google Drive")
+        if (student.drive_folder_id != student_folder_id):
             student.drive_folder_id = student_folder_id
             student.save()
-        else:
-            student_folder_id = student.drive_folder_id
 
-        attachments_files = request.FILES.getlist('attachment')
         for attachment_file in attachments_files:
-            file_id = drive_service.upload_file(attachment_file, student_folder_id)
+            file_id = drive_service.upload_file(attachment_file, student.drive_folder_id)
             if not file_id:
                 raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
             Attachment.objects.create(
@@ -286,8 +285,8 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Usuário não está relacionado com a solicitação")
         for field, value in validated_data.items():
             setattr(instance, field, value)
-        instance.save()
-        self.handle_file_uploads(instance)
+        student = get_object_or_404(Student, id=instance.student_id)
+        self.handle_file_uploads(instance, student)
         return instance
 
 
@@ -302,7 +301,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     student_course = serializers.CharField(source='student.course', read_only=True)
     attachments = AttachmentSerializer(many=True, read_only=True)
     steps = StepSerializer(many=True, read_only=True)
-    test_attachment = serializers.FileField(required=False, read_only=False, allow_null=True)
+    test_attachment = serializers.FileField(required=False, read_only=False, allow_null=True)#AttachmentSerializer
 
     class Meta:
         model = KnowledgeCertification
@@ -385,54 +384,48 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request:
             return
-
+        attachments_files = request.FILES.getlist('attachment')
+        test_attachment_file = request.FILES.get('test_attachment')
+        if not attachments_files and not test_attachment_file:
+            return
         drive_service = GoogleDriveService()
-        if not student.drive_folder_id:
-            folder_name = f"{student.name} - {student.matricula}"
-            student_folder_id = drive_service.get_or_create_folder(folder_name)
-            if not student_folder_id:
-                raise serializers.ValidationError("Falha ao criar pasta no Google Drive")
+        folder_name = f"{student.name} - {student.matricula}"
+        student_folder_id = drive_service.get_or_create_folder(folder_name)
+        if not student_folder_id:
+            raise serializers.ValidationError("Falha ao criar pasta no Google Drive")
+        if (student.drive_folder_id != student_folder_id):
             student.drive_folder_id = student_folder_id
             student.save()
-        else:
-            student_folder_id = student.drive_folder_id
 
-        attachments_files = request.FILES.getlist('attachment')
-        for attachment_file in attachments_files:
-            file_id = drive_service.upload_file(attachment_file)
-            if not file_id:
-                raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
-            Attachment.objects.create(
-                id=file_id,
-                file_name=attachment_file.name,
-                content_type=attachment_file.content_type,
-                certification_form=instance,
-                is_test_attachment=False
-            )
-
-        test_attachment_file = request.FILES.get('test_attachment')
-        if test_attachment_file:
-            existing_test_attachment = instance.attachments.filter(is_test_attachment=True).first()
-            if existing_test_attachment:
-                new_file_id = drive_service.upload_file(test_attachment_file)
-                if not new_file_id:
-                    raise serializers.ValidationError("Falha ao atualizar arquivo de teste")
-                drive_service.delete_file(existing_test_attachment.id)
-                existing_test_attachment.id = new_file_id
-                existing_test_attachment.file_name = test_attachment_file.name
-                existing_test_attachment.content_type = test_attachment_file.content_type
-                existing_test_attachment.save()
-            else:
-                file_id = drive_service.upload_file(test_attachment_file)
+        if attachments_files:
+            for attachment_file in attachments_files:
+                file_id = drive_service.upload_file(attachment_file, student.drive_folder_id)
                 if not file_id:
-                    raise serializers.ValidationError("Falha ao enviar arquivo de teste")
+                    raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
                 Attachment.objects.create(
                     id=file_id,
-                    file_name=test_attachment_file.name,
-                    content_type=test_attachment_file.content_type,
+                    file_name=attachment_file.name,
+                    content_type=attachment_file.content_type,
                     certification_form=instance,
-                    is_test_attachment=True
+                    is_test_attachment=False
                 )
+
+        if test_attachment_file:
+            newly_uploaded_drive_id = drive_service.upload_file(test_attachment_file, student.drive_folder_id)
+            if not newly_uploaded_drive_id:
+                raise serializers.ValidationError("Falha ao enviar o arquivo de teste para o Google Drive.")
+            existing_test_attachment = instance.attachments.filter(is_test_attachment=True).first()
+            if existing_test_attachment:
+                if existing_test_attachment.id:
+                    drive_service.delete_file(existing_test_attachment.id)
+                existing_test_attachment.delete()
+            Attachment.objects.create(
+                id=newly_uploaded_drive_id,
+                file_name=test_attachment_file.name,
+                content_type=test_attachment_file.content_type,
+                certification_form=instance,
+                is_test_attachment=True
+            )
 
     def create(self, validated_data):
         # Verifica se existe um Notice (edital) aberto
@@ -471,5 +464,6 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
-        self.handle_file_uploads(instance)
+        student = get_object_or_404(Student, id=instance.student_id)
+        self.handle_file_uploads(instance, student)
         return instance
