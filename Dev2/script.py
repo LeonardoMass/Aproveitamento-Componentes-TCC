@@ -146,35 +146,35 @@ discipline1 = Disciplines.objects.create(
     name="Redes de Computadores",
     workload=123,
     syllabus= "Servidor-cliente",
-    professors= "Habilitar o aluno a compreender request-response"
+    main_objetive= "Habilitar o aluno a compreender request-response"
 )
 
 discipline2 = Disciplines.objects.create(
     name= "Banco de Dados",
     workload= "66h",
     syllabus= "Consultas de dados",
-    professors= "Habilitar o estudante a realizar consultas em bancado de dados",
+    main_objetive= "Habilitar o estudante a realizar consultas em bancado de dados",
 )
 
 discipline3 = Disciplines.objects.create(
     name= "Programacão I",
     workload= "66h",
     syllabus= "Conceitos fundamentais da progracao",
-    professors= "Incentivar o pensamento abstrato para programar e utilizar conceitos fundamentais",
+    main_objetive= "Incentivar o pensamento abstrato para programar e utilizar conceitos fundamentais",
 )
 
 discipline4 = Disciplines.objects.create(
     name= "Gestao de Projetos",
     workload= "66h",
     syllabus= "Conceitos fundamentais da gestão de projetos",
-    professors= "Incentivar a adaptacão de conceitos fundamentais para a gestão de projetos",
+    main_objetive= "Incentivar a adaptacão de conceitos fundamentais para a gestão de projetos",
 )
 
 discipline5 = Disciplines.objects.create(
     name= "Introducão à Engenharia de Software",
     workload= "33h",
-    syllabus= "Introduzir os principais conceitos de engenharia de software relacionando estes conceitos ao ciclo de vida do desenvolvimento de software",
-    professors= "Histórico e conceituacão da Engenharia de Software. Princípios da Engenharia de Software."+
+    main_objetive= "Introduzir os principais conceitos de engenharia de software relacionando estes conceitos ao ciclo de vida do desenvolvimento de software",
+    syllabus= "Histórico e conceituacão da Engenharia de Software. Princípios da Engenharia de Software."+
 "Conceito e apresentacão dos principais ciclos de vida: Cascata, Prototipacão, Espiral, Iterativo e"+
 "Incremental. Conceituacão sobre Processos de Software. Processo de Software Tradicional x Métodos"+
 "Ágeis. Manifesto Ágil. Introducão aos métodos ágeis: Metodologia Extreme Programming e SCRUM."+
@@ -184,8 +184,8 @@ discipline5 = Disciplines.objects.create(
 discipline6 = Disciplines.objects.create(
     name= "Programacão II",
     workload= "66h",
-    syllabus= "Familiarizar o(a) estudante com conceitos do paradigma de programacão orientada a objetos. ",
-    professors= "Classes e Objetos conceitos avancados. Encapsulamento de Dados. Heranca."+
+    main_objetive= "Familiarizar o(a) estudante com conceitos do paradigma de programacão orientada a objetos. ",
+    syllabus= "Classes e Objetos conceitos avancados. Encapsulamento de Dados. Heranca."+
 "Interfaces e Polimorfismo. Sobrecarga e Sobrescrita de Métodos. Tratamento de Excecões."+
 "Linguagem de Programacão Orientada a Objeto.",
 )
@@ -193,8 +193,8 @@ discipline6 = Disciplines.objects.create(
 discipline7 = Disciplines.objects.create(
     name= "Interfaces Web",
     workload= "33h",
-    syllabus= "Apresentar tecnologias e ferramentas para desenvolvimento de páginas web (lado cliente) de acordo com os padrões consolidados no mercado",
-    professors= "Linguagem de marcacão HTML (HyperText Markup Language): principais tags, construcão de layouts, elementos multimídia, listas, tabelas, formulários e validacão de formulários. Estilizacão com"+
+    main_objetive= "Apresentar tecnologias e ferramentas para desenvolvimento de páginas web (lado cliente) de acordo com os padrões consolidados no mercado",
+    syllabus= "Linguagem de marcacão HTML (HyperText Markup Language): principais tags, construcão de layouts, elementos multimídia, listas, tabelas, formulários e validacão de formulários. Estilizacão com"+
 "CSS (Cascading Style Sheets): regras, seletores, classes, pseudo classes, pseudo elementos, heranca,"+
 "propriedades, dimensionamento, posicionamento. I",
 )

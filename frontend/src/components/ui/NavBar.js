@@ -179,6 +179,12 @@ const NavBar = ({ data = false }) => {
         >
           Cursos
         </li>
+        <li
+          onClick={() => (window.location.href = `/discipline`)}
+          className={path === "/discipline" ? styles.active : ""}
+        >
+          Disciplinas
+        </li>
         {user.type === "Estudante" && notice && (
           <li
             onClick={() => (window.location.href = `/requests/requestForm`)}
@@ -189,12 +195,6 @@ const NavBar = ({ data = false }) => {
         )}
         {(user?.type === "Coordenador" || user?.type === "Ensino") && (
           <>
-            <li
-              onClick={() => (window.location.href = `/discipline`)}
-              className={path === "/discipline" ? styles.active : ""}
-            >
-              Disciplinas
-            </li>
             <li
               onClick={() => (window.location.href = `/usersList`)}
               className={path === "/usersList" ? styles.active : ""}

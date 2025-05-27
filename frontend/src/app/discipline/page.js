@@ -27,7 +27,7 @@ const Discipline = () => {
     name: "",
     workload: "",
     syllabus: "",
-    professors: ""
+    main_objetive: ""
   });
   const [toast, setToast] = useState(false);
   const [toastMessage, setToastMessage] = useState({});
@@ -51,7 +51,7 @@ const Discipline = () => {
     return data.filter(
       (discipline) =>
         discipline.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (discipline.professors && discipline.professors.toLowerCase().includes(searchTerm.toLowerCase()))
+        (discipline.main_objetive && discipline.main_objetive.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   };
 
@@ -61,7 +61,7 @@ const Discipline = () => {
     const filtered = disciplines.filter(
       (discipline) =>
         discipline.name.toLowerCase().includes(value.toLowerCase()) ||
-        (discipline.professors && discipline.professors.toLowerCase().includes(value.toLowerCase()))
+        (discipline.main_objetive && discipline.main_objetive.toLowerCase().includes(value.toLowerCase()))
     );
     setFilteredDisciplines(filtered);
   };
@@ -78,14 +78,14 @@ const Discipline = () => {
         name: discipline.name,
         workload: discipline.workload,
         syllabus: discipline.syllabus,
-        professors: discipline.professors
+        main_objetive: discipline.main_objetive
       });
     } else if (mode === 'new') {
       setFormData({
         name: "",
         workload: "",
         syllabus: "",
-        professors: ""
+        main_objetive: ""
       });
     }
   };
@@ -102,7 +102,7 @@ const Discipline = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.workload || !formData.syllabus || !formData.professors) {
+    if (!formData.name || !formData.workload || !formData.syllabus || !formData.main_objetive) {
       setToastMessage({ type: "warning", text: "Preencha todos os campos obrigatórios!" });
       setToast(true);
       return;
@@ -184,7 +184,7 @@ const Discipline = () => {
             <tr>
               <th>Disciplina</th>
               <th>Carga Horária</th>
-              <th>Ementa</th>
+              <th>Objetivo Geral</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -193,7 +193,7 @@ const Discipline = () => {
               <tr key={discipline.id} className={!discipline.is_active ? styles.inactiveRow : ''}>
                 <td>{discipline.name}</td>
                 <td>{discipline.workload}</td>
-                <td>{discipline.syllabus || "N/A"}</td>
+                <td>{discipline.main_objetive || "N/A"}</td>
                 <td>
                   <div className={styles.actions}>
                     <button
@@ -253,13 +253,38 @@ const Discipline = () => {
 
             <div className={styles.modalBody}>
               {(modalState.mode === 'view') ? (
-                <>
-                  <p><strong>Nome:</strong> {modalState.data?.name}</p>
-                  <p><strong>Carga Horária:</strong> {modalState.data?.workload}</p>
-                  <p><strong>Ementa:</strong> {modalState.data?.syllabus}</p>
-                  <p><strong>Objetivo Geral:</strong> {modalState.data?.professors || "N/A"}</p>
-                  <p><strong>Status:</strong> {modalState.data?.is_active ? "Ativa" : "Inativa"}</p>
-                </>
+                <table className={styles.detailsTable}>
+                  <tbody>
+                    <tr>
+                      <td className={styles.detailLabel}><strong>Nome:</strong></td>
+                      <td className={styles.detailValue}>{modalState.data?.name}</td>
+                    </tr>
+                    <tr>
+                      <td className={styles.detailLabel}><strong>Carga Horária:</strong></td>
+                      <td className={styles.detailValue}>{modalState.data?.workload}</td>
+                    </tr>
+                    <tr>
+                      <td className={styles.detailLabel}><strong>Ementa:</strong></td>
+                      <td className={styles.detailValue}>
+                        <div className={styles.syllabusBox}>
+                          {modalState.data?.syllabus || "N/A"}
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className={styles.detailLabel}><strong>Objetivo Geral:</strong></td>
+                      <td className={styles.detailValue}>{modalState.data?.main_objetive || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <td className={styles.detailLabel}><strong>Status:</strong></td>
+                      <td className={styles.detailValue}>
+                        <span className={`${styles.statusIndicator} ${modalState.data?.is_active ? styles.active : styles.inactive}`}>
+                          {modalState.data?.is_active ? "Ativa" : "Inativa"}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               ) : (
                 <div className={styles.form}>
                   <div className={styles.formGroup}>
@@ -296,8 +321,8 @@ const Discipline = () => {
                     <label>Objetivo Geral:</label>
                     <InputText
                       type="text"
-                      name="professors"
-                      value={formData.professors}
+                      name="main_objetive"
+                      value={formData.main_objetive}
                       onChange={handleFormChange}
                       disabled={modalState.mode === 'view'}
                     />

@@ -17,7 +17,7 @@ class Disciplines(models.Model):
         help_text="Enter the workload of the discipline:"
     )
     syllabus = models.TextField(
-        max_length=500,
+        max_length=1500,
         blank=True,
         verbose_name="Syllabus",
         help_text="Enter the syllabus of the discipline:"
@@ -30,11 +30,11 @@ class Disciplines(models.Model):
         verbose_name="Prerequisites",
         help_text="Select the disciplines that are prerequisites:"
     )
-    professors = models.TextField(
-        max_length=500,
+    main_objetive = models.TextField(
+        max_length=1000,
         blank=True,
         verbose_name="Professors",
-        help_text="Select the professors for this discipline:"
+        help_text="Select the main_objetive for this discipline:"
     )
     
     is_active = models.BooleanField(
