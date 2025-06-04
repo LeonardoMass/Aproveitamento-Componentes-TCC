@@ -8,7 +8,7 @@ import { noticeListAll } from "@/services/NoticeService";
 import { FileUpload } from "primereact/fileupload";
 import RequestService from "@/services/RequestService";
 import { courseListByName } from "@/services/CourseService";
-import { getDisciplineDetailsBatch } from "@/services/DisciplineService";
+import { getDisciplineByArrayIds } from "@/services/DisciplineService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { ppcList } from "@/services/PpcService";
@@ -82,7 +82,7 @@ const CertificationRequestForm = () => {
 
     const selectedPpcObj = ppc.find((item) => item.id === selectedPpcId);
     if (selectedPpcObj && selectedPpcObj.disciplines && selectedPpcObj.disciplines.length > 0) {
-      const disciplineDetails = await getDisciplineDetailsBatch(selectedPpcObj.disciplines, true);
+      const disciplineDetails = await getDisciplineByArrayIds(selectedPpcObj.disciplines, true);
       setDisciplines(disciplineDetails);
     } else {
       setDisciplines([]);

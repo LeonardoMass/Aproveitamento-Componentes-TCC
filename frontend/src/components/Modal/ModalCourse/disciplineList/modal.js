@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./modalDisciplineList.module.css";
 import { ppcList } from '@/services/PpcService';
-import { getDisciplineDetailsBatch } from '@/services/DisciplineService';
+import { getDisciplineByArrayIds } from '@/services/DisciplineService';
 import Button from "@/components/ButtonDefault/button";
 
 const ModalPpcDisciplineList = ({ course, onClose }) => {
@@ -28,7 +28,7 @@ const ModalPpcDisciplineList = ({ course, onClose }) => {
           const firstPpc = fetchedPpcs[0];
           setSelectedPpc(firstPpc);
           if (firstPpc.disciplines && firstPpc.disciplines.length > 0) {
-            const disciplineDetails = await getDisciplineDetailsBatch(firstPpc.disciplines, true);
+            const disciplineDetails = await getDisciplineByArrayIds(firstPpc.disciplines, true);
             setDisplayDisciplines(disciplineDetails);
           } else {
             setDisplayDisciplines([]);
@@ -58,7 +58,7 @@ const ModalPpcDisciplineList = ({ course, onClose }) => {
       setError('');
       try {
           if (newSelectedPpc.disciplines && newSelectedPpc.disciplines.length > 0) {
-              const disciplineDetails = await getDisciplineDetailsBatch(newSelectedPpc.disciplines, true);
+              const disciplineDetails = await getDisciplineByArrayIds(newSelectedPpc.disciplines, true);
               setDisplayDisciplines(disciplineDetails);
           } else {
               setDisplayDisciplines([]);

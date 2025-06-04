@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faArrowLeft, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { ppcGet, ppcEdit } from '@/services/PpcService';
-import { DisciplineList, getDisciplineDetailsBatch } from '@/services/DisciplineService';
+import { DisciplineList, getDisciplineByArrayIds } from '@/services/DisciplineService';
 import styles from './ppc.module.css';
 import { Button } from "primereact/button";
 import { usePathname, useRouter } from 'next/navigation';
@@ -41,7 +41,7 @@ const EditPpcPage = () => {
             setAvailableDisciplines(allDisciplines || []);
 
             if (ppcData.disciplines && ppcData.disciplines.length > 0) {
-                const initialDisciplineDetails = await getDisciplineDetailsBatch(ppcData.disciplines);
+                const initialDisciplineDetails = await getDisciplineByArrayIds(ppcData.disciplines);
                 setSelectedDisciplines(initialDisciplineDetails);
             } else {
                 setSelectedDisciplines([]);

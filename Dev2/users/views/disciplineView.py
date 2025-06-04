@@ -1,3 +1,4 @@
+from uuid import UUID
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -91,3 +92,30 @@ def discipline_detail(request, pk):
             # Retorna 204 No Content para indicar sucesso na exclusão
             return Response({"detail": "Disciplina foi excluida."}, status=status.HTTP_200_OK)
     return Response({"detail": "Um erro ocorreu em disciplinas."}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def discipline_list_by_ids(request):
+    try:
+        discipline_ids = request.data.get('ids', [])
+        active_param = request.data.get('active', None)
+
+        if not discipline_ids:
+            return Response({"detail": "Nenhum ID fornecido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        valid_ids = []
+        for id in discipline_ids:
+            try:
+                valid_ids.append(UUID(id))
+            except ValueError:
+                pass
+        disciplines = Disciplines.objects.filter(id__in=valid_ids)
+
+        if active_param is not None:
+            disciplines = disciplines.filter(is_active=active_param)
+
+        serializer = DisciplineSerializer(disciplines, many=True)
+        return Response(serializer.data)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

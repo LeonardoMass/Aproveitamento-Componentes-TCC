@@ -2,7 +2,7 @@ from django.urls import path
 from .views.user_list_view import ListUsersAPIView, RetrieveUserByIdView
 from .views.user import CreateUserView, UpdateActiveByIdView, UpdateUserByIdView
 from .views.user_details import UserDetails
-from .views.disciplineView import discipline_detail , discipline_list_create
+from .views.disciplineView import discipline_detail , discipline_list_create, discipline_list_by_ids
 from .views.noticeView import NoticeListCreateView, NoticeDetailView
 from .views.courseView import (ListCoursesAPIView, CreateCourseAPIView,
                                 RetrieveCourseByIdAPIView, UpdateCourseAPIView,
@@ -21,6 +21,7 @@ urlpatterns = [
     path('users/retrieve/<int:id>/', RetrieveUserByIdView.as_view(), name='retrieve_user_by_id'),
     path('api/disciplines/', discipline_list_create, name='discipline_list_create'),
     path('api/disciplines/<uuid:pk>/', discipline_detail, name='discipline_detail'),
+    path('api/disciplines/get-by-ids/', discipline_list_by_ids, name='discipline_list_by_ids'),
     path('notices/', NoticeListCreateView.as_view(), name='notice-list-create'),
     path('notices/<uuid:id>/', NoticeDetailView.as_view(), name='notice-detail'),
     path('courses/list/', ListCoursesAPIView.as_view(), name='list_courses'),
