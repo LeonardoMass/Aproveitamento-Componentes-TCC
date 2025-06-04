@@ -166,13 +166,17 @@ const Discipline = () => {
         <h1 className={styles.pageTitle}>Disciplinas</h1>
         <div className={styles.searchContainer}>
           <div className={styles.searchWrapper}>
-            <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
             <InputText
               className={styles.nameFilter}
               type="text"
               value={searchTerm}
-              placeholder="Buscar pela disciplina.."
+              placeholder="Buscar"
               onChange={handleSearch}
+            />
+            <FontAwesomeIcon
+              icon={faSearch}
+              size="lg"
+              className={styles.searchIcon}
             />
           </div>
         </div>

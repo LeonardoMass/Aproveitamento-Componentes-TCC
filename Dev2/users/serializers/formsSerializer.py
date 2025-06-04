@@ -128,7 +128,8 @@ class StepSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Professor não pode definir o status como '{status}'")
 
         # Verifica se o step possui um feedback caso precise
-        if status not in [ANALYSIS_STATUS] and status != RequestStatus.CANCELED:
+        print("Status do step: " + status)
+        if status in [FAILED_STATUS] and status != RequestStatus.CANCELED:
             if not data.get('feedback'):
                 raise serializers.ValidationError("É necessário informar um feedback")
 
@@ -151,6 +152,7 @@ class AttachmentSerializer(serializers.ModelSerializer):
 class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
     status_display = serializers.SerializerMethodField(read_only=True)
     discipline_name = serializers.CharField(source='discipline.name', read_only=True)
+    discipline_workload = serializers.CharField(source='discipline.workload', read_only=True)
     student_id = serializers.IntegerField(write_only=True)
     student = serializers.PrimaryKeyRelatedField(read_only=True)
     student_name = serializers.SerializerMethodField()
@@ -163,8 +165,8 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecognitionOfPriorLearning
         fields = [
-            'id', 'course_workload', 'course_studied_workload', 'notice', 'discipline', 'course',
-            'discipline_name', 'create_date', 'status_display', 'attachments', 'student_id', 'student', 'student',
+            'id', 'course_workload', 'course_studied_workload', 'previous_course', 'notice', 'discipline', 'course',
+            'discipline_name', 'discipline_workload', 'create_date', 'status_display', 'attachments', 'student_id', 'student', 'student',
             'student_name', 'student_email', 'student_matricula', 'student_course', 'steps'
         ]
 
@@ -293,6 +295,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
 class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     status_display = serializers.SerializerMethodField(read_only=True)
     discipline_name = serializers.CharField(source='discipline.name', read_only=True)
+    discipline_workload = serializers.CharField(source='discipline.workload', read_only=True)
     student_id = serializers.IntegerField(write_only=True)
     student = serializers.PrimaryKeyRelatedField(read_only=True)
     student_name = serializers.SerializerMethodField()
@@ -306,7 +309,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = KnowledgeCertification
         fields = [
-            'id', 'previous_knowledge', 'scheduling_date', 'test_score', 'notice', 'discipline', 'course',
+            'id', 'previous_knowledge', 'discipline_workload', 'scheduling_date', 'test_score', 'notice', 'discipline', 'course',
             'discipline_name', 'create_date', 'status_display', 'attachments', 'student_id', 'student',
             'student_name', 'student_email', 'student_matricula', 'student_course', 'steps', 'test_attachment'
         ]

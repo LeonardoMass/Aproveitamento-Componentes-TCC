@@ -9,10 +9,10 @@ from users.models import Servant
 
 # Enum para status da requisição
 class RequestStatus(models.TextChoices):
-    IN_ANALYSIS_BY_CRE = "CRE", "Aguardando período de análise"
+    IN_ANALYSIS_BY_CRE = "CRE", "Solicitação criada"
     CANCELED = "CANCELED", "Cancelado pelo Aluno"
     CANCELED_BY_CRE = "C_CRE", "Cancelado pelo Ensino"
-    ANALYZED_BY_CRE = "A_CRE", "Analisado pelo Ensino"
+    ANALYZED_BY_CRE = "A_CRE", "Encaminhado para o Coordenador"
     IN_ANALYSIS_BY_COORDINATOR = "COORD", "Em análise do Coordenador"
     CANCELED_BY_COORDINATOR = "C_COORD", "Cancelado pelo Coordenador"
     ANALYZED_BY_COORDINATOR = "A_COORD", "Analisado pelo Coordenador"
@@ -23,10 +23,10 @@ class RequestStatus(models.TextChoices):
     RETURNED_BY_COORDINATOR = "R_COORD", "Retornado pelo Coordenador"
     REJECTED_BY_COORDINATOR = "RJ_COORD", "Rejeitado pelo Coordenador"
     APPROVED_BY_COORDINATOR = "AP_COORD", "Aprovado pelo Coordenador"
-    IN_APPROVAL_BY_CRE = "IN_AP_CRE", "Em homologação do Ensino"
+    IN_APPROVAL_BY_CRE = "IN_AP_CRE", "Em aguardo para divulgação"
     RETURNED_BY_CRE = "R_CRE", "Retornado pelo Ensino"
     REJECTED_BY_CRE = "RJ_CRE", "Rejeitado pelo Ensino"
-    APPROVED_BY_CRE = "AP_CRE", "Aprovado pelo Ensino"
+    APPROVED_BY_CRE = "AP_CRE", "Finalizado e divulgado"
 
     def get_request_status_by_string(value):
         for status in RequestStatus.values:
@@ -148,6 +148,7 @@ class RecognitionOfPriorLearning(RequisitionForm):
     notice = models.ForeignKey(Notice, on_delete=models.CASCADE, related_name="recognition_notices")
     course_workload = models.IntegerField()
     course_studied_workload = models.IntegerField()
+    previous_course = models.CharField(max_length=255)
 
     def __str__(self):
         return f"RecognitionOfPriorLearning {self.id}"

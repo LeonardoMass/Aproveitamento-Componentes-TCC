@@ -1,8 +1,8 @@
 export const StatusEnum = Object.freeze([
-    "Aguardando período de análise",
+    "Solicitação criada",
     "Cancelado pelo Aluno",
     "Cancelado pelo Ensino",
-    "Analisado pelo Ensino",
+    "Encaminhado para o Coordenador",
     "Em análise do Coordenador",
     "Cancelado pelo Coordenador",
     "Analisado pelo Coordenador",
@@ -13,10 +13,10 @@ export const StatusEnum = Object.freeze([
     "Retornado pelo Coordenador",
     "Rejeitado pelo Coordenador",
     "Aprovado pelo Coordenador",
-    "Em homologação do Ensino",
+    "Em aguardo para divulgação",
     "Retornado pelo Ensino",
     "Rejeitado pelo Ensino",
-    "Aprovado pelo Ensino",
+    "Finalizado e divulgado",
 ]);
 
 export const steps = [
@@ -24,7 +24,7 @@ export const steps = [
     {index: 1, label: 'Análise do Coordenador'},
     {index: 2, label: 'Análise do Professor'},
     {index: 3, label: 'Homologação do Coordenador'},
-    {index: 4, label: 'Homologação do Ensino'}
+    {index: 4, label: 'Aguardando divulgação'}
 ]
 
 
@@ -39,8 +39,8 @@ export function getEnumIndexByValue(value) {
 }
 
 export function getSucceeded() {
-    return ["Analisado pelo Ensino", "Analisado pelo Coordenador", "Analisado pelo Professor",
-        "Aprovado pelo Coordenador", "Aprovado pelo Ensino"];
+    return ["Encaminhado para o Coordenador", "Analisado pelo Coordenador", "Analisado pelo Professor",
+        "Aprovado pelo Coordenador", "Finalizado e divulgado"];
 }
 
 export function getFailed() {
@@ -49,8 +49,8 @@ export function getFailed() {
 }
 
 export function getPending() {
-    return ["Aguardando período de análise", "Em análise do Coordenador", "Em análise do Professor", "Em homologação do Coordenador",
-        "Retornado pelo Coordenador", "Em homologação do Ensino", "Retornado pelo Ensino"]
+    return ["Solicitação criada", "Em análise do Coordenador", "Em análise do Professor", "Em homologação do Coordenador",
+        "Retornado pelo Coordenador", "Em aguardo para divulgação", "Retornado pelo Ensino"]
 }
 
 export function getStatusStepIndex(status) {
@@ -59,10 +59,11 @@ export function getStatusStepIndex(status) {
     if (getStep3Status().includes(status)) return 2;
     if (getStep4Status().includes(status)) return 3;
     if (getStep5Status().includes(status)) return 4;
+    if (getStep6Status().includes(status)) return 4;
 }
 
 export function getStep1Status() {
-    return ["Aguardando período de análise", "Cancelado pelo Aluno", "Cancelado pelo Ensino", "Analisado pelo Ensino"];
+    return ["Solicitação criada", "Cancelado pelo Aluno", "Cancelado pelo Ensino", "Encaminhado para o Coordenador"];
 }
 
 export function getStep2Status() {
@@ -78,18 +79,22 @@ export function getStep4Status() {
 }
 
 export function getStep5Status() {
-    return ["Em homologação do Ensino", "Rejeitado pelo Ensino", "Aprovado pelo Ensino"]
+    return ["Em aguardo para divulgação", "Rejeitado pelo Ensino", "Finalizado e divulgado"]
+}
+
+export function getStep6Status() {
+    return ["Finalizado e divulgado"]
 }
 
 export function getStatus(status) {
     switch (status) {
-        case "Aguardando período de análise":
+        case "Solicitação criada":
             return "CRE";
         case "Cancelado pelo Aluno":
             return "CANCELED";
         case "Cancelado pelo Ensino":
             return "C_CRE";
-        case "Analisado pelo Ensino":
+        case "Encaminhado para o Coordenador":
             return "A_CRE";
         case "Em análise do Coordenador":
             return "COORD";
@@ -111,13 +116,13 @@ export function getStatus(status) {
             return "RJ_COORD";
         case "Aprovado pelo Coordenador":
             return "AP_COORD";
-        case "Em homologação do Ensino":
+        case "Em aguardo para divulgação":
             return "IN_AP_CRE";
         case "Retornado pelo Ensino":
             return "R_CRE";
         case "Rejeitado pelo Ensino":
             return "RJ_CRE";
-        case "Aprovado pelo Ensino":
+        case "Finalizado e divulgado":
             return "AP_CRE";
     }
 }

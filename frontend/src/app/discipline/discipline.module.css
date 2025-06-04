@@ -28,33 +28,41 @@
 .searchContainer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  flex: 1;
 }
 
 .searchWrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  position: relative;
-  width: auto;
+  width: 100%;
 }
 
 .nameFilter {
-  padding: 10px 40px 10px 40px;
-  border: 1px solid rgb(166, 165, 165);
-  border-radius: 5px;
-  font-size: 14px;
-  width: 300px;
-  height: 50px;
+  width: 100%;
+  padding-right: 2.5rem;
   box-sizing: border-box;
 }
+
 .searchIcon {
   position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #aaa;
+  right: 0.8rem;
   pointer-events: none;
+  color: #888;
+}
+
+.searchInput {
+  padding: 10px 12px 10px 35px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  min-width: 250px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
 }
 
 .scrollableTable {

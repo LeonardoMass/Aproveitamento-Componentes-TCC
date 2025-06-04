@@ -27,7 +27,7 @@
 .searchWrapper {
   display: flex;
   position: relative;
-  width: 50%; /* Garante que o wrapper tenha a mesma largura do input */
+  width: 30%;
 }
 
 .searchIcon {
@@ -67,7 +67,7 @@
   display: flex;
   flex-direction: row;  /* Filtros alinhados na horizontal */
   gap: 10px; /* Espaço entre os filtros */
-  width: 100%; /* Para garantir que os filtros ocupem a largura disponível */
+  width: 60%; /* Para garantir que os filtros ocupem a largura disponível */
   align-items: center;
   justify-content: flex-end; /* Alinha os filtros e o botão à direita */
 }

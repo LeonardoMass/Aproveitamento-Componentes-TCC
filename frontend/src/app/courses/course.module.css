@@ -1,5 +1,4 @@
 .contentWrapper {
-  min-height: 50vh;
   width: 90%;
   max-width: 1200px;
   margin: 0 auto;
@@ -75,11 +74,30 @@
 }
 
 .table {
+  border: 1px solid rgb(178, 178, 178);
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
-  border-collapse: collapse;
+  border-radius: 10px;
+  overflow: hidden;
+  table-layout: auto;
 }
 
-.table th,
+.table thead {
+  position: sticky;
+  top: 0;
+  background-color: #2f9e41;
+  z-index: 1;
+}
+
+.table thead th {
+  padding: 16px;
+  border-bottom: 1px solid rgb(178, 178, 178);
+  text-align: left;
+  color: white;
+}
+
+
 .table td {
   padding: 12px 15px;
   text-align: left;
@@ -87,13 +105,10 @@
   vertical-align: middle;
 }
 
-.table th {
-  background-color: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.table td, .table th {
+  border: 1px solid rgb(178, 178, 178);
+  padding: 8px 12px;
+  vertical-align: middle;
 }
 
 .table tbody tr:hover {

@@ -26,6 +26,7 @@ import {
   getStep3Status,
   getStep4Status,
   getStep5Status,
+  getStep6Status,
   getSucceeded,
   StatusEnum,
 } from "@/app/requests/status";
@@ -57,6 +58,7 @@ const Details = () => {
   const [professorFeedback, setProfessorFeedback] = useState("");
   const [coordinatorSecondFeedback, setCoordinatorSecondFeedback] = useState("");
   const [creFeedback, setCreFeedback] = useState("");
+  const [endRequest, setEndRequest] = useState("");
   const [editedTestScore, setEditedTestScore] = useState("");
   const [hasChangesKnowledge, setHasChangesKnowledge] = useState(false);
   const [hasChangesWorkload, setHasChangesWorkload] = useState(false);
@@ -142,12 +144,15 @@ const Details = () => {
       const step3Feedback = getStepStatus(data.steps, getStep3Status);
       const step4Feedback = getStepStatus(data.steps, getStep4Status);
       const step5Feedback = getStepStatus(data.steps, getStep5Status);
+      const step6Date = getStepStatus(data.steps, getStep6Status);
 
       if (step2Feedback) setCoordinatorFeedback(step2Feedback.feedback);
       if (step3Feedback) setProfessorFeedback(step3Feedback.feedback);
       if (step3Feedback) setProfessor(step3Feedback.responsible.name);
       if (step4Feedback) setCoordinatorSecondFeedback(step4Feedback.feedback);
-      if (step5Feedback) setCreFeedback(step5Feedback.feedback);
+      if (step5Feedback) setCreFeedback(step5Feedback.initial_step_date);
+      if (step6Date) setEndRequest(step6Date.initial_step_date);
+
 
       if (
         role === "Coordenador" &&
@@ -196,6 +201,11 @@ const Details = () => {
     );
   };
 
+  const requestType = () => {
+       return type === "knowledge-certifications"
+          ? "Certificação de conhecimento"
+          : "Aproveitamento de estudos";
+    }
   const createStep = async (status, feedback) => {
     try {
       const formType =
@@ -251,7 +261,7 @@ const Details = () => {
     createStep(getStatus(status), fb).then((value) => {
       if (
         getSucceeded().includes(status) &&
-        status !== "Aprovado pelo Ensino"
+        status !== "Finalizado e divulgado"
       ) {
         const index = getEnumIndexByValue(status) + 1;
         createStep(getStatus(StatusEnum[index]), "Pendente");
@@ -427,6 +437,9 @@ const Details = () => {
     if (getFailed().includes(status)) {
       return { color: "red", icon: faTimes, label: "Rejeitado" };
     } else if (getSucceeded().includes(status)) {
+      if (status === "Encaminhado para o Coordenador") {
+        return { color: "green", icon: faCheck, label: "Encaminhado" };
+      }
       return { color: "green", icon: faCheck, label: "Aprovado" };
     } else {
       return { color: "yellow", icon: faClock, label: "Pendente" };
@@ -448,7 +461,7 @@ const Details = () => {
   return (
     <div>
       <div className={styles.container}>
-        <h1 className={styles.center_title}>Detalhes da Solicitação</h1>
+        <h1 className={styles.center_title}>{requestType()}</h1>
         {details ? (
           <div>
             {stepsStatus && details.status_display !== "Cancelado" ? (
@@ -465,7 +478,7 @@ const Details = () => {
               </div>
             )}
             {role === "Estudante" &&
-              details.status_display === "Aguardando período de análise" && (
+              details.status_display === "Solicitação criada" && (
                 <div className={styles.centered}>
                   <Button
                     label="Cancelar solicitação"
@@ -524,7 +537,11 @@ const Details = () => {
                     <strong>Componente curricular: </strong>
                     {details.discipline_name}
                   </p>
-                  {role === "Estudante" && details.status_display === "Aguardando período de análise" ? (
+                  <p className={styles.info}>
+                    <strong>Carga horária: </strong>
+                    {details.discipline_workload}
+                  </p>
+                  {role === "Estudante" && details.status_display === "Solicitação criada" ? (
                     <div className={styles.attachmentsSection}>
                       <h3>Anexos</h3>
                       {details.attachments && details.attachments.length > 0 && (
@@ -603,7 +620,7 @@ const Details = () => {
                         {details.previous_knowledge || "Pendente"}
                       </span>
                       {/*role === "Estudante" &&
-                        details.status_display === "Aguardando período de análise" && (
+                        details.status_display === "Solicitação criada" && (
                           <>
                             <FontAwesomeIcon
                               icon={faEdit}
@@ -624,76 +641,18 @@ const Details = () => {
 
                   {type === "recognition-forms" && (
                     <>
-                      <div className={styles.infoField}>
-                        <strong className={styles.info}>Carga horária: </strong>
-                        <span
-                          ref={editableRef}
-                          contentEditable={isEditingCourseWorkload}
-                          suppressContentEditableWarning={true}
-                          className={`${styles.editableSpan} ${isEditingCourseWorkload ? styles.editing : ""}`}
-                          onInput={(e) => handleInput(e, "course_workload")}
-                        >
-                          {details.course_workload || "Pendente"}
-                        </span>
-                        {/*{role === "Estudante" &&
-                          details.status_display === "Aguardando período de análise" && (
-                            <>
-                              <FontAwesomeIcon
-                                icon={faEdit}
-                                onClick={handleEditToggleCourseWorkload}
-                                className={`${styles.iconSpacing} ${styles.editIcon}`}
-                              />
-                              {isEditingCourseWorkload &&
-                                hasChangesWorkload && (
-                                  <FontAwesomeIcon
-                                    icon={faSave}
-                                    onClick={() =>
-                                      handleSave("course_workload")
-                                    }
-                                    className={`${styles.iconSpacing} ${styles.saveIcon}`}
-                                  />
-                                )}
-                            </>
-                          )}
-                          */}
-                      </div>
-                      <div className={styles.infoField}>
-                        <strong className={styles.info}>
-                          Carga horária efetiva:{" "}
-                        </strong>
-                        <span
-                          ref={editableRef}
-                          contentEditable={isEditingCourseStudiedWorkload}
-                          suppressContentEditableWarning={true}
-                          className={`${styles.editableSpan} ${isEditingCourseStudiedWorkload ? styles.editing : ""}`}
-                          onInput={(e) =>
-                            handleInput(e, "course_studied_workload")
-                          }
-                        >
-                          {details.course_studied_workload || "Pendente"}
-                        </span>
-                        {/*{role === "Estudante" &&
-                          details.status_display === "Aguardando período de análise" && (
-                            <>
-                              <FontAwesomeIcon
-                                icon={faEdit}
-                                onClick={handleEditToggleCourseStudiedWorkload}
-                                className={`${styles.iconSpacing} ${styles.editIcon}`}
-                              />
-                              {isEditingCourseStudiedWorkload &&
-                                hasChangesStudiedWorkload && (
-                                  <FontAwesomeIcon
-                                    icon={faSave}
-                                    onClick={() =>
-                                      handleSave("course_studied_workload")
-                                    }
-                                    className={`${styles.iconSpacing} ${styles.saveIcon}`}
-                                  />
-                                )}
-                            </>
-                          )}
-                          */}
-                      </div>
+                      <p className={styles.info}>
+                        <strong>Cursado anteriormente: </strong>
+                        {details.previous_course || "Pendente"}
+                      </p>
+                      <p className={styles.info}>
+                        <strong>Carga horária cursado anteriormente: </strong>
+                        {details.course_studied_workload || "Pendente"}
+                      </p>
+                      <p className={styles.info}>
+                        <strong>Nota obtida: </strong>
+                        {details.course_workload || "Pendente"}
+                      </p>
                     </>
                   )}
                 </div>
@@ -710,19 +669,13 @@ const Details = () => {
                     </div>
 
                     {role === "Ensino" &&
-                      details.status_display === "Aguardando período de análise" && (
+                      details.status_display === "Solicitação criada" && (
                         <div className={styles.actionButtons}>
                           <Button
-                            label="Aprovar"
+                            label="Encaminhar para o coordenador"
                             icon="pi pi-check"
-                            onClick={() => openModal("Analisado pelo Ensino")}
+                            onClick={() => openModal("Encaminhado para o Coordenador")}
                             className={styles.pButtonSuccess}
-                          />
-                          <Button
-                            label="Rejeitar"
-                            icon="pi pi-times"
-                            onClick={() => openModal("Cancelado pelo Ensino")}
-                            className={styles.pButtonDanger}
                           />
                         </div>
                       )}
@@ -1064,12 +1017,29 @@ const Details = () => {
                 getStep5Status().includes(value.status_display),
               ) && (
               <div className={styles.analysis}>
-                <h1 className={styles.center_title}>Homologação do Ensino</h1>
+                <h1 className={styles.center_title}>Divulgação do Ensino</h1>
                 <div className={styles.columns}>
-                  <div className={styles.infoColumn}>
+                 <div className={styles.infoColumn}>
                     <p className={styles.info}>
-                      <strong>Parecer: </strong>
-                      {creFeedback || "Pendente"}
+                      {endRequest ? (
+                        <>
+                          <strong>Finalizado em </strong>
+                          {new Date(endRequest).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric"
+                          })}
+                          {" - "}
+                          {new Date(endRequest).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                            timeZone: "America/Sao_Paulo"
+                          })}
+                        </>
+                      ) : (
+                        "Pendente"
+                      )}
                     </p>
                   </div>
                   <div className={styles.actionColumn}>
@@ -1085,12 +1055,12 @@ const Details = () => {
                       </div>
                     )}
                     {role === "Ensino" &&
-                      details.status_display === "Em homologação do Ensino" && (
+                      details.status_display === "Em aguardo para divulgação" && (
                         <div className={styles.actionButtons}>
                           <Button
                             label="Aprovar"
                             icon="pi pi-check"
-                            onClick={() => openModal("Aprovado pelo Ensino")}
+                            onClick={() => openModal("Finalizado e divulgado")}
                             className={styles.pButtonSuccess}
                           />
                           <Button
@@ -1098,12 +1068,6 @@ const Details = () => {
                             icon="pi pi-arrow-left"
                             onClick={() => openModal("Retornado pelo Ensino")}
                             className={styles.pButtonReturn}
-                          />
-                          <Button
-                            label="Rejeitar"
-                            icon="pi pi-times"
-                            onClick={() => openModal("Rejeitado pelo Ensino")}
-                            className={styles.pButtonDanger}
                           />
                         </div>
                       )}

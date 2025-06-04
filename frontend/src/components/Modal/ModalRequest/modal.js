@@ -22,12 +22,17 @@ const Modal = ({ status, onClose, onConfirm, isOpen }) => {
     };
 
     const handleConfirm = () => {
-        if (feedback.trim() === "") {
-            setIsFeedbackValid(false);
-            return;
-        }
-        onConfirm(feedback);
-    };
+    let finalFeedback = feedback;
+
+    if (feedback.trim() === "" && isFailed) {
+        setIsFeedbackValid(false);
+        return;
+    } else if (feedback.trim() === "") {
+        finalFeedback = "Sem parecer";
+    }
+    setFeedback(finalFeedback);
+    onConfirm(finalFeedback);
+};
 
     useEffect(() => {
         if (!isOpen) {

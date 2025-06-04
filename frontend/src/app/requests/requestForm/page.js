@@ -3,19 +3,20 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./requestForm.module.css";
-import { Button } from "primereact/button";
+import Button from "@/components/ButtonDefault/button";
 import { noticeListAll } from "@/services/NoticeService";
 import { FileUpload } from "primereact/fileupload";
 import RequestService from "@/services/RequestService";
-import { courseList, courseListByName } from "@/services/CourseService";
-import { GetDiscipline, getDisciplineDetailsBatch } from "@/services/DisciplineService";
+import { courseListByName } from "@/services/CourseService";
+import { getDisciplineDetailsBatch } from "@/services/DisciplineService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { ppcList } from "@/services/PpcService";
 
 const CertificationRequestForm = () => {
   const [requestType, setRequestType] = useState("");
   const [previousKnowledge, setPreviousKnowledge] = useState("");
+  const [previousCourse, setPreviousCourse] = useState("");
   const [courseWorkload, setCourseWorkload] = useState("");
   const [courseStudiedWorkload, setCourseStudiedWorkload] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("");
@@ -28,6 +29,7 @@ const CertificationRequestForm = () => {
   const [status] = useState("CR");
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
+  const [isCreating, setIsCreating] = useState(false);
 
   const idCounterRef = useRef(1);
   const [uploadLines, setUploadLines] = useState([{ id: idCounterRef.current, file: null }]);
@@ -108,13 +110,14 @@ const CertificationRequestForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setIsCreating(true);
     const formData = new FormData();
     formData.append("discipline", disciplineId);
     formData.append("course", selectedCourse.id);
     formData.append("notice", selectedNotice.id);
     formData.append("course_workload", courseWorkload);
     formData.append("course_studied_workload", courseStudiedWorkload);
+    formData.append("previous_course", previousCourse);
     formData.append("status", status);
     formData.append("student_id", user.id);
 
@@ -136,23 +139,28 @@ const CertificationRequestForm = () => {
         formData.append("attachment", line.file);
       }
     });
-    let formType = requestType === "certificacao" ? "knowledge-certifications" : "recognition-forms";
-    const response =
-      requestType === "certificacao"
-        ? await RequestService.CreateKnowledgeCertification(formData)
-        : await RequestService.CreateRecognitionForm(formData);
-    console.log("Resposta do servidor:", response);
-    if (response.status === 201) {
-      console.log("Formulário enviado com sucesso!");
-      window.location.href = `/requests/details/${formType}/${response.data.id}`;
-    } else {
-      console.error("Erro ao enviar o formulário:", response);
+    try {
+      let formType = requestType === "certificacao" ? "knowledge-certifications" : "recognition-forms";
+      const response =
+        requestType === "certificacao"
+          ? await RequestService.CreateKnowledgeCertification(formData)
+          : await RequestService.CreateRecognitionForm(formData);
+      console.log("Resposta do servidor:", response);
+      if (response.status === 201) {
+        console.log("Formulário enviado com sucesso!");
+        window.location.href = `/requests/details/${formType}/${response.data.id}`;
+      }
+    } catch (error) {
+      console.error("Erro ao enviar o formulário:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
   const handleCancel = () => {
     console.log("Ação de cancelar.");
     console.log("Linhas atuais de upload:", uploadLines);
+    window.location.href = `/requests`
   };
 
   return (
@@ -245,6 +253,14 @@ const CertificationRequestForm = () => {
         )}
         {requestType === "aproveitamento" && (
           <div className={styles.typeContainer}>
+            <label className={styles.textForm}>Componente curricular(s) cursada(s) anteriormente:</label>
+            <textarea
+              value={previousCourse}
+              onChange={(e) => setPreviousCourse(e.target.value)}
+              placeholder="Nome do curso cursado anteriormente.."
+              className={styles.selectForm}
+              required
+            />
             <label className={styles.textForm}>Carga Horaria do componente cursado anteriormente</label>
             <input
               type="number"
@@ -279,14 +295,14 @@ const CertificationRequestForm = () => {
                 accept="application/pdf,image/png,image/jpeg"
                 maxFileSize={5000000}
                 chooseLabel="Selecionar arquivo"
-                className={styles.selectForm}
+                className={styles.fileInput}
                 onSelect={(e) => handleFileSelect(line.id, e)}
                 auto={false}
                 customUpload={true}
               />
               <Button
                 type="button"
-                className={styles.cancelButton}
+                className={styles.xButton}
                 style={{ marginLeft: "0.5rem", marginBottom: "1 rem" }}
                 onClick={() => removeUploadLine(line.id)}
               >
@@ -301,16 +317,19 @@ const CertificationRequestForm = () => {
           </div>
         </div>
         <div className={styles.formBtnContainer}>
-          <Button type="button" className={styles.cancelButton} onClick={handleCancel}>
+          <Button variant="cancel" className={styles.cancelButton} onClick={handleCancel}>
             Cancelar
           </Button>
           <Button
-            type="button"
-            disabled={!selectedNotice}
-            className={!selectedNotice ? styles.btnDisabled : styles.confirmButton}
+            variant="save"
             onClick={handleSubmit}
+            disabled={!selectedNotice}
+            className={!selectedNotice && styles.btnDisabled}
           >
-            Enviar
+            {isCreating &&
+              <FontAwesomeIcon icon={faSpinner} spin size="sm" fixedWidth />
+            }
+            <span>{isCreating ? "Enviando" : " Enviar"}</span>
           </Button>
         </div>
       </form>
