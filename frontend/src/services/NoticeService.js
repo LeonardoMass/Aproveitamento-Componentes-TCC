@@ -1,9 +1,14 @@
 import { apiClient } from "@/libs/api";
 
-const noticeList = async ({ page = 1, pageSize = 10 }) => {
-  const url = `notices/?page=${page}&pageSize=${pageSize}`;
-  console.log("Fetching from URL:", url); // Para depuração
-  return await apiClient.get(url).then((response) => response.data);
+const noticeList = async ({ page = 1, pageSize = 10, search = "" }) => {
+  const params = new URLSearchParams();
+  params.append("page", page);
+  params.append("pageSize", pageSize);
+  if (search) {
+    params.append("search", search);
+  }
+  const url = `notices/?${params.toString()}`;
+  return apiClient.get(url).then((response) => response.data);
 };
 
 const noticeListAll = async () => {

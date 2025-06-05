@@ -14,14 +14,29 @@
   padding: 0.5rem;
 }
 
+.headerRow {
+  margin-top: 30px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.pageTitle {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
 
 .filters {
-  margin-top: 60px;
   display: flex;
-  flex-direction: column;  /* Filtros e botão alinhados na horizontal */
+  width: 100%;
+  justify-content: flex-end;
   gap: 15px; /* Espaço entre os filtros */
-  align-items: flex-end;
-  margin-bottom: 20px; /* Adiciona espaçamento abaixo dos filtros antes da tabela */
+  margin-bottom: 20px;
 }
 
 .searchWrapper {
@@ -65,11 +80,9 @@
 
 .filtersContainer {
   display: flex;
-  flex-direction: row;  /* Filtros alinhados na horizontal */
-  gap: 10px; /* Espaço entre os filtros */
-  width: 60%; /* Para garantir que os filtros ocupem a largura disponível */
-  align-items: center;
-  justify-content: flex-end; /* Alinha os filtros e o botão à direita */
+  gap: 10px;
+  justify-content: flex-end;
+  width: auto;
 }
 
 .filter {
@@ -233,4 +246,55 @@
   min-width: 120px;
 }
 
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
 
+.actionButton,
+.editButton,
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+}
+
+.actionButton { color: #000000; }
+.editButton { color: #000000; }
+.deleteButton { color: #dc3545; }
+
+.actionButton:hover { color: #000000; transform: scale(1.1); background-color: rgba(189, 190, 190, 0.1);}
+.editButton:hover { color: #000000; transform: scale(1.1); background-color: rgba(189, 190, 190, 0.1); }
+.deleteButton:hover { color: #c82333; transform: scale(1.1); background-color: rgba(220, 53, 69, 0.1); }
+
+.editButton:disabled {
+  color: #adb5bd;
+  cursor: not-allowed;
+  background-color: transparent;
+  transform: none;
+}
+.editButton:disabled:hover {
+   background-color: transparent;
+   transform: none;
+}
+
+.inactiveRow td {
+  background-color: #f0f0f0;
+  color: #888;
+  font-style: italic;
+}
+
+.table tbody tr.inactiveRow:hover td {
+  background-color: #e0e0e0;
+}

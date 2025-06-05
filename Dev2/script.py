@@ -103,18 +103,17 @@ Servant.objects.create(
     servant_type=ServantTypeEnum.ENSINO.value,
     is_verified=True
 )
-notice = Notice.objects.create(
-    id="1f7755ade0b341299ee00c46a12dc467",
-    number="001-2025",
-    publication_date="2025-05-01T09:00:00Z",
-    documentation_submission_start="2025-04-01T00:00:00Z",
-    documentation_submission_end="2025-10-01T17:00:00Z",
-    proposal_analysis_start="2025-10-12T09:00:00Z",
-    proposal_analysis_end="2025-10-20T17:00:00Z",
-    result_publication="2025-10-21T09:00:00Z",
-    result_homologation="2025-10-23T09:00:00Z",
-    link="https://dev2.com"
-)
+#notice = Notice.objects.create(
+#   id="1f7755ade0b341299ee00c46a12dc467",
+#    number="001-2025",
+#    publication_date="2025-05-01T09:00:00Z",
+#    documentation_submission_start="2025-04-01T00:00:00Z",
+#    documentation_submission_end="2025-10-01T17:00:00Z",
+#    proposal_analysis_start="2025-10-12T09:00:00Z",
+#    proposal_analysis_end="2025-10-20T17:00:00Z",
+#    result_publication="2025-10-21T09:00:00Z",
+#    link="https://dev2.com"
+#)
 
 notice2 = Notice.objects.create(
     id="1f7755ade0b341299ee00c46a12dc468",
@@ -125,7 +124,6 @@ notice2 = Notice.objects.create(
     proposal_analysis_start="2024-10-12T09:00:00Z",
     proposal_analysis_end="2024-10-20T17:00:00Z",
     result_publication="2024-10-21T09:00:00Z",
-    result_homologation="2024-10-23T09:00:00Z",
     link="https://ifrs.edu.br/alvorada/editais/edital-n-26-2024-aproveitamento-de-estudos-e-certificacao-de-conhecimentos-para-estudantes-regularmente-matriculados-nos-cursos-superiores-e-tecnicos-subsequentes-do-ifrs-campus-alvorada/"
 )
 
@@ -138,7 +136,6 @@ notice3 = Notice.objects.create(
     proposal_analysis_start="2024-01-03T09:00:00Z",
     proposal_analysis_end="2024-01-04T17:00:00Z",
     result_publication="2024-01-04T09:00:00Z",
-    result_homologation="2024-01-05T09:00:00Z",
     link="https://ifrs.edu.br/canoas/editais/edital-no-2-2024-gab-can-aproveitamento-de-estudos-para-os-alunos-regularmente-matriculados-nos-cursos-superiores-do-ifrs-campus-canoas/"
 )
 discipline1 = Disciplines.objects.create(

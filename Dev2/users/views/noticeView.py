@@ -1,28 +1,30 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-
+from django.db.models import Q
 from ..models.notice import Notice
 from ..serializers.noticeSerializer import NoticeSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.services.user import UserService
-
+from api.utils.pagination import NoticePagination
 class NoticeListCreateView(generics.ListCreateAPIView):
 
     permission_classes = [IsAuthenticated]
     user_service = UserService()
-
     queryset = Notice.objects.all()
     serializer_class = NoticeSerializer
-    
+    pagination_class = NoticePagination
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.query_params.get('search', None)
+        if search:
+            qs = qs.filter(Q(number__icontains=search))
+        return qs
+
     def post(self, request, *args, **kwargs):
-        # Verifique o tipo de usuário
         user = request.user
-        user_autorized = self.user_service.userAutorized(user)
-        if not user_autorized:
-            return Response(
-                {"detail": "Você não tem permissão para criar este recurso."},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not self.user_service.userAutorized(user):
+            return Response({"detail": "Você não tem permissão para criar este recurso."}, status=status.HTTP_403_FORBIDDEN)
         return super().post(request, *args, **kwargs)
 
 class NoticeDetailView(generics.RetrieveUpdateDestroyAPIView):

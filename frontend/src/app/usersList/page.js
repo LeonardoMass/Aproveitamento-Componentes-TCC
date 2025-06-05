@@ -108,7 +108,8 @@ const UsersList = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.filters}>
+        <div className={styles.headerRow}>
+          <h1 className={styles.pageTitle}>Gerenciamento de Cursos</h1>
           <div className={styles.searchWrapper}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
             <InputText
@@ -120,6 +121,9 @@ const UsersList = () => {
               onKeyDown={handleFilterKeyDown}
             />
           </div>
+        </div>
+
+        <div className={styles.filters}>
           <div className={styles.filtersContainer}>
             <Filter
               optionList={coursesArray}
@@ -159,7 +163,7 @@ const UsersList = () => {
             </thead>
             <tbody>
               {filteredUsers.map((u) => (
-                <tr key={u.id}>
+                <tr key={u.id} className={!u.is_active ? styles.inactiveRow : ''}>
                   <td>{u.name ?? "N/A"}</td>
                   <td>{u.type ?? "N/A"}</td>
                   <td>{u.matricula ?? u.siape ?? "N/A"}</td>
@@ -169,16 +173,23 @@ const UsersList = () => {
                   <td>
                     {user?.type === 'Ensino' && (
                       <>
-                        <FontAwesomeIcon
-                          icon={faPenToSquare}
-                          style={{ marginRight: "10px", cursor: "pointer" }}
-                          onClick={() => handleEdit(u)}
-                        />
-                        <FontAwesomeIcon
-                          icon={u.is_active ? faTrash : faEye}
-                          style={{ cursor: "pointer", color: u.is_active ? "#dc3545" : "#6c757d" }}
-                          onClick={() => updateActivity(u.id)}
-                        />
+                        <div className={styles.actions}>
+                          <button
+                            className={styles.editButton}
+                            onClick={() => handleEdit(u)}
+                            title="Editar"
+                            disabled={!u.is_active}
+                          >
+                            <FontAwesomeIcon icon={faPenToSquare} />
+                          </button>
+                          <button
+                            className={styles.deleteButton}
+                            onClick={() => updateActivity(u.id)}
+                            title="Inativar/Ativar"
+                          >
+                            <FontAwesomeIcon icon={u.is_active ? faTrash : faEye} />
+                          </button>
+                        </div>
                       </>
                     )}
                   </td>

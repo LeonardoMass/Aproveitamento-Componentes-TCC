@@ -1,61 +1,68 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { handleUserLogout, useAuth } from "@/context/AuthContext";
 import { Menu } from "primereact/menu";
-import styles from "./navBar.module.css";
-import MenuIcon from "@mui/icons-material/Menu";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { Button } from "primereact/button";
 import { noticeListAll } from "@/services/NoticeService";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
 import { Toaster } from "react-hot-toast";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+import styles from "./navBar.module.css";
 
-const NavBar = ({ data = false }) => {
+const NavBar = () => {
   const { user } = useAuth();
+  const isUserAuth = !!user;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const pathname = usePathname();
   const [notice, setNotice] = useState(null);
-  const isUserAuth = !!user || false;
-  const [dropdownMenu, setDropdownMenu] = useState(false);
-  const [theme, setTheme] = useState("light"); // Estado para controlar o tema
-  const [path, setPath] = useState("");
+  const menuLeft = useRef(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setPath(window.location.pathname); // Obtém o caminho da URL
+    const routeToIndexMap = {
+      "/home": 0,
+      "/requests": 1,
+      "/notice": 2,
+      "/courses": 3,
+      "/discipline": 4,
+      "/requests/requestForm": 5,
+      "/usersList": 6,
+    };
+    if (routeToIndexMap.hasOwnProperty(pathname)) {
+      setActiveIndex(routeToIndexMap[pathname]);
+    } else {
+      setActiveIndex(0);
     }
-    if (isUserAuth && user.type === "Estudante") getCurrentNotice();
-  }, []);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (isUserAuth && user?.type === "Estudante") {
+      getCurrentNotice();
+    }
+  }, [isUserAuth, user]);
 
   const getCurrentNotice = async () => {
     try {
       const value = await noticeListAll();
-      const currentNotice = Array.from(value.results)
-        .filter(
-          (notice) =>
-            new Date(notice.documentation_submission_start) <= new Date() &&
-            new Date(notice.documentation_submission_end) >= new Date(),
-        )
-        .sort(
-          (a, b) =>
-            new Date(b.documentation_submission_start) -
-            new Date(a.documentation_submission_start),
-        )
-        .slice(0, 1)[0];
-      setNotice(currentNotice);
-      return currentNotice;
+      if (isNoticeOpen(value.results[0])) setNotice(value.results[0]);
+
     } catch (error) {
       console.error("Error fetching notice:", error);
     }
   };
-
-  const handleDropdown = () => {
-    setDropdownMenu(!dropdownMenu);
+  const isNoticeOpen = (notice) => {
+    if (!notice) return false;
+    const now = new Date();
+    const start = new Date(notice.documentation_submission_start);
+    const end = new Date(notice.documentation_submission_end);
+    return now >= start && now <= end;
   };
 
   const items = [
     {
+      label: "Opções",
       items: [
         {
           label: "Perfil",
@@ -76,63 +83,75 @@ const NavBar = ({ data = false }) => {
     },
   ];
 
+  const handleDropdown = (event) => {
+    if (menuLeft.current) {
+      menuLeft.current.toggle(event);
+    }
+  };
+
+  const menuItems = [
+    {
+      label: "Home",
+      icon: "pi pi-home",
+      command: () => (window.location.href = `/home`),
+    },
+    {
+      label: "Solicitações",
+      icon: "pi pi-envelope",
+      command: () => (window.location.href = `/requests`),
+    },
+    {
+      label: "Editais",
+      icon: "pi pi-file",
+      command: () => (window.location.href = `/notice`),
+    },
+    {
+      label: "Cursos",
+      icon: "pi pi-book",
+      command: () => (window.location.href = `/courses`),
+    },
+    {
+      label: "Disciplinas",
+      icon: "pi pi-list",
+      command: () => (window.location.href = `/discipline`),
+    },
+    ...(user?.type === "Estudante" && notice
+      ? [
+        {
+          label: "Realizar Solicitação",
+          icon: "pi pi-check-circle",
+          command: () => (window.location.href = `/requests/requestForm`),
+        },
+      ]
+      : []),
+    ...(user?.type === "Coordenador" || user?.type === "Ensino"
+      ? [
+        {
+          label: "Usuários",
+          icon: "pi pi-users",
+          command: () => (window.location.href = `/usersList`),
+        },
+      ]
+      : []),
+  ];
+
   const menuAuth = () => (
     <>
-      <div className="px-3">
-        Bem vindo, <b>{user?.name || "Usuário"}</b>
-      </div>
-      <div className="px-2">
-        <button
-          style={{
-            border: "1px solid grey",
-            padding: "10px",
-            borderRadius: "15px",
-          }}
-          onClick={handleDropdown}
-        >
-          Menu de Agora
-        </button>
-        {dropdownMenu ? (
-          <Menu
-            model={items}
-            className="absolute z-50"
-            popupAlignment="right"
-          />
-        ) : (
-          ""
-        )}
-      </div>
-    </>
-  );
-
-  //função para ambiente de dev
-  const menuAuthDev = () => (
-    <>
-      <div
-        className="px-3"
-        style={{ display: "flex", flexDirection: "column" }}
-      >
+      <div className="px-3 flex flex-col">
         <span>
           Bem vindo, <b>{user?.name || "Usuário"}</b>
         </span>
-        <strong style={{ textAlign: "center" }}>
-          {user?.type || "Tipo de Usuário"}
-        </strong>
+        <strong className="text-center">{user?.type || "Tipo de Usuário"}</strong>
       </div>
-      <div className="px-2">
-        <MenuIcon
+      <div className="px-2 relative">
+        <Button
+          icon="pi pi-fw pi-bars"
+          className="p-button-text p-button-sm text-white"
           onClick={handleDropdown}
-          style={{ cursor: "pointer" }}
-        ></MenuIcon>
-        {dropdownMenu ? (
-          <Menu
-            model={items}
-            className="absolute z-50 right-10"
-            popupAlignment="right"
-          />
-        ) : (
-          ""
-        )}
+          aria-controls="popup_menu_left"
+          aria-haspopup
+        />
+        <Menu model={items} popup ref={menuLeft} id="popup_menu_left" />
       </div>
     </>
   );
@@ -152,62 +171,30 @@ const NavBar = ({ data = false }) => {
     </>
   );
 
+  const [theme, setTheme] = useState("light");
+
   const navOptions = () => (
     <>
-      <ul className={styles.navBarOptions} style={{ listStyle: "none" }}>
-        <li
-          onClick={() => (window.location.href = `/home`)}
-          className={path === "/home" ? styles.active : ""}
-        >
-          Home
-        </li>
-        <li
-          onClick={() => (window.location.href = `/requests`)}
-          className={path === "/requests" ? styles.active : ""}
-        >
-          Solicitações
-        </li>
-        <li
-          onClick={() => (window.location.href = `/notice`)}
-          className={path === "/notice" ? styles.active : ""}
-        >
-          Editais
-        </li>
-        <li
-          onClick={() => (window.location.href = `/courses`)}
-          className={path === "/courses" ? styles.active : ""}
-        >
-          Cursos
-        </li>
-        <li
-          onClick={() => (window.location.href = `/discipline`)}
-          className={path === "/discipline" ? styles.active : ""}
-        >
-          Disciplinas
-        </li>
-        {user.type === "Estudante" && notice && (
-          <li
-            onClick={() => (window.location.href = `/requests/requestForm`)}
-            className={path === "/requests/requestForm" ? styles.active : ""}
-          >
-            Realizar Solicitação
-          </li>
-        )}
-        {(user?.type === "Coordenador" || user?.type === "Ensino") && (
-          <>
-            <li
-              onClick={() => (window.location.href = `/usersList`)}
-              className={path === "/usersList" ? styles.active : ""}
+      <div className={styles.navBarWrapper}>
+        <div className={styles.customTabMenu}>
+          {menuItems.map((item, index) => (
+            <div
+              key={index}
+              className={`${styles.menuItem} ${activeIndex === index ? styles.active : ""
+                }`}
+              onClick={() => {
+                setActiveIndex(index);
+                item.command();
+              }}
             >
-              Usuários
-            </li>
-          </>
-        )}
-      </ul>
+              <i className={`pi ${item.icon}`} style={{ marginRight: "0.5rem" }}></i>
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </>
   );
-
-  // Função para alternar entre temas
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -216,7 +203,6 @@ const NavBar = ({ data = false }) => {
   };
 
   useEffect(() => {
-    // Adiciona o tema inicial com base na preferência do usuário ou no estado
     document.body.classList.add(theme);
   }, []);
 
@@ -234,11 +220,8 @@ const NavBar = ({ data = false }) => {
         pauseOnHover
         theme="light"
       />
-      <Toaster
-        position="top-center"
-        reverseOrder={false}
-      />
-      <div className="flex items-center justify-between max-w-screen-xlg pl-20 pt-8 pb-8 pr-20 mx-auto">
+      <Toaster position="top-center" reverseOrder={false} />
+      <div className="flex items-center justify-between max-w-screen-xlg px-20 py-8 mx-auto">
         <Link href={isUserAuth ? "/profile" : "/auth"} className="pl-12">
           <Image
             src="/ifrs.png"
@@ -250,12 +233,7 @@ const NavBar = ({ data = false }) => {
         </Link>
         {isUserAuth ? navOptions() : ""}
         <div className="flex items-center justify-around text-white">
-          {isUserAuth ? menuAuthDev() : menuNotAuth()}
-          {theme === "light" ? (
-            <DarkModeIcon cursor="pointer" onClick={toggleTheme} />
-          ) : (
-            <LightModeIcon cursor="pointer" onClick={toggleTheme} />
-          )}
+          {isUserAuth ? menuAuth() : menuNotAuth()}
         </div>
       </div>
     </div>

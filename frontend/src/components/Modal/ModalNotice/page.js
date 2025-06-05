@@ -1,10 +1,11 @@
+"use client";
 import { useEffect, useState } from "react";
 import { TextField } from "@mui/material";
 import styles from "./modalNotice.module.css";
-import { Button } from "../../Button/button";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { noticeCreate, noticeEdit } from "@/services/NoticeService";
-import Toast from "../../../utils/toast";
-import { use } from "react";
+import Button from "@/components/ButtonDefault/button";
 
 const ModalNotice = ({ onClose, editData = null, response }) => {
   const formatDate = (date) => {
@@ -16,38 +17,28 @@ const ModalNotice = ({ onClose, editData = null, response }) => {
     return `${year}-${month}-${day}`;
   };
 
-  const [isFormValid, setIsFormValid] = useState();
+  const [isFormValid, setIsFormValid] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
-
   const [formData, setFormData] = useState({
     number: editData?.number || "",
     publicationDate: formatDate(editData?.publication_date),
-    documentationDeadlineFrom: formatDate(
-      editData?.documentation_submission_start
-    ),
+    documentationDeadlineFrom: formatDate(editData?.documentation_submission_start),
     documentationDeadlineTo: formatDate(editData?.documentation_submission_end),
     proposalAnalysisFrom: formatDate(editData?.proposal_analysis_start),
     proposalAnalysisTo: formatDate(editData?.proposal_analysis_end),
-    resultPublication: formatDate(editData?.result_publication), // Único campo agora
-    resultApproval: formatDate(editData?.result_homologation), // Único campo agora
+    resultPublication: formatDate(editData?.result_publication),
     link: editData?.link || "",
     rectifications: editData?.rectifications || [""],
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setFormData((prev) => {
       const updatedData = { ...prev, [name]: value };
-
-      const publicationDate = new Date(updatedData.publicationDate);
-
-      // Validação das datas
       const dateFields = [
         ["documentationDeadlineFrom", "documentationDeadlineTo"],
         ["proposalAnalysisFrom", "proposalAnalysisTo"],
       ];
-
       dateFields.forEach(([startField, endField]) => {
         if (name === startField && updatedData[endField]) {
           const fromDate = new Date(value);
@@ -64,14 +55,16 @@ const ModalNotice = ({ onClose, editData = null, response }) => {
           }
         }
       });
-
       return updatedData;
     });
   };
-
-  useEffect(() => {
-    console.log(fieldErrors);
-  }, [fieldErrors]);
+  const isValidURL = (url) => {
+    const pattern = new RegExp(
+      "^(https?:\\/\\/)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w .-]*)*\\/?$",
+      "i"
+    );
+    return pattern.test(url);
+  };
 
   const handleRectificationChange = (index, value) => {
     setFormData((prev) => {
@@ -82,42 +75,78 @@ const ModalNotice = ({ onClose, editData = null, response }) => {
   };
 
   const addRectification = () => {
-    setFormData((prev) => ({
-      ...prev,
-      rectifications: [...prev.rectifications, ""],
-    }));
+    setFormData((prev) => ({ ...prev, rectifications: [...prev.rectifications, ""] }));
   };
+
+  useEffect(() => {
+    const validateFields = () => {
+      const errors = {};
+      const requiredFields = [
+        "number",
+        "publicationDate",
+        "documentationDeadlineFrom",
+        "documentationDeadlineTo",
+        "proposalAnalysisFrom",
+        "proposalAnalysisTo",
+        "resultPublication",
+        "link",
+      ];
+      requiredFields.forEach((field) => {
+        if (!formData[field]?.trim()) {
+          errors[field] = "Campo obrigatório";
+        }
+      });
+
+      const publicationDate = formData.publicationDate ? new Date(formData.publicationDate) : null;
+      if (publicationDate) {
+        [
+          "documentationDeadlineFrom",
+          "documentationDeadlineTo",
+          "proposalAnalysisFrom",
+          "proposalAnalysisTo",
+          "resultPublication",
+        ].forEach((field) => {
+          if (formData[field]) {
+            const selectedDate = new Date(formData[field]);
+            if (selectedDate < publicationDate) {
+              errors[field] = "Data não pode ser anterior à publicação do edital.";
+            }
+          }
+        });
+      }
+      const docTo = formData.documentationDeadlineTo ? new Date(formData.documentationDeadlineTo) : null;
+      const analysisFrom = formData.proposalAnalysisFrom ? new Date(formData.proposalAnalysisFrom) : null;
+      if (docTo && analysisFrom && analysisFrom < docTo) {
+        errors.proposalAnalysisFrom =
+          "A data de início da análise deve ser após o fim da entrega da documentação.";
+      }
+      if (formData.link && !isValidURL(formData.link)) {
+        errors.link = "URL inválida";
+      }
+      formData.rectifications.forEach((rect, index) => {
+        if (rect && !isValidURL(rect)) {
+          errors[`rectifications-${index}`] = "URL inválida";
+        }
+      });
+      setFieldErrors(errors);
+      setIsFormValid(Object.keys(errors).length === 0);
+    };
+    validateFields();
+  }, [formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const payload = {
       number: formData.number,
-      publication_date: new Date(
-        `${formData.publicationDate}T09:00:00Z`
-      ).toISOString(),
-      documentation_submission_start: new Date(
-        `${formData.documentationDeadlineFrom}T09:00:00Z`
-      ).toISOString(),
-      documentation_submission_end: new Date(
-        `${formData.documentationDeadlineTo}T17:00:00Z`
-      ).toISOString(),
-      proposal_analysis_start: new Date(
-        `${formData.proposalAnalysisFrom}T09:00:00Z`
-      ).toISOString(),
-      proposal_analysis_end: new Date(
-        `${formData.proposalAnalysisTo}T17:00:00Z`
-      ).toISOString(),
-      result_publication: new Date(
-        `${formData.resultPublication}T09:00:00Z`
-      ).toISOString(),
-      result_homologation: new Date(
-        `${formData.resultApproval}T09:00:00Z`
-      ).toISOString(),
+      publication_date: `${formData.publicationDate}T00:00:00-03:00`,
+      documentation_submission_start: `${formData.documentationDeadlineFrom}T00:00:00-03:00`,
+      documentation_submission_end: `${formData.documentationDeadlineTo}T00:00:00-03:00`,
+      proposal_analysis_start: `${formData.proposalAnalysisFrom}T00:00:00-03:00`,
+      proposal_analysis_end: `${formData.proposalAnalysisTo}T00:00:00-03:00`,
+      result_publication: `${formData.resultPublication}T00:00:00-03:00`,
       link: formData.link,
       rectifications: formData.rectifications.filter((link) => link !== ""),
     };
-
     try {
       if (editData) {
         await noticeEdit(editData.id, payload);
@@ -127,349 +156,189 @@ const ModalNotice = ({ onClose, editData = null, response }) => {
         response("create");
       }
       onClose();
-    } catch (error) {
+    } catch {
       response("error");
     }
   };
 
-  useEffect(() => {
-    const requiredFields = [
-      "number",
-      "publicationDate",
-      "documentationDeadlineFrom",
-      "documentationDeadlineTo",
-      "proposalAnalysisFrom",
-      "proposalAnalysisTo",
-      "resultPublication",
-      "resultApproval",
-      "link",
-    ];
-    const isValid = requiredFields.every(
-      (field) => formData[field].trim() !== ""
-    );
-    const isLinkValid = isValidURL(formData.link);
-    const areRectificationsValid = formData.rectifications.every(
-      (rect) => rect === "" || isValidURL(rect)
-    );
-    setIsFormValid(isValid && isLinkValid && areRectificationsValid);
-  }, [formData]);
-
-  useEffect(() => {
-    const validateFields = () => {
-      const errors = {};
-
-      const requiredFields = [
-        "number",
-        "publicationDate",
-        "documentationDeadlineFrom",
-        "documentationDeadlineTo",
-        "proposalAnalysisFrom",
-        "proposalAnalysisTo",
-        "resultPublication",
-        "resultApproval",
-        "link",
-      ];
-
-      requiredFields.forEach((field) => {
-        if (!formData[field]?.trim()) {
-          errors[field] = "Campo obrigatório";
-        }
-      });
-
-      // Validação do formato do número do edital
-      if (formData.number) {
-        const pattern = /^\d{3}-\d{4}$/;
-        if (!pattern.test(formData.number)) {
-          errors.number = "Formato inválido (exemplo: 001-2024)";
-        } else if (formData.publicationDate) {
-          // Validação com a data de publicação
-          const publicationDate = new Date(formData.publicationDate);
-          const [edital, year] = formData.number.split("-");
-          const pubYear = publicationDate.getFullYear();
-          const pubMonth = publicationDate.getMonth() + 1;
-          const expectedSemester = pubMonth <= 6 ? "001" : "002";
-
-          if (year !== String(pubYear) || edital !== expectedSemester) {
-            errors.number = `Número incorreto para o semestre e ano (${expectedSemester}-${pubYear}).`;
-          }
-        }
-      }
-
-      // Validação de datas em relação à publicação
-      const publicationDate = formData.publicationDate
-        ? new Date(formData.publicationDate)
-        : null;
-      if (publicationDate) {
-        [
-          "documentationDeadlineFrom",
-          "documentationDeadlineTo",
-          "proposalAnalysisFrom",
-          "proposalAnalysisTo",
-          "resultPublication",
-          "resultApproval",
-        ].forEach((field) => {
-          if (formData[field]) {
-            const selectedDate = new Date(formData[field]);
-            if (selectedDate < publicationDate) {
-              errors[field] =
-                "Data não pode ser anterior à publicação do edital.";
-            }
-          }
-        });
-      }
-
-      // Validação: "Prazo para Análise das Propostas" deve ser após "Prazo para Entrega da Documentação"
-      const docTo = formData.documentationDeadlineTo
-        ? new Date(formData.documentationDeadlineTo)
-        : null;
-      const analysisFrom = formData.proposalAnalysisFrom
-        ? new Date(formData.proposalAnalysisFrom)
-        : null;
-      if (docTo && analysisFrom && analysisFrom < docTo) {
-        errors.proposalAnalysisFrom =
-          "A data de início do prazo para análise deve ser após o prazo para entrega da documentação.";
-      }
-
-      if (formData.number && !isValidNumber(formData.number)) {
-        errors.number = "Formato inválido (exemplo: 002-2024)";
-      }
-
-      if (formData.link && !isValidURL(formData.link)) {
-        errors.link = "URL inválida";
-      }
-
-      formData.rectifications.forEach((rect, index) => {
-        if (rect && !isValidURL(rect)) {
-          errors[`rectifications-${index}`] = "URL inválida";
-        }
-      });
-
-      setFieldErrors(errors);
-      setIsFormValid(Object.keys(errors).length === 0);
-    };
-
-    validateFields();
-  }, [formData]);
-
-  const isValidNumber = (number) => {
-    const pattern = /^\d{3}-\d{4}$/;
-    return pattern.test(number);
-  };
-
-  const isValidURL = (url) => {
-    const pattern = new RegExp(
-      "^(https?:\\/\\/)?([\\da-z.-]+)\\.([a-z.]{2,6})([/\\w .-]*)*\\/?$",
-      "i"
-    );
-    return pattern.test(url);
-  };
-
   return (
     <div className={styles.modalBackground}>
-      <form onSubmit={handleSubmit} className={styles.modalContainer}>
-        <div className={styles.modalContainerContent}>
-          <div className={styles.modalSection}>
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Número do Edital *
-            </label>
-            <TextField
-              type="text"
-              name="number"
-              value={formData.number}
-              onChange={handleChange}
-              placeholder="Ex: 002-2024"
-              className={styles.textInput}
-              fullWidth
-              error={!!fieldErrors.number}
-              helperText={fieldErrors.number}
-            />
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Data de Publicação do Edital *
-            </label>
-            <div className={styles.dateRange}>
-              <TextField
-                type="date"
-                name="publicationDate"
-                value={formData.publicationDate}
-                onChange={handleChange}
-                className={styles.textInput}
-                fullWidth
-                error={!!fieldErrors.publicationDate}
-                helperText={fieldErrors.publicationDate}
-              />
-            </div>
-          </div>
-          <div className={styles.modalSection}>
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Prazo para Entrega da Documentação *
-            </label>
-            <div className={styles.dateRange}>
-              <label>De</label>
-              <TextField
-                type="date"
-                name="documentationDeadlineFrom"
-                value={formData.documentationDeadlineFrom}
-                onChange={handleChange}
-                className={styles.textInput}
-                fullWidth
-                error={!!fieldErrors.documentationDeadlineFrom}
-                helperText={fieldErrors.documentationDeadlineFrom}
-                inputProps={{
-                  max: formData.documentationDeadlineTo || undefined,
-                  min: formData.publicationDate || undefined,
-                }}
-              />
-              <label>Até</label>
-              <TextField
-                type="date"
-                name="documentationDeadlineTo"
-                value={formData.documentationDeadlineTo}
-                onChange={handleChange}
-                className={styles.textInput}
-                fullWidth
-                error={!!fieldErrors.documentationDeadlineTo}
-                helperText={fieldErrors.documentationDeadlineTo}
-                inputProps={{
-                  min:
-                    formData.documentationDeadlineFrom ||
-                    formData.publicationDate ||
-                    undefined,
-                  max: formData.proposalAnalysisTo || undefined,
-                }}
-              />
-            </div>
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Prazo para Análise das Propostas *
-            </label>
-            <div className={styles.dateRange}>
-              <label>De</label>
-              <TextField
-                type="date"
-                name="proposalAnalysisFrom"
-                value={formData.proposalAnalysisFrom}
-                onChange={handleChange}
-                className={styles.textInput}
-                fullWidth
-                error={!!fieldErrors.proposalAnalysisFrom}
-                helperText={fieldErrors.proposalAnalysisFrom}
-                inputProps={{
-                  max: formData.proposalAnalysisTo || undefined,
-                  min:
-                    formData.documentationDeadlineTo ||
-                    formData.publicationDate ||
-                    undefined,
-                }}
-              />
-              <label>Até</label>
-              <TextField
-                type="date"
-                name="proposalAnalysisTo"
-                value={formData.proposalAnalysisTo}
-                onChange={handleChange}
-                className={styles.textInput}
-                fullWidth
-                error={!!fieldErrors.proposalAnalysisTo}
-                helperText={fieldErrors.proposalAnalysisTo}
-                inputProps={{
-                  min:
-                    formData.proposalAnalysisFrom ||
-                    formData.publicationDate ||
-                    undefined,
-                }}
-              />
-            </div>
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Homologação do Resultado *
-            </label>
+      <div className={styles.modalContainer}>
+        <h2 className={styles.modalTitle}>{editData ? "Editar Edital" : "Cadastrar Edital"}</h2>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Número do Edital*</label>
+          <TextField
+            type="text"
+            name="number"
+            value={formData.number}
+            onChange={handleChange}
+            placeholder="Ex: 002-2024"
+            className={styles.input}
+            fullWidth
+            error={!!fieldErrors.number}
+            helperText={fieldErrors.number}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Data de Publicação do Edital*</label>
+          <TextField
+            type="date"
+            name="publicationDate"
+            value={formData.publicationDate}
+            onChange={handleChange}
+            className={styles.input}
+            fullWidth
+            error={!!fieldErrors.publicationDate}
+            helperText={fieldErrors.publicationDate}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Prazo para Abertura de Solicitações*</label>
+          <div className={styles.dateRange}>
             <TextField
               type="date"
-              name="resultApproval"
-              value={formData.resultApproval}
+              name="documentationDeadlineFrom"
+              value={formData.documentationDeadlineFrom}
               onChange={handleChange}
-              className={styles.textInput}
-              style={{ width: "50%" }}
+              className={styles.input}
               fullWidth
-              error={!!fieldErrors.resultApproval}
-              helperText={fieldErrors.resultApproval}
+              error={!!fieldErrors.documentationDeadlineFrom}
+              helperText={fieldErrors.documentationDeadlineFrom}
+              inputProps={{
+                max: formData.documentationDeadlineTo || undefined,
+                min: formData.publicationDate || undefined,
+              }}
+            />
+            <span className={styles.toLabel}>até</span>
+            <TextField
+              type="date"
+              name="documentationDeadlineTo"
+              value={formData.documentationDeadlineTo}
+              onChange={handleChange}
+              className={styles.input}
+              fullWidth
+              error={!!fieldErrors.documentationDeadlineTo}
+              helperText={fieldErrors.documentationDeadlineTo}
               inputProps={{
                 min:
-                  formData.proposalAnalysisTo ||
+                  formData.documentationDeadlineFrom || formData.publicationDate || undefined,
+                max: formData.proposalAnalysisTo || undefined,
+              }}
+            />
+          </div>
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Prazo para Análise de Solicitações*</label>
+          <div className={styles.dateRange}>
+            <TextField
+              type="date"
+              name="proposalAnalysisFrom"
+              value={formData.proposalAnalysisFrom}
+              onChange={handleChange}
+              className={styles.input}
+              fullWidth
+              error={!!fieldErrors.proposalAnalysisFrom}
+              helperText={fieldErrors.proposalAnalysisFrom}
+              inputProps={{
+                max: formData.proposalAnalysisTo || undefined,
+                min:
+                  formData.documentationDeadlineTo ||
                   formData.publicationDate ||
                   undefined,
               }}
             />
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Publicação do Resultado *
-            </label>
+            <span className={styles.toLabel}>até</span>
             <TextField
               type="date"
-              name="resultPublication"
-              value={formData.resultPublication}
+              name="proposalAnalysisTo"
+              value={formData.proposalAnalysisTo}
               onChange={handleChange}
-              className={styles.textInput}
-              style={{ width: "50%" }}
+              className={styles.input}
               fullWidth
-              error={!!fieldErrors.resultPublication}
-              helperText={fieldErrors.resultPublication}
+              error={!!fieldErrors.proposalAnalysisTo}
+              helperText={fieldErrors.proposalAnalysisTo}
               inputProps={{
                 min:
-                  formData.resultApproval ||
-                  formData.publicationDate ||
-                  undefined,
+                  formData.proposalAnalysisFrom || formData.publicationDate || undefined,
               }}
             />
           </div>
-          <div className={styles.modalSectionLinks}>
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Link do Edital *
-            </label>
-            <TextField
-              type="text"
-              name="link"
-              value={formData.link}
-              onChange={handleChange}
-              placeholder="Insira o link do edital"
-              className={styles.textInput}
-              fullWidth
-              error={!!fieldErrors.link}
-              helperText={fieldErrors.link}
-            />
-            <label style={{ fontWeight: "700", fontSize: "20px" }}>
-              Retificações
-            </label>
-            {formData.rectifications.map((rectification, index) => (
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Resultado*</label>
+          <TextField
+            type="date"
+            name="resultPublication"
+            value={formData.resultPublication}
+            onChange={handleChange}
+            className={styles.input}
+            fullWidth
+            error={!!fieldErrors.resultPublication}
+            helperText={fieldErrors.resultPublication}
+            inputProps={{
+              min:
+                formData.proposalAnalysisTo || formData.publicationDate || undefined,
+            }}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Link do Edital*</label>
+          <TextField
+            type="text"
+            name="link"
+            value={formData.link}
+            onChange={handleChange}
+            placeholder="Insira o link do edital"
+            className={styles.input}
+            fullWidth
+            error={!!fieldErrors.link}
+            helperText={fieldErrors.link}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>Retificações</label>
+          {formData.rectifications.map((rect, index) => (
+            <div key={index} className={styles.rectRow}>
               <TextField
-                key={index}
                 type="text"
-                value={rectification}
-                onChange={(e) =>
-                  handleRectificationChange(index, e.target.value)
-                }
-                placeholder="Insira o link da retificação"
-                className={styles.textInput}
+                value={rect}
+                onChange={(e) => handleRectificationChange(index, e.target.value)}
+                placeholder="Link da retificação"
+                className={styles.input}
                 fullWidth
                 error={!!fieldErrors[`rectifications-${index}`]}
                 helperText={fieldErrors[`rectifications-${index}`]}
               />
-            ))}
-            <Button type="button" onClick={addRectification}>
-              Adicionar Retificação
-            </Button>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: "50px" }}>
-          <Button
-            type="submit"
-            disabled={!isFormValid}
-            color={!isFormValid ? "#bfbfbf" : "#046708"}
-          >
-            {editData ? "Salvar" : "Cadastrar"}
+              <button
+                type="button"
+                className={styles.removeButton}
+                onClick={() =>
+                  setFormData((prev) => {
+                    const updated = prev.rectifications.filter((_, i) => i !== index);
+                    return { ...prev, rectifications: updated };
+                  })
+                }
+              >
+                <FontAwesomeIcon icon={faTrash} size="xs" />
+              </button>
+            </div>
+          ))}
+          <Button variant="save" className={styles.addRectButton} onClick={addRectification}>
+            Adicionar Retificação
           </Button>
-          <Button type="button" color="#af0a0a" onClick={onClose}>
+        </div>
+        <div className={styles.modalActions}>
+          <Button className={styles.cancelButton} onClick={onClose}>
             Cancelar
           </Button>
+          <Button variant="save" className={styles.saveButton}
+            onClick={handleSubmit}
+            disabled={!isFormValid}>
+            {editData ? "Salvar Alterações" : "Cadastrar"}
+          </Button>
+
         </div>
-      </form>
+      </div>
     </div>
   );
 };

@@ -1,12 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSearch, faEdit } from "@fortawesome/free-solid-svg-icons";
 import styles from "./notice.module.css";
 import ModalNotice from "@/components/Modal/ModalNotice/page";
 import { noticeList, noticeListAll } from "@/services/NoticeService";
-import { useDateFormatter } from "@/hooks/useDateFormatter";
-import { Button } from "@/components/Button/button";
+import { formatDate } from "@/hooks/formatDate";
 import Toast from "@/utils/toast";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -14,7 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { InputText } from "primereact/inputtext";
 
-const ITEMS_PER_PAGE = 10; // Quantidade de itens por página
+const ITEMS_PER_PAGE = 10;
 
 const Notice = () => {
   const { user } = useAuth();
@@ -22,232 +21,229 @@ const Notice = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState("");
-  const [modal, setModal] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState(null);
   const [lastNotice, setLastNotice] = useState(null);
   const [allNotices, setAllNotices] = useState(null);
-
-  const [toast, setToast] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState({});
   const [expand, setExpand] = useState(false);
 
-  // Fetch notices com paginação
-  const fetchNotices = async (page = 1) => {
+  const fetchNotices = useCallback(async (page, search) => {
     try {
-      const data = await noticeList({ page, pageSize: ITEMS_PER_PAGE });
+      const data = await noticeList({ page, pageSize: ITEMS_PER_PAGE, search });
       setNotices(data.results);
       setTotalPages(Math.ceil(data.count / ITEMS_PER_PAGE));
-    } catch (err) {
-      console.error("Erro ao buscar notices:", err);
+    } catch {
+      setToastVisible(true);
+      setToastMessage({ type: "error", text: "Falha ao carregar editais." });
     }
-  };
+  }, []);
 
   useEffect(() => {
-    const fetchNotices = async () => {
+    fetchNotices(currentPage, filter);
+  }, [currentPage, filter, fetchNotices]);
+
+  useEffect(() => {
+    const loadAll = async () => {
       try {
         const data = await noticeListAll();
         setAllNotices(data.results);
-        setLastNotice(
-          data.results
-            .sort(
-              (a, b) =>
-                new Date(b.publication_date) - new Date(a.publication_date)
-            )
-            .slice(0, 1)[0]
-        );
-      } catch (err) {
-        setToast(true);
-        setToastMessage({
-          type: "error",
-          text: "Não fui possivel buscar os editais",
-        });
+        setLastNotice(data.results[0] || null);
+      } catch {
+        setToastVisible(true);
+        setToastMessage({ type: "error", text: "Não foi possível buscar os editais." });
       }
     };
-    fetchNotices();
+    loadAll();
   }, []);
 
   const isNoticeOpen = (notice) => {
     if (!notice) return false;
     const now = new Date();
-    const startDate = new Date(notice.documentation_submission_start);
-    const endDate = new Date(notice.documentation_submission_end);
-    return now >= startDate && now <= endDate;
+    const start = new Date(notice.documentation_submission_start);
+    const end = new Date(notice.documentation_submission_end);
+    return now >= start && now <= end;
   };
-  const isOtherNoticeOpen = (notice) => {
+
+  const isNoticeActive = (notice) => {
     if (!notice) return false;
-
     const now = new Date();
-    const startDate = new Date(notice.documentation_submission_start);
-    const endDate = new Date(notice.documentation_submission_end);
-
-    return now >= startDate && now <= endDate;
+    const pub = new Date(notice.publication_date);
+    const res = new Date(notice.result_publication);
+    return now >= pub && now <= res;
   };
 
-  // Fetch inicial
-  useEffect(() => {
-    fetchNotices(currentPage);
-  }, [currentPage]);
-
-  // Atualiza notices após fechar o modal
-  useEffect(() => {
-    if (!modal) {
-      fetchNotices(currentPage);
-    }
-  }, [modal]);
-
-  // Handle filtro
-  const applyFilters = () => {
-    if (filter) {
-      return notices.filter(
-        (notice) =>
-          notice.number?.toLowerCase().includes(filter.toLowerCase()) ||
-          notice.publication_date.includes(filter) ||
-          notice.link?.toLowerCase().includes(filter.toLowerCase())
-      );
-    }
-    return notices;
+  const isOpeningFuture = (notice) => {
+    if (!notice) return false;
+    const now = new Date();
+    const start = new Date(notice.documentation_submission_start);
+    return now < start;
   };
 
-  const filteredNotices = applyFilters();
-
-  // Controle de página
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
 
-  // Modal e toast
-  const openModalForEdit = (notice) => {
-    setEditData(notice);
-    setModal(true);
-  };
-
-  const closeModal = () => {
+  const handleOpenCreate = () => {
     setEditData(null);
-    setModal(false);
+    setModalOpen(true);
   };
 
-  const clearFilters = () => {
-    setFilter("");
+  const handleOpenEdit = (e, notice) => {
+    e.stopPropagation();
+    setEditData(notice);
+    setModalOpen(true);
   };
 
-  const closeToast = () => {
-    setToast(false);
+  const handleCloseModal = () => {
+    setEditData(null);
+    setModalOpen(false);
   };
 
-  const response = (responseModal) => {
+  const handleCloseToast = () => {
+    setToastVisible(false);
+  };
+
+  const handleModalResponse = (responseType) => {
     const messages = {
       edit: "Edital atualizado com sucesso!",
       create: "Edital criado com sucesso!",
       error: "Erro ao enviar os dados. Tente novamente.",
     };
-
-    setToast(true);
+    setToastVisible(true);
     setToastMessage({
-      type: responseModal === "error" ? "error" : "success",
-      text: messages[responseModal],
+      type: responseType === "error" ? "error" : "success",
+      text: messages[responseType],
     });
+    if (responseType === "edit" || responseType === "create") {
+      fetchNotices(currentPage, filter);
+    }
   };
 
-  return user.type !== "Estudante" ? (
-    <div className={styles.contentWrapper}>
-      <div className={styles.titleWrapper}>
-        <h1 className={styles.title}>Editais</h1>
-      </div>
-      <div className={styles.filters}>
-        <div className={styles.filterInputWrapper}>
-          <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
-          <InputText
-            type="text"
-            placeholder="Filtrar..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className={styles.filterInput}
-          />
+  if (user.type === "Ensino") {
+    return (
+      <div className={styles.contentWrapper}>
+        <div className={styles.headerContainer}>
+          <h1 className={styles.pageTitle}>Editais</h1>
+          <div className={styles.searchContainer}>
+            <div className={styles.searchWrapper}>
+              <InputText
+                className={styles.nameFilter}
+                type="text"
+                value={filter}
+                placeholder="Filtrar por número..."
+                onChange={(e) => {
+                  setFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+              <FontAwesomeIcon icon={faSearch} size="lg" className={styles.searchIcon} />
+            </div>
+          </div>
         </div>
-        <Button onClick={clearFilters} className={styles.clearButton}>
-          Limpar
-        </Button>
-      </div>
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Edital</th>
-              <th>Ano de Publicação</th>
-              <th>Inicio</th>
-              <th>Fim</th>
-              <th>Link</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredNotices.map((notice) => (
-              <tr key={notice.id} onClick={() => openModalForEdit(notice)}>
-                <td>{notice.number ?? "N/A"}</td>
-                <td>{useDateFormatter(notice.publication_date) ?? "N/A"}</td>
-                <td>
-                  {useDateFormatter(notice.documentation_submission_start) ??
-                    "N/A"}
-                </td>
-                <td>
-                  {useDateFormatter(notice.documentation_submission_end) ??
-                    "N/A"}
-                </td>
-                <td>
-                  <a href={notice.link}>{notice.link ?? "N/A"}</a>
-                </td>
+        <div className={styles.scrollableTable}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Edital</th>
+                <th>Data da Publicação</th>
+                <th>Abertura de solicitações</th>
+                <th>Análise das solicitações</th>
+                <th>Resultado</th>
+                <th>Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {notices.length > 0 ? (
+                notices.map((notice) => (
+                  <tr key={notice.id}>
+                    <td>
+                      <button
+                        className={styles.linkButton}
+                        onClick={() => window.open(notice.link, "_blank")}
+                      >
+                        {notice.number ?? "N/A"}
+                      </button>
+                    </td>
+                    <td>{formatDate(notice.publication_date) ?? "N/A"}</td>
+                    <td>
+                      {`${formatDate(notice.documentation_submission_start)} – ${formatDate(
+                        notice.documentation_submission_end
+                      )}`}
+                    </td>
+                    <td>
+                      {`${formatDate(notice.proposal_analysis_start)} – ${formatDate(
+                        notice.proposal_analysis_end
+                      )}`}
+                    </td>
+                    <td>{formatDate(notice.result_publication) ?? "N/A"}</td>
+                    <td>
+                      <button
+                        className={styles.editButton}
+                        onClick={(e) => handleOpenEdit(e, notice)}
+                        title="Editar"
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className={styles.noResults}>
+                    {filter ? "Nenhum resultado." : "Nenhum edital encontrado."}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className={styles.addButtonContainer}>
+          <button
+            onClick={handleOpenCreate}
+            className={!isNoticeActive(lastNotice) ? styles.addButton : styles.addDisableButton}
+            disabled={isNoticeActive(lastNotice)}
+          >
+            <FontAwesomeIcon icon={faPlus} size="lg" />
+            <span>Novo Edital</span>
+          </button>
+        </div>
+        <div className={styles.paginationContainer}>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`${styles.pageButton} ${currentPage === 1 ? styles.pageButtonDisabled : ""
+              }`}
+          >
+            Anterior
+          </button>
+          <span>
+            Página {currentPage} de {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`${styles.pageButton} ${currentPage === totalPages ? styles.pageButtonDisabled : ""
+              }`}
+          >
+            Próxima
+          </button>
+        </div>
+        {modalOpen && <ModalNotice onClose={handleCloseModal} editData={editData} response={handleModalResponse} />}
+        {toastVisible && (
+          <Toast type={toastMessage.type} close={handleCloseToast}>
+            {toastMessage.text}
+          </Toast>
+        )}
       </div>
-      <button onClick={() => setModal(true)} className={styles.addButton}>
-        <FontAwesomeIcon icon={faPlus} size="2x" />
-      </button>
-      <div className={styles.paginationContainer}>
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          style={{
-            backgroundColor: `${currentPage === 1 ? "gray" : "#5299f7"}`,
-            cursor: `${currentPage === 1 ? "not-allowed" : "pointer"}`,
-          }}
-        >
-          Anterior
-        </button>
-        <span>
-          Página {currentPage} de {totalPages}
-        </span>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          style={{
-            backgroundColor: `${
-              currentPage === totalPages ? "gray" : "#5299f7"
-            }`,
-            cursor: `${currentPage === totalPages ? "not-allowed" : "pointer"}`,
-          }}
-        >
-          Próxima
-        </button>
-      </div>
-      {modal && (
-        <ModalNotice
-          onClose={closeModal}
-          editData={editData}
-          response={response}
-        />
-      )}
-      {toast && (
-        <Toast type={toastMessage.type} close={closeToast}>
-          {toastMessage.text}
-        </Toast>
-      )}
-    </div>
-  ) : (
-    <div className={styles.contentWrapper}>
+    );
+  }
 
+  return (
+    <div className={styles.contentWrapper}>
       <div className={styles.lastNoticeSection}>
         {lastNotice ? (
           <div
@@ -258,16 +254,50 @@ const Notice = () => {
               <span className={styles.cardTitle}>
                 Último Edital: {lastNotice.number}
               </span>
-              <span className={`${styles.statusBadge} ${isNoticeOpen(lastNotice) ? styles.open : styles.closed}`}>
-                {isNoticeOpen(lastNotice) ? "Aberto" : "Fechado"}
+              <span
+                className={`${styles.statusBadge} ${isOpeningFuture(lastNotice)
+                  ? styles.upcoming
+                  : isNoticeOpen(lastNotice)
+                    ? styles.open
+                    : styles.closed
+                  }`}
+              >
+                {isOpeningFuture(lastNotice)
+                  ? `Abertura de solicitações estará disponível em ${formatDate(
+                    lastNotice.documentation_submission_start
+                  )}`
+                  : isNoticeOpen(lastNotice)
+                    ? "Aberto para solicitações"
+                    : "Fechado para solicitações"}
               </span>
             </div>
             <div className={styles.cardBody}>
-              <p>Publicado em {useDateFormatter(lastNotice.publication_date)}</p>
-              <p>
-                Prazo: {useDateFormatter(lastNotice.documentation_submission_start)} –{" "}
-                {useDateFormatter(lastNotice.documentation_submission_end)}
+              <p>Publicado em {formatDate(lastNotice.publication_date)}</p>
+              <p className={styles.highlightDate}>
+                <strong>Abertura de solicitações:</strong>{" "}
+                {formatDate(lastNotice.documentation_submission_start)} –{" "}
+                {formatDate(lastNotice.documentation_submission_end)}
               </p>
+              <p>
+                <strong>Análise das solicitações:</strong>{" "}
+                {formatDate(lastNotice.proposal_analysis_start)} –{" "}
+                {formatDate(lastNotice.proposal_analysis_end)}
+              </p>
+              <p>
+                <strong>Resultado:</strong>{" "}
+                {formatDate(lastNotice.result_publication)}
+              </p>
+              <div className={styles.cardButtons}>
+                <button className={styles.viewButton}>Ver edital completo</button>
+                <button
+                  className={`${styles.requestButton} ${!(isNoticeOpen(lastNotice) && user.type === "Estudante") ? styles.disabledButton : ""
+                    }`}
+                  disabled={!(isNoticeOpen(lastNotice) && user.type === "Estudante")}
+                  onClick={() => (window.location.href = `/requests/requestForm`)}
+                >
+                  Realizar solicitação
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -281,8 +311,8 @@ const Notice = () => {
       {expand && (
         <div className={styles.collapseContent}>
           {allNotices
-            .filter(n => n.id !== lastNotice?.id)
-            .map(notice => (
+            ?.filter((n) => n.id !== lastNotice?.id)
+            .map((notice) => (
               <div
                 key={notice.id}
                 className={styles.noticeCard}
@@ -290,24 +320,36 @@ const Notice = () => {
               >
                 <div className={styles.cardHeader}>
                   <span className={styles.cardTitle}>{notice.number}</span>
-                  <span className={`${styles.statusBadge} ${isNoticeOpen(notice) ? styles.open : styles.closed}`}>
+                  <span
+                    className={`${styles.statusBadge} ${isNoticeOpen(notice) ? styles.open : styles.closed
+                      }`}
+                  >
                     {isNoticeOpen(notice) ? "Aberto" : "Fechado"}
                   </span>
                 </div>
                 <div className={styles.cardBody}>
-                  <p>Publicado em {useDateFormatter(notice.publication_date)}</p>
+                  <p>Publicado em {formatDate(notice.publication_date)}</p>
+                  <p className={styles.highlightDate}>
+                    <strong>Abertura de solicitações:</strong>{" "}
+                    {formatDate(notice.documentation_submission_start)} –{" "}
+                    {formatDate(notice.documentation_submission_end)}
+                  </p>
                   <p>
-                    Prazo: {useDateFormatter(notice.documentation_submission_start)} –{" "}
-                    {useDateFormatter(notice.documentation_submission_end)}
+                    <strong>Análise das solicitações:</strong>{" "}
+                    {formatDate(notice.proposal_analysis_start)} –{" "}
+                    {formatDate(notice.proposal_analysis_end)}
+                  </p>
+                  <p>
+                    <strong>Resultado:</strong>{" "}
+                    {formatDate(notice.result_publication)}
                   </p>
                 </div>
               </div>
             ))}
         </div>
       )}
-
     </div>
-  )
+  );
 };
 
 export default Notice;

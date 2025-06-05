@@ -11,9 +11,8 @@ class Notice(models.Model):
     documentation_submission_end = models.DateTimeField()
     proposal_analysis_start = models.DateTimeField()
     proposal_analysis_end = models.DateTimeField()
-    result_homologation = models.DateTimeField()
     result_publication = models.DateTimeField()
-    link = models.URLField(max_length=200, blank=False, null=False)
+    link = models.URLField(max_length=400, blank=False, null=False)
     rectifications = models.JSONField(default=list, blank=True)
     extra_fields = models.TextField(blank=True, null=True)
 
@@ -27,3 +26,5 @@ class Notice(models.Model):
         if self.extra_fields:
             return json.loads(self.extra_fields)
         return {}
+    class Meta:
+        ordering = ["-publication_date"]

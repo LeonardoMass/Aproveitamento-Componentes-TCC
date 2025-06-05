@@ -1,4 +1,4 @@
-export const useDateFormatter = (isoDate) => {
+export const formatDate = (isoDate) => {
   if (!isoDate) return "";
 
   const date = new Date(isoDate);

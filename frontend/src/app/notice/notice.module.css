@@ -1,108 +1,233 @@
 .contentWrapper {
   width: 90%;
-  max-width: 1000px;
-  margin: 40px auto;
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-.titleWrapper {
-  margin-bottom: 20px;
-  width: 90%;
-}
-.title {
-  font-size: 35px;
-  text-decoration: underline;
-}
-
-.filters {
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px;
-  gap: 16px;
-  width: 90%;
-}
-.filterInputWrapper {
+  justify-content: center;
+  padding: 20px 0;
+  margin-top: 40px;
   position: relative;
-  width: 50%;
 }
-.filterInput {
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+  z-index: 1;
+}
+
+.pageTitle {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.searchContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 16px 12px 16px 40px;
-  border: 1px solid rgb(167, 167, 167);
-  border-radius: 6px;
-  font-size: 14px;
 }
+
+.nameFilter {
+  width: 100%;
+  padding-right: 2.5rem;
+  box-sizing: border-box;
+}
+
+.nameFilter:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
 .searchIcon {
   position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  font-size: 16px;
-  color: grey;
+  right: 0.8rem;
   pointer-events: none;
+  color: #888;
 }
+
 .clearButton {
   background-color: #046708;
   color: white;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
-}
-.clearButton:hover {
-  background-color: #046708;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
 }
 
-.tableWrapper {
-  height: fit-content;
-  padding: 16px;
-  width: 100%;
+.clearButton:hover {
+  background-color: #035a05;
 }
+
+.scrollableTable {
+  flex-grow: 1;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
 .table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border: 3px solid #b8b8b8;
+  border: 1px solid rgb(178, 178, 178);
   border-radius: 10px;
   overflow: hidden;
+  table-layout: auto;
 }
+
 .table thead {
   position: sticky;
-  top: -3px;
+  top: 0;
   background-color: #2f9e41;
+  z-index: 1;
 }
+
 .table thead th {
   padding: 16px;
-  border-bottom: 1px solid #c7c7c7e1;
+  border-bottom: 1px solid rgb(178, 178, 178);
   text-align: left;
+  color: white;
+  white-space: nowrap;
 }
-.table th,
+
 .table td {
-  border: 1px solid #b8b8b8;
-  padding: 8px;
+  padding: 5px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+  color: #333;
 }
-.table tr:nth-child(even) {
-  background-color: #f2f2f2;
+
+.table td,
+.table th {
+  border: 1px solid rgb(178, 178, 178);
+  padding: 8px 12px;
+  vertical-align: middle;
 }
+
 .table tbody tr:hover {
-  background-color: #ddd;
+  background-color: #f1f3f5;
+}
+
+.table th:nth-child(1) {
+  width: 9%;
+}
+
+.noResults {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.linkButton {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+}
+
+.linkButton:hover {
+  background-color: #217dbb;
+}
+
+.editActionButton {
+  background: none;
+  border: 1px solid #f39c12;
+  border-radius: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: #f39c12;
+  transition: background-color 0.2s ease;
+}
+
+.editActionButton:hover {
+  background-color: rgba(243, 156, 18, 0.1);
+}
+
+.addButtonContainer {
+  gap: 20px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 30px;
 }
 
 .addButton {
-  background: greenyellow;
+  background-color: #28a745;
+  color: white;
   border: none;
-  border-radius: 4px;
-  padding: 10px;
-  cursor: pointer;
-  margin-top: 10px;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #046708;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  padding: 5px;
+  position: relative;
+  z-index: 1;
 }
+
+.addButton span {
+  font-size: 0.7rem;
+  margin-top: 2px;
+}
+
 .addButton:hover {
+  background-color: #27ae60;
+  transform: scale(1.05);
+}
+
+.addDisableButton {
+  background-color: #7a7a7a;
   color: white;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  padding: 5px;
+  position: relative;
+  z-index: 1;
+}
+
+.addDisableButton span {
+  font-size: 0.7rem;
+  margin-top: 2px;
 }
 
 .paginationContainer {
@@ -112,81 +237,25 @@
   justify-content: center;
   align-items: center;
 }
-.paginationContainer button {
+
+.pageButton {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
-  max-height: 50px;
-  max-width: 200px;
+  padding: 12px 20px;
   border: none;
-  border-radius: 15px;
-  color: white;
-  font-size: 15px;
-}
-
-.noticeCard {
-  background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  padding: 16px;
+  color: white;
+  font-size: 0.95rem;
+  background-color: #5299f7;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: 
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease;
- }
-.noticeCard:hover {
-  background-color: #f1f3f5;
-  transform: translateY(-2px);
-  border-color: rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, cursor 0.2s ease;
 }
 
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+.pageButtonDisabled {
+  background-color: gray;
+  cursor: not-allowed;
 }
-.cardTitle {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
-}
-
-.cardBody p {
-  margin: 4px 0;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-
-.statusBadge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #fff;
-}
-.open {
-  background-color: #69d95e;
-}
-.closed {
-  background-color: #f95858;
-}
-
-.headerContainer {
-  display: flex;
-  align-items: center;
-}
-.pageTitle {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-}
-
 
 .lastNoticeSection {
   width: 100%;
@@ -194,24 +263,105 @@
   justify-content: left;
   margin-bottom: 24px;
 }
+
 .lastNoticeCard {
   width: 100%;
-  max-width: 600px;
-  background: #fff;
+  background-color: #f1f3f5;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  padding: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: 
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
-.lastNoticeCard:hover {
-  background-color: #f1f3f5;
-  transform: translateY(-2px);
-  border-color: rgba(0, 0, 0, 0.15);
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.cardBody p {
+  margin: 6px 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.highlightDate {
+  font-size: 1.05rem;
+  color: #2c3e50;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.statusBadge {
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  max-width: 280px;
+  text-align: center;
+}
+
+.upcoming {
+  background-color: #f1c40f;
+  color: #2c3e50;
+}
+
+.open {
+  background-color: #69d95e;
+}
+
+.closed {
+  background-color: #f95858;
+}
+
+.cardButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.viewButton {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.viewButton:hover {
+  background-color: #217dbb;
+}
+
+.requestButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.requestButton:hover {
+  background-color: #27ae60;
+}
+
+.disabledButton {
+  background-color: #7a7a7a;
+  cursor: not-allowed;
 }
 
 .collapseHeader {
@@ -221,9 +371,80 @@
   cursor: pointer;
   margin-bottom: 16px;
 }
+
 .collapseContent {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
+}
+
+.noticeCard {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.noticeCard:hover {
+  background-color: #f1f3f5;
+  transform: translateY(-2px);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.actionButton,
+.editButton,
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+}
+
+.actionButton {
+  color: #000000;
+}
+.editButton {
+  color: #000000;
+}
+.deleteButton {
+  color: #dc3545;
+}
+
+.actionButton:hover {
+  color: #000000;
+  transform: scale(1.1);
+  background-color: rgba(189, 190, 190, 0.1);
+}
+.editButton:hover {
+  color: #000000;
+  transform: scale(1.1);
+  background-color: rgba(189, 190, 190, 0.1);
+}
+.deleteButton:hover {
+  color: #c82333;
+  transform: scale(1.1);
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.editButton:disabled {
+  color: #adb5bd;
+  cursor: not-allowed;
+  background-color: transparent;
+  transform: none;
+}
+.editButton:disabled:hover {
+  background-color: transparent;
+  transform: none;
 }
