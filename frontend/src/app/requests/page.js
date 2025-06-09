@@ -36,47 +36,29 @@ const Requests = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let [kcResponse, rplResponse] = [];
-        if (user.type === "Estudante") {
-          [kcResponse, rplResponse] = await Promise.all([
-            RequestService.GetKnowledgeCertificationsById(user.id),
-            RequestService.GetRecognitionOfPriorLearningById(user.id),
-          ]);
-        } else if (user.type === "Professor" || user.type === "Coordenador") {
-          [kcResponse, rplResponse] = await Promise.all([
-            RequestService.GetKnowledgeCertificationsByServantId(user.id),
-            RequestService.GetRecognitionOfPriorLearningByServantId(user.id),
-          ]);
-        } else {
-          [kcResponse, rplResponse] = await Promise.all([
-            RequestService.GetKnowledgeCertifications(),
-            RequestService.GetRecognitionOfPriorLearning(),
-          ]);
-        }
+        const response = await RequestService.GetAllRequests();
+        const data = response.data;
 
-        const knowledgeCertifications = kcResponse.data.results.map((item) => ({
+        const recognitionForms = (data.recognition || []).map((item) => ({
+          ...item,
+          type: "recognition",
+        }));
+
+        const knowledgeCertifications = (data.knowledge || []).map((item) => ({
           ...item,
           type: "knowledge",
         }));
-        const recognitionOfPriorLearning = rplResponse.data.results.map(
-          (item) => ({
-            ...item,
-            type: "recognition",
-          }),
-        );
 
-        const merged = [
-          ...knowledgeCertifications,
-          ...recognitionOfPriorLearning,
-        ];
+        const merged = [...recognitionForms, ...knowledgeCertifications];
 
         merged.sort(
-          (a, b) => new Date(b.create_date) - new Date(a.create_date),
+          (a, b) => new Date(b.create_date) - new Date(a.create_date)
         );
         console.log(merged);
         setMergedRequests(merged);
         setLoading(false);
       } catch (error) {
+        console.error(error);
         setError(error.message);
         setLoading(false);
       }

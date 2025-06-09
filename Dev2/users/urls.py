@@ -9,7 +9,7 @@ from .views.courseView import (ListCoursesAPIView, CreateCourseAPIView,
                                 DeleteCourseAPIView, SearchCourseByNameAPIView, CourseProfessorsView)
 from .views.formsView import (
     RecognitionOfPriorLearningListCreateView, RecognitionOfPriorLearningDetailView,
-    KnowledgeCertificationListCreateView, KnowledgeCertificationDetailView, AttachmentDownloadView, StepCreateView, check_notice_open
+    KnowledgeCertificationListCreateView, KnowledgeCertificationDetailView, AttachmentDownloadView, StepCreateView, RecognitionAndCertificationListView, check_notice_open
 )
 from .views.ppcView import ListCreatePpcAPIView, RetrieveUpdateDestroyPpcAPIView
 urlpatterns = [
@@ -35,6 +35,7 @@ urlpatterns = [
     path('forms/recognition-forms/', RecognitionOfPriorLearningListCreateView.as_view(), name='recognition-forms-list-create'),
     path('forms/recognition-forms/<uuid:id>/', RecognitionOfPriorLearningDetailView.as_view(), name='recognition-form-detail'),
     path('forms/knowledge-certifications/', KnowledgeCertificationListCreateView.as_view(), name='knowledge-certifications-list-create'),
+    path('forms/list/', RecognitionAndCertificationListView.as_view(), name='unified-forms-list'),
     path('forms/knowledge-certifications/<uuid:id>/', KnowledgeCertificationDetailView.as_view(), name='knowledge-certification-detail'),
     path('forms/attachments/<str:attachment_id>/', AttachmentDownloadView.as_view(), name='download_attachment'),
     path('forms/check-notice-open/', check_notice_open, name='check-notice-open'),  # URL específica de verificação

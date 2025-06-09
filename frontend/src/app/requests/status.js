@@ -12,7 +12,7 @@ export const StatusEnum = Object.freeze([
     "Em homologação do Coordenador",
     "Retornado pelo Coordenador",
     "Rejeitado pelo Coordenador",
-    "Aprovado pelo Coordenador",
+    "Homologado pelo Coordenador",
     "Em aguardo para divulgação",
     "Retornado pelo Ensino",
     "Rejeitado pelo Ensino",
@@ -20,7 +20,7 @@ export const StatusEnum = Object.freeze([
 ]);
 
 export const steps = [
-    {index: 0, label: 'Período de análise'},
+    {index: 0, label: 'Solicitações iniciadas'},
     {index: 1, label: 'Análise do Coordenador'},
     {index: 2, label: 'Análise do Professor'},
     {index: 3, label: 'Homologação do Coordenador'},
@@ -40,7 +40,7 @@ export function getEnumIndexByValue(value) {
 
 export function getSucceeded() {
     return ["Encaminhado para o Coordenador", "Analisado pelo Coordenador", "Analisado pelo Professor",
-        "Aprovado pelo Coordenador", "Finalizado e divulgado"];
+        "Homologado pelo Coordenador", "Finalizado e divulgado"];
 }
 
 export function getFailed() {
@@ -75,7 +75,7 @@ export function getStep3Status() {
 }
 
 export function getStep4Status() {
-    return ["Em homologação do Coordenador", "Rejeitado pelo Coordenador", "Aprovado pelo Coordenador", "Retornado pelo Ensino"]
+    return ["Em homologação do Coordenador", "Rejeitado pelo Coordenador", "Homologado pelo Coordenador", "Retornado pelo Ensino"]
 }
 
 export function getStep5Status() {
@@ -114,7 +114,7 @@ export function getStatus(status) {
             return "R_COORD";
         case "Rejeitado pelo Coordenador":
             return "RJ_COORD";
-        case "Aprovado pelo Coordenador":
+        case "Homologado pelo Coordenador":
             return "AP_COORD";
         case "Em aguardo para divulgação":
             return "IN_AP_CRE";

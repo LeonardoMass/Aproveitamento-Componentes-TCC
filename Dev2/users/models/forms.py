@@ -22,7 +22,7 @@ class RequestStatus(models.TextChoices):
     IN_APPROVAL_BY_COORDINATOR = "IN_AP_COORD", "Em homologação do Coordenador"
     RETURNED_BY_COORDINATOR = "R_COORD", "Retornado pelo Coordenador"
     REJECTED_BY_COORDINATOR = "RJ_COORD", "Rejeitado pelo Coordenador"
-    APPROVED_BY_COORDINATOR = "AP_COORD", "Aprovado pelo Coordenador"
+    APPROVED_BY_COORDINATOR = "AP_COORD", "Homologado pelo Coordenador"
     IN_APPROVAL_BY_CRE = "IN_AP_CRE", "Em aguardo para divulgação"
     RETURNED_BY_CRE = "R_CRE", "Retornado pelo Ensino"
     REJECTED_BY_CRE = "RJ_CRE", "Rejeitado pelo Ensino"
@@ -75,6 +75,13 @@ SUCCESS_STATUS = [
 ]
 
 FAILED_STATUS = [
+    RequestStatus.CANCELED,
+    RequestStatus.CANCELED_BY_CRE,
+    RequestStatus.REJECTED_BY_COORDINATOR,
+    RequestStatus.REJECTED_BY_CRE
+]
+
+REPROVED_STATUS = [
     RequestStatus.CANCELED,
     RequestStatus.CANCELED_BY_CRE,
     RequestStatus.CANCELED_BY_COORDINATOR,
@@ -138,6 +145,7 @@ class RequisitionForm(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ["-create_date"]
 
     def __str__(self):
         return f"RequisitionForm {self.id} - {self.status}"

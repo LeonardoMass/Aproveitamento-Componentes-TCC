@@ -41,6 +41,10 @@ async function GetRecognitionOfPriorLearningByServantId(id) {
     return apiClient.get(`/forms/recognition-forms/?servant_id=${id}`)
 }
 
+async function GetAllRequests() {
+    return apiClient.get(`/forms/list/`);
+}
+
 export async function checkIfNoticeIsOpen() {
     try {
         const response = await apiClient.get('/forms/check-notice-open/');
@@ -62,5 +66,6 @@ export default {
     GetRecognitionOfPriorLearningById,
     GetKnowledgeCertificationsByServantId,
     GetRecognitionOfPriorLearningByServantId,
-    checkIfNoticeIsOpen
+    checkIfNoticeIsOpen,
+    GetAllRequests
 }

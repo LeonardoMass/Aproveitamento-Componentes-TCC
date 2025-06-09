@@ -266,6 +266,18 @@ const Details = () => {
         const index = getEnumIndexByValue(status) + 1;
         createStep(getStatus(StatusEnum[index]), "Pendente");
       }
+      if (getFailed().includes(status)) {
+
+        if (status == "Rejeitado pelo Professor") {
+          const index = getEnumIndexByValue(status) + 2;
+          createStep(getStatus(StatusEnum[index]), "Pendente");
+        }
+        if (status == "Cancelado pelo Coordenador") {
+          const index = getEnumIndexByValue(status) + 5;
+          createStep(getStatus(StatusEnum[index]), "Pendente");
+        }
+      }
+
     });
     console.log("Feedback enviado:", feedback);
     closeModal();
@@ -716,7 +728,7 @@ const Details = () => {
                       )}
                     <p className={styles.info}>
                       <strong>Professor responsável: </strong>
-                      {professor || "Pendente"}
+                      {professor || ""}
                     </p>
                     <p className={styles.info}>
                       <strong>Parecer do coordenador: </strong>
@@ -988,7 +1000,7 @@ const Details = () => {
                           <Button
                             label="Aprovar"
                             icon="pi pi-check"
-                            onClick={() => openModal("Aprovado pelo Coordenador")}
+                            onClick={() => openModal("Homologado pelo Coordenador")}
                             className={styles.pButtonSuccess}
                           />
                           <Button

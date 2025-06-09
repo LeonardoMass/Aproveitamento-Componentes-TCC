@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from api.services import GoogleDriveService
 from ..models.forms import Notice, FAILED_STATUS
 from ..models.forms import RecognitionOfPriorLearning, KnowledgeCertification, RequestStatus, Attachment, Step
-from ..models.servant import Servant
+from ..models.servant import Servant, AbstractUser
 from ..models.course import Course
 from ..serializers.formsSerializer import (
     RecognitionOfPriorLearningSerializer, KnowledgeCertificationSerializer, StepSerializer
@@ -120,10 +120,11 @@ class KnowledgeCertificationListCreateView(generics.ListCreateAPIView):
         queryset = super().get_queryset()
         student = self.request.query_params.get('student')
         servant_id = self.request.query_params.get('servant_id')
+        user = AbstractUser.objects.get(user=self.request.user)
         if servant_id:
             try:
                 servant = Servant.objects.get(id=servant_id)
-                certification_id = Step.objects.filter(responsible_id=servant_id).values_list('certification_form_id', flat=True)
+                certification_id = Step.objects.filter(responsible_id=user.id).values_list('certification_form_id', flat=True)
                 queryset = queryset.filter(id__in=certification_id)
 
 
@@ -199,3 +200,28 @@ class AttachmentDownloadView(APIView):
 
         response = Response(status=status.HTTP_200_OK)
         return response
+
+class RecognitionAndCertificationListView(APIView):
+    def get(self, request, *args, **kwargs):
+        user = AbstractUser.objects.get(user=request.user)
+        user_type = user.typeString
+        recognition_qs = RecognitionOfPriorLearning.objects.all()
+        certification_qs = KnowledgeCertification.objects.all()
+
+        if user_type == 'Estudante':
+            recognition_qs = recognition_qs.filter(student=user.id)
+            certification_qs = certification_qs.filter(student=user.id)
+        elif user_type in ['Professor', 'Coordenador']:
+            recognition_ids = Step.objects.filter(responsible_id=user.id).values_list('recognition_form_id', flat=True)
+            certification_ids = Step.objects.filter(responsible_id=user.id).values_list('certification_form_id', flat=True)
+
+            recognition_qs = recognition_qs.filter(id__in=recognition_ids)
+            certification_qs = certification_qs.filter(id__in=certification_ids)
+
+        recognition_data = RecognitionOfPriorLearningSerializer(recognition_qs, many=True, context={'user': request.user}).data
+        certification_data = KnowledgeCertificationSerializer(certification_qs, many=True, context={'user': request.user}).data
+
+        return Response({
+            'recognition': recognition_data,
+            'knowledge': certification_data
+        }, status=status.HTTP_200_OK)
