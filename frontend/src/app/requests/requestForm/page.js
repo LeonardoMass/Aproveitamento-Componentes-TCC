@@ -323,7 +323,7 @@ const CertificationRequestForm = () => {
           <Button
             variant="save"
             onClick={handleSubmit}
-            disabled={!selectedNotice}
+            disabled={!selectedNotice || isCreating}
             className={!selectedNotice && styles.btnDisabled}
           >
             {isCreating &&

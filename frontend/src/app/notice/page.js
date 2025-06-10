@@ -170,12 +170,12 @@ const Notice = () => {
                     </td>
                     <td>{formatDate(notice.publication_date) ?? "N/A"}</td>
                     <td>
-                      {`${formatDate(notice.documentation_submission_start)} – ${formatDate(
+                      {`${formatDate(notice.documentation_submission_start)} até ${formatDate(
                         notice.documentation_submission_end
                       )}`}
                     </td>
                     <td>
-                      {`${formatDate(notice.proposal_analysis_start)} – ${formatDate(
+                      {`${formatDate(notice.proposal_analysis_start)} até ${formatDate(
                         notice.proposal_analysis_end
                       )}`}
                     </td>
