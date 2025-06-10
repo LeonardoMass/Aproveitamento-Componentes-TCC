@@ -109,7 +109,7 @@ const UsersList = () => {
     <div className={styles.container}>
       <div className={styles.content}>
         <div className={styles.headerRow}>
-          <h1 className={styles.pageTitle}>Gerenciamento de Cursos</h1>
+          <h1 className={styles.pageTitle}>Gerenciamento de Usuários</h1>
           <div className={styles.searchWrapper}>
             <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
             <InputText

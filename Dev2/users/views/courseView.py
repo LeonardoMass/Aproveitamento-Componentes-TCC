@@ -7,7 +7,7 @@ from django.db.models import Q
 
 from users.serializers import ServantSerializer
 from users.models import Course
-from users.serializers import CourseSerializer
+from users.serializers import CourseSerializer, ReducedCourseSerializer
 from users.models.discipline import Disciplines
 from users.models import Servant
 from users.services.user import UserService
@@ -17,7 +17,7 @@ class ListCoursesAPIView(APIView):
     def get(self, request, *args, **kwargs):
 
         course_name = request.GET.get('course_name')
-
+        reduced = request.GET.get('reduced')
         courses_filter = Q()
 
         # Filtro pelo nome do curso
@@ -27,8 +27,10 @@ class ListCoursesAPIView(APIView):
         # Buscando cursos de acordo com os filtros aplicados
         courses = Course.objects.filter(courses_filter)
 
-        # Serializando os resultados
-        courses_serialized = CourseSerializer(courses, many=True)
+        if reduced:
+            courses_serialized = ReducedCourseSerializer(courses, many=True)
+        else:
+            courses_serialized = CourseSerializer(courses, many=True)
 
         return Response(courses_serialized.data)
 

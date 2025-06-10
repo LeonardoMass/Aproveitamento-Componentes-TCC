@@ -218,6 +218,17 @@ class RecognitionAndCertificationListView(APIView):
             recognition_qs = recognition_qs.filter(id__in=recognition_ids)
             certification_qs = certification_qs.filter(id__in=certification_ids)
 
+        notice_id = request.query_params.get('notice')
+        course_id = request.query_params.get('course')
+
+        if notice_id:
+            recognition_qs = recognition_qs.filter(notice_id=notice_id)
+            certification_qs = certification_qs.filter(notice_id=notice_id)
+
+        if course_id:
+            recognition_qs = recognition_qs.filter(course_id=course_id)
+            certification_qs = certification_qs.filter(course_id=course_id)
+
         recognition_data = RecognitionOfPriorLearningSerializer(recognition_qs, many=True, context={'user': request.user}).data
         certification_data = KnowledgeCertificationSerializer(certification_qs, many=True, context={'user': request.user}).data
 

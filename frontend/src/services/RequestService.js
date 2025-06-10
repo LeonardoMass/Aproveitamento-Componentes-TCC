@@ -41,8 +41,8 @@ async function GetRecognitionOfPriorLearningByServantId(id) {
     return apiClient.get(`/forms/recognition-forms/?servant_id=${id}`)
 }
 
-async function GetAllRequests() {
-    return apiClient.get(`/forms/list/`);
+async function GetAllRequests({ params } = {}) {
+  return apiClient.get(`/forms/list/`, { params });
 }
 
 export async function checkIfNoticeIsOpen() {

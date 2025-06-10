@@ -1,4 +1,4 @@
-# 2024-2-Aproveitamento-Componentes
+# Sistema para aproveitamento de estudo e certificação de conhecimentos
 
 frontend
 node 18 >
@@ -15,6 +15,4 @@ py manage.py makemigrations users
 py manage.py migrate
 py manage.py shell < script.py
 py manage.py runserver
-
-pip install python-decouple
 ```

@@ -9,7 +9,7 @@ const courseListByName = async (params = {}) => {
     const response = await apiClient.get("courses/list/", { params });
     return response.data[0] || [];
   } catch (error) {
-    console.error("Erro ao listar PPCs:", error);
+    console.error("Erro ao listar Cursos:", error);
     return [];
   }
 };
@@ -45,4 +45,14 @@ const courseEdit = async (id, data) => {
     });
 };
 
-export { courseList, courseCreate, courseEdit, getCourseById, courseListByName };
+const courseListReduced = async (params = { reduced: true }) => {
+  try {
+    const response = await apiClient.get("courses/list/", { params });
+    return response.data || [];
+  } catch (error) {
+    console.error("Erro ao listar cursos reduzidos:", error);
+    return [];
+  }
+};
+
+export { courseList, courseCreate, courseEdit, getCourseById, courseListByName, courseListReduced };

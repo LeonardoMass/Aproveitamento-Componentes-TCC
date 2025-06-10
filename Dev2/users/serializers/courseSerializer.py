@@ -35,3 +35,12 @@ class CourseSerializer(serializers.ModelSerializer):
         if coordinator_data:
             instance.coordinator = coordinator_data
         return super().update(instance, validated_data)
+
+
+class ReducedCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = [
+            "id",
+            "name",
+        ]
