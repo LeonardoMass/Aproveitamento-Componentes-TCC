@@ -11,7 +11,7 @@ export default function Page() {
 
     const accessToken = localStorage.getItem('token');
     if (accessToken) {
-      window.location.href = '/profile';
+      window.location.href = '/redirect';
     }
     setLoading(false);
   }, []);

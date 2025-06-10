@@ -52,9 +52,9 @@ export default function Requests() {
         const allNotices = noticeRes.results || [];
         setNotices(allNotices);
         if (allNotices.length > 0 && !selectedNotice) {
-          const defaultNotice = { 
-            id: allNotices[0].id, 
-            title: allNotices[0].number 
+          const defaultNotice = {
+            id: allNotices[0].id,
+            title: allNotices[0].number
           };
           updateFilter('selectedNotice', defaultNotice);
         }
@@ -130,7 +130,7 @@ export default function Requests() {
   const stepOptions = steps.map(s => ({ id: s.index, title: s.label }));
   const statusOptions = filterStatus.map(s => ({ id: s, title: s }));
   const disciplineOptions = disciplines.map(d => ({ id: d, title: d }));
-  const perPageList = perPageOptions.map(n => ({ id: n, title: n === 0 ? 'Todos' : n }));
+  const perPageList = perPageOptions.map(n => ({ id: n, title: n === 0 ? 'Todos' : n.toString() }));
 
   const handleDetailsClick = item => {
     const path = item.type === 'recognition'
@@ -163,14 +163,14 @@ export default function Requests() {
         <div className={styles.filtersContainer}>
           <Filter
             optionList={stepOptions}
-            label="Situação"
+            label="Etapas"
             value={selectedStep}
             onChange={(e, v) => handleFilterChange('selectedStep', v)}
           />
 
           <Filter
             optionList={statusOptions}
-            label="Etapas"
+            label="Situação"
             value={selectedStatus}
             onChange={(e, v) => handleFilterChange('selectedStatus', v)}
             width={180}
@@ -204,7 +204,7 @@ export default function Requests() {
             label="Itens"
             width={100}
             value={perPageList.find(o => o.id === itemsPerPage)}
-            onChange={(e, v) => handleFilterChange('itemsPerPage', v.id)}
+            onChange={(e, v) => handleFilterChange('itemsPerPage', v ? v.id : 10)}
           />
         </div>
         <div className={styles.tableSection}>
