@@ -44,17 +44,17 @@ const Modal = ({ status, onClose, onConfirm, isOpen }) => {
     return (
         <div className={styles.modalBackground}>
             <div className={styles.modalContent}>
-                <h2>Informe o seu parecer sobre {getMessage()} desta etapa da solicitação:</h2>
+                <h2>Confirme sua decisão sobre {getMessage()} desta etapa da solicitação:</h2>
 
                 <textarea
                     className={styles.textareaFeedback}
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="Digite seu parecer aqui..."
+                    placeholder="Opcional em caso de aprovação "
                     required
                     rows={4}
                 />
-                {!isFeedbackValid && <p style={{ color: "red" }}>*O parecer é obrigatório</p>}
+                {!isFeedbackValid && <p style={{ color: "red" }}>*O parecer é obrigatório para rejeições</p>}
 
                 <div className="modalActions">
                     <Button variant="cancel" className={`${styles.btn} ${styles.btnSecondary}`} onClick={onClose}>

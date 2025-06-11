@@ -54,6 +54,10 @@ const Details = () => {
   const [currentResponsible, setCurrentResponsible] = useState(false);
   const [selectedProfessor, setSelectedProfessor] = useState("");
   const [availableProfessors, setAvailableProfessors] = useState([]);
+  const [coordinatorResponsible, setCoordinatorResponsible] = useState("");
+  const [step2FinalStepDate, setStep2FinalStepDate] = useState("");
+  const [step3FinalStepDate, setStep3FinalStepDate] = useState("");
+  const [step4FinalStepDate, setStep4FinalStepDate] = useState("");
   const [coordinatorFeedback, setCoordinatorFeedback] = useState("");
   const [professorFeedback, setProfessorFeedback] = useState("");
   const [coordinatorSecondFeedback, setCoordinatorSecondFeedback] = useState("");
@@ -146,13 +150,22 @@ const Details = () => {
       const step5Feedback = getStepStatus(data.steps, getStep5Status);
       const step6Date = getStepStatus(data.steps, getStep6Status);
 
-      if (step2Feedback) setCoordinatorFeedback(step2Feedback.feedback);
-      if (step3Feedback) setProfessorFeedback(step3Feedback.feedback);
-      if (step3Feedback) setProfessor(step3Feedback.responsible.name);
-      if (step4Feedback) setCoordinatorSecondFeedback(step4Feedback.feedback);
+      if (step2Feedback) {
+        setCoordinatorFeedback(step2Feedback.feedback);
+        setCoordinatorResponsible(step2Feedback.responsible.name);
+        setStep2FinalStepDate(step2Feedback.final_step_date);
+      }
+      if (step3Feedback) {
+        setProfessor(step3Feedback.responsible.name);
+        setProfessorFeedback(step3Feedback.feedback);
+        setStep3FinalStepDate(step3Feedback.final_step_date);
+      }
+      if (step4Feedback) {
+        setCoordinatorSecondFeedback(step4Feedback.feedback);
+        setStep4FinalStepDate(step4Feedback.final_step_date);
+      }
       if (step5Feedback) setCreFeedback(step5Feedback.initial_step_date);
       if (step6Date) setEndRequest(step6Date.initial_step_date);
-
 
       if (
         role === "Coordenador" &&
@@ -200,6 +213,30 @@ const Details = () => {
       stepStatusFunc().includes(value.status_display),
     );
   };
+
+  const formatDate = (date) => {
+    <p className={styles.info}>
+      {date ? (
+        <>
+          <strong>Finalizado em </strong>
+          {new Date(date).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+          })}
+          {" - "}
+          {new Date(date).toLocaleTimeString("pt-BR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZone: "America/Sao_Paulo"
+          })}
+        </>
+      ) : (
+        "Pendente"
+      )}
+    </p>
+  }
 
   const requestType = () => {
        return type === "knowledge-certifications"
@@ -700,13 +737,21 @@ const Details = () => {
               .find((value) =>
                 getStep2Status().includes(value.status_display),
               ) && (
-              <div className={styles.analysis}>
-                <h1 className={styles.center_title}>Análise do Coordenador</h1>
-                <div className={styles.columns}>
-                  <div className={styles.infoColumn}>
-                    {role === "Coordenador" &&
-                      details.status_display === "Em análise do Coordenador" && (
+                <div className={styles.analysis}>
+                  <h1 className={styles.center_title}>Análise do Coordenador</h1>
+                  <div className={styles.columns}>
+                    <div className={styles.infoColumn}>
+                      <p className={styles.info}>
+                        <strong>Coordenador responsável: </strong>
+                        {coordinatorResponsible || ""}
+                      </p>
+                      {role === "Coordenador" &&
+                        details.status_display === "Em análise do Coordenador" ? (
                         <div className={styles.selector_container}>
+                          <p className={styles.info}>
+                            <strong>Professor responsável: </strong>
+                            {professor || ""}
+                          </p>
                           <select
                             className={styles.selector}
                             onChange={(e) =>
@@ -725,14 +770,34 @@ const Details = () => {
                             className={`${styles.iconSpacing} ${styles.asterisk}`}
                           />
                         </div>
+                      ) : (
+                        <p className={styles.info}>
+                          <strong>Professor designado: </strong>
+                          {professor || ""}
+                        </p>
                       )}
-                    <p className={styles.info}>
-                      <strong>Professor responsável: </strong>
-                      {professor || ""}
-                    </p>
                     <p className={styles.info}>
                       <strong>Parecer do coordenador: </strong>
                       {coordinatorFeedback || "Pendente"}
+                    </p>
+                    <p className={styles.info}>
+                      {step2FinalStepDate && (
+                        <>
+                          <strong>Analisado em </strong>
+                          {new Date(step2FinalStepDate).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric"
+                          })}
+                          {" - "}
+                          {new Date(step2FinalStepDate).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                            timeZone: "America/Sao_Paulo"
+                          })}
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className={styles.actionColumn}>
@@ -924,6 +989,25 @@ const Details = () => {
                       <strong>Parecer: </strong>
                       {professorFeedback || "Pendente"}
                     </p>
+                    <p className={styles.info}>
+                      {step3FinalStepDate && (
+                        <>
+                          <strong>Decisão em </strong>
+                          {new Date(step3FinalStepDate).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric"
+                          })}
+                          {" - "}
+                          {new Date(step3FinalStepDate).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                            timeZone: "America/Sao_Paulo"
+                          })}
+                        </>
+                      )}
+                    </p>
                   </div>
                   <div className={styles.actionColumn}>
                     {details.status_display !== "Cancelado" && (
@@ -979,6 +1063,25 @@ const Details = () => {
                       <strong>Parecer: </strong>
                       {coordinatorSecondFeedback || "Pendente"}
                     </p>
+                    <p className={styles.info}>
+                      {step4FinalStepDate && (
+                        <>
+                          <strong>Analisado em </strong>
+                          {new Date(step4FinalStepDate).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric"
+                          })}
+                          {" - "}
+                          {new Date(step4FinalStepDate).toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                            timeZone: "America/Sao_Paulo"
+                          })}
+                        </>
+                      )}
+                    </p>
                   </div>
                   <div className={styles.actionColumn}>
                     {details.status_display !== "Cancelado" && (
@@ -995,7 +1098,7 @@ const Details = () => {
                     {(details.status_display ===
                       "Em homologação do Coordenador" ||
                       details.status_display === "Retornado pelo Ensino") &&
-                      role === "Coordenador" && (
+                      role === "Coordenador" && currentResponsible && (
                         <div className={styles.actionButtons}>
                           <Button
                             label="Aprovar"

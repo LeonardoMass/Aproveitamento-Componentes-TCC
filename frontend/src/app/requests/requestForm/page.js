@@ -108,8 +108,22 @@ const CertificationRequestForm = () => {
     console.log("Linhas de upload após remoção:", uploadLines);
   };
 
+  const isFormValid =
+    selectedNotice &&
+    requestType &&
+    selectedPpc &&
+    disciplineId &&
+    uploadLines.every(l => l.file) &&
+    (requestType === "certificacao"
+      ? previousKnowledge
+      : requestType === "aproveitamento"
+        ? previousCourse && courseStudiedWorkload && courseWorkload
+        : false
+    );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isFormValid) return;
     setIsCreating(true);
     const formData = new FormData();
     formData.append("discipline", disciplineId);
@@ -317,14 +331,17 @@ const CertificationRequestForm = () => {
           </div>
         </div>
         <div className={styles.formBtnContainer}>
-          <Button variant="cancel" className={styles.cancelButton} onClick={handleCancel}>
+          <Button variant="cancel" 
+          className={styles.cancelButton} 
+          onClick={handleCancel}
+          disabled={isCreating}>
             Cancelar
           </Button>
           <Button
             variant="save"
             onClick={handleSubmit}
-            disabled={!selectedNotice || isCreating}
-            className={!selectedNotice && styles.btnDisabled}
+            disabled={!isFormValid || isCreating}
+            className={!isFormValid ? styles.btnDisabled : ""}
           >
             {isCreating &&
               <FontAwesomeIcon icon={faSpinner} spin size="sm" fixedWidth />
