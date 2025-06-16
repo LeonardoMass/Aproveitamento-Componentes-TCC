@@ -11,7 +11,7 @@ from users.models.notice import Notice
 from users.models import Servant, AbstractUser
 from users.models import Student
 from users.serializers import ServantSerializer
-from users.models import Step, Attachment, RecognitionOfPriorLearning, KnowledgeCertification, \
+from users.models import Step, Attachment, RecognitionOfPriorLearning, KnowledgeCertification, ApprovalStatus, \
     RequestStatus, FAILED_STATUS, ANALYSIS_STATUS, STUDENT_STATUS, CRE_STATUS, COORD_STATUS, PROF_STATUS
 
 
@@ -84,7 +84,12 @@ class StepSerializer(serializers.ModelSerializer):
 
         # Caso o coordenador retorne o step, o professor que aprovou ficará como responsável
         elif status == RequestStatus.RETURNED_BY_COORDINATOR:
-            responsible = form.steps.filter(status=RequestStatus.ANALYZED_BY_PROFESSOR).last().responsible
+            responsible = form.steps.filter(
+                status__in=[
+                    RequestStatus.ANALYZED_BY_PROFESSOR,
+                    RequestStatus.REJECTED_BY_PROFESSOR,
+                ]
+            ).last().responsible
             data['responsible_id'] = responsible.id if responsible else None
 
         # Define como responsável pela homologação do ensino o mesmo servidor que analisou a solicitação
@@ -96,6 +101,8 @@ class StepSerializer(serializers.ModelSerializer):
         elif status == RequestStatus.CANCELED:
             data['responsible_id'] = None
 
+        elif status == RequestStatus.APPROVED_BY_CRE:
+            data['responsible_id'] = None
         # Sem condições especiais, quem fez a requisição ficará responsável pelo step
         else:
             data['responsible_id'] = abstract_user.id
@@ -103,7 +110,7 @@ class StepSerializer(serializers.ModelSerializer):
         print("Cargo do usuário: " + user_role)
 
         # Valida se a solicitação foi finalizada, não podendo mais ser alterada
-        if current_status in FAILED_STATUS or current_status == RequestStatus.APPROVED_BY_CRE:
+        if current_status == RequestStatus.APPROVED_BY_CRE:
             if status != current_status:
                 raise serializers.ValidationError("Não é permitido alterar o status após finalização")
 
@@ -116,11 +123,6 @@ class StepSerializer(serializers.ModelSerializer):
         elif user_role == 'Ensino':
             if status not in CRE_STATUS:
                 raise serializers.ValidationError(f"CRE não pode definir o status como '{status}'")
-
-        # Verifica se o step criado possui um status que pode ser criado pelo coordenador
-        elif user_role == 'Coordenador':
-            if status not in COORD_STATUS:
-                raise serializers.ValidationError(f"Coordenador não pode definir o status como '{status}'")
 
         # Verifica se o step criado possui um status que pode ser criado pelo professor
         elif user_role == 'Professor':
@@ -167,7 +169,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'course_workload', 'course_studied_workload', 'previous_course', 'notice', 'discipline', 'course',
             'discipline_name', 'discipline_workload', 'create_date', 'status_display', 'attachments', 'student_id', 'student', 'student',
-            'student_name', 'student_email', 'student_matricula', 'student_course', 'steps'
+            'student_name', 'student_email', 'student_matricula', 'student_course', 'steps', 'approval_status'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -216,6 +218,11 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("course_studied_workload deve ser um número inteiro válido.")
         if self.instance and self.abstract_user.id != self.instance.student_id:
             raise serializers.ValidationError("Apenas o aluno que fez a requisição pode alterar esse campo")
+        return value
+
+    def validate_approval_status(self, value):
+        if value not in dict(ApprovalStatus.choices):
+            raise serializers.ValidationError("Status de aprovação inválido")
         return value
 
     def validate_status(self, value):
@@ -287,8 +294,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Usuário não está relacionado com a solicitação")
         for field, value in validated_data.items():
             setattr(instance, field, value)
-        student = get_object_or_404(Student, id=instance.student_id)
-        self.handle_file_uploads(instance, student)
+        instance.save()
         return instance
 
 
@@ -311,7 +317,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'previous_knowledge', 'discipline_workload', 'scheduling_date', 'test_score', 'notice', 'discipline', 'course',
             'discipline_name', 'create_date', 'status_display', 'attachments', 'student_id', 'student',
-            'student_name', 'student_email', 'student_matricula', 'student_course', 'steps', 'test_attachment'
+            'student_name', 'student_email', 'student_matricula', 'student_course', 'steps', 'test_attachment', 'approval_status'
         ]
 
     def __init__(self, *args, **kwargs):
@@ -378,9 +384,14 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
         if (user_role != 'Professor') and (user_role != 'Coordenador'):
             raise serializers.ValidationError("Apenas o professor pode alterar a nota")
         if not isinstance(value, Decimal):
-            raise serializers.ValidationError("test_score deve ser um número válido.")
+            raise serializers.ValidationError("A avaliação deve ser um número válido.")
         if not (0 <= value <= 10):
-            raise serializers.ValidationError("test_score deve estar entre 0 e 10.")
+            raise serializers.ValidationError("A avaliação deve estar entre 0 e 10.")
+        return value
+
+    def validate_approval_status(self, value):
+        if value not in dict(ApprovalStatus.choices):
+            raise serializers.ValidationError("Status de aprovação inválido")
         return value
 
     def handle_file_uploads(self, instance, student):

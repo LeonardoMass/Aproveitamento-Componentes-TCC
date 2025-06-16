@@ -28,7 +28,7 @@ const Modal = ({ status, onClose, onConfirm, isOpen }) => {
         setIsFeedbackValid(false);
         return;
     } else if (feedback.trim() === "") {
-        finalFeedback = "Sem parecer";
+        finalFeedback = "-";
     }
     setFeedback(finalFeedback);
     onConfirm(finalFeedback);
@@ -50,7 +50,7 @@ const Modal = ({ status, onClose, onConfirm, isOpen }) => {
                     className={styles.textareaFeedback}
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="Opcional em caso de aprovação "
+                    placeholder={isFailed ? "Parecer obrigatório em rejeições.." : "Parecer opcional.."}
                     required
                     rows={4}
                 />

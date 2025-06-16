@@ -113,6 +113,10 @@ RETURNED_STATUS = [
     RequestStatus.RETURNED_BY_CRE
 ]
 
+class ApprovalStatus(models.TextChoices):
+    PENDING = 'Pendente', 'Pendente'
+    APPROVED = 'Deferido', 'Deferido'
+    REJECTED = 'Indeferido', 'Indeferido'
 
 class Attachment(models.Model):
     id = models.CharField(primary_key=True,max_length=100, editable=False)
@@ -142,6 +146,7 @@ class RequisitionForm(models.Model):
     discipline = models.ForeignKey('users.Disciplines', on_delete=models.CASCADE)
     course = models.ForeignKey('users.Course', on_delete=models.CASCADE)
     create_date = models.DateTimeField(default=timezone.now)
+    approval_status = models.CharField(max_length=20, choices=ApprovalStatus.choices, default=ApprovalStatus.PENDING)
 
     class Meta:
         abstract = True

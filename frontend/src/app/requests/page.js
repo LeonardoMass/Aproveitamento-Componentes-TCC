@@ -77,13 +77,13 @@ export default function Requests() {
         if (selectedNotice) params.notice = selectedNotice.id;
         if (selectedCourse) params.course = selectedCourse.id;
         const { data } = await RequestService.GetAllRequests({ params });
-        const combined = [
+        const requests = [
           ...(data.recognition || []).map(i => ({ ...i, type: 'recognition' })),
           ...(data.knowledge || []).map(i => ({ ...i, type: 'knowledge' }))
         ];
-        combined.sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
-        setMergedRequests(combined);
-        const uniq = Array.from(new Set(combined.map(i => i.discipline_name))).filter(Boolean);
+        requests.sort((a, b) => new Date(b.create_date) - new Date(a.create_date));
+        setMergedRequests(requests);
+        const uniq = Array.from(new Set(requests.map(i => i.discipline_name))).filter(Boolean);
         setDisciplines(uniq);
         setCurrentPage(1);
       } catch (e) {

@@ -34,6 +34,7 @@ import RequestService from "@/services/RequestService";
 import { TextField } from "@mui/material";
 import Modal from "@/components/Modal/ModalRequest/modal";
 import { FileUpload } from "primereact/fileupload";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 const Details = () => {
   const [details, setDetails] = useState(null);
@@ -83,6 +84,7 @@ const Details = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [testDate, setTestDate] = useState(null);
   const [testAttachment, setTestAttachment] = useState(null);
+  const [approvalStatus, setApprovalStatus] = useState("");
 
   const [uploadAttachmentLines, setUploadAttachmentLines] = useState([]);
   const attachmentIdCounterRef = useRef(1);
@@ -110,6 +112,7 @@ const Details = () => {
 
   const fetchDetails = async () => {
     try {
+      setLoading(true);
       const response = await apiClient.get(`${baseURL}/forms/${type}/${id}/`);
       if (response.status !== 200) throw new Error("Erro ao buscar detalhes");
       const data = await response.data;
@@ -183,15 +186,10 @@ const Details = () => {
         console.log("professors data - " + professorsData);
       }
       const stepAtual = data.steps.find(step => step.current === true);
-      if (stepAtual && stepAtual.responsible && stepAtual.responsible.id) {
-        if (stepAtual.responsible.id === user.id) {
-          setCurrentResponsible(true);
-          console.log("Usuário é responsável pela etapa atual");
-        }else {
-          setCurrentResponsible(false);
-          console.log("Usuário não é responsável pela etapa atual");
-        }
+      if (stepAtual && stepAtual.responsible) {
+        setCurrentResponsible(stepAtual.responsible.id === user.id);
       }
+      setApprovalStatus(data.approval_status);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -296,18 +294,31 @@ const Details = () => {
       fb = feedback.toString();
     }
     createStep(getStatus(status), fb).then((value) => {
-      if (
-        getSucceeded().includes(status) &&
-        status !== "Finalizado e divulgado"
-      ) {
-        const index = getEnumIndexByValue(status) + 1;
-        createStep(getStatus(StatusEnum[index]), "Pendente");
+      if (getSucceeded().includes(status) && status !== "Finalizado e divulgado") {
+        if (status == "Homologado pelo Coordenador" && (!getStatusProps(1).isApproved || !getStatusProps(2).isApproved)) {
+          createStep(getStatus("Finalizado e divulgado"), "A solicitação foi indeferida");
+          handleSave("approval_status", "Indeferido");
+          setApprovalStatus("Indeferido");
+        } else {
+          const index = getEnumIndexByValue(status) + 1;
+          createStep(getStatus(StatusEnum[index]), "Pendente");
+          if (status == "Homologado pelo Coordenador" && getStatusProps(1).isApproved && getStatusProps(2).isApproved) {
+            handleSave("approval_status", "Deferido");
+            setApprovalStatus("Deferido");
+          }
+        }
       }
       if (getFailed().includes(status)) {
 
         if (status == "Rejeitado pelo Professor") {
           const index = getEnumIndexByValue(status) + 2;
           createStep(getStatus(StatusEnum[index]), "Pendente");
+        }
+        if (status == "Rejeitado pelo Coordenador") {
+          const index = getEnumIndexByValue(status) + 2;
+          createStep(getStatus(StatusEnum[index]), "A solicitação foi indeferida pelo coordenador").then((value) => {
+            createStep(getStatus("Finalizado e divulgado"), "A solicitação foi indeferida pelo coordenador");
+          });
         }
         if (status == "Cancelado pelo Coordenador") {
           const index = getEnumIndexByValue(status) + 5;
@@ -387,6 +398,7 @@ const Details = () => {
 
   const handleSave = async (field, file) => {
     try {
+      setLoading(true);
       let response;
 
       if (field === "test_attachment") {
@@ -399,6 +411,7 @@ const Details = () => {
         );
   
         if (response.status !== 200) throw new Error("Erro ao salvar alterações");
+        toast.success("Arquivo enviado com sucesso");
         setDetails((prevDetails) => ({
           ...prevDetails,
         }));
@@ -422,13 +435,17 @@ const Details = () => {
           case "scheduling_date":
             updatedData = { scheduling_date: editedSchedulingDate };
             break;
+          case "approval_status":
+            updatedData = { approval_status: file };
+            break;
         }
+        console.log("updatedData", updatedData);
         response = await apiClient.patch(
           `${baseURL}/forms/${type}/${id}/`,
           updatedData,
         );
         if (response.status !== 200) throw new Error("Erro ao salvar alterações");
-  
+        toast.success(response.data.detail);
         setDetails((prevDetails) => ({
           ...prevDetails,
           ...updatedData,
@@ -470,8 +487,11 @@ const Details = () => {
       setEditedCourseStudiedWorkload("");
       setEditedTestScore("");
     } catch (error) {
+      console.error("Erro ao salvar alterações:", error);
       let erro = Object.values(error.response.data) 
       toast.error(erro[0][0]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -484,18 +504,23 @@ const Details = () => {
 
     if (status) status = status.status_display;
     if (getFailed().includes(status)) {
-      return { color: "red", icon: faTimes, label: "Rejeitado" };
+      return { color: "red", icon: faTimes, label: "Rejeitado", isApproved: false };
     } else if (getSucceeded().includes(status)) {
       if (status === "Encaminhado para o Coordenador") {
-        return { color: "green", icon: faCheck, label: "Encaminhado" };
+        return { color: "green", icon: faCheck, label: "Encaminhado", isApproved: true };
       }
-      return { color: "green", icon: faCheck, label: "Aprovado" };
+      if (status === "Analisado pelo Professor") {
+        return { color: "green", icon: faCheck, label: "Deferido", isApproved: true };
+      }
+      if (status === "Homologado pelo Coordenador") {
+        return { color: "green", icon: faCheck, label: "Homologado", isApproved: true };
+      }
+      return { color: "green", icon: faCheck, label: "Aprovado", isApproved: true };
     } else {
-      return { color: "yellow", icon: faClock, label: "Pendente" };
+      return { color: "yellow", icon: faClock, label: "Pendente", isApproved: false };
     }
   };
 
-  if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
   const handleDateChange = (e) => {
@@ -513,19 +538,7 @@ const Details = () => {
         <h1 className={styles.center_title}>{requestType()}</h1>
         {details ? (
           <div>
-            {stepsStatus && details.status_display !== "Cancelado" ? (
-              <Stepper stepsStatus={stepsStatus} />
-            ) : (
-              <div className={styles.centered}>
-                <div className={`${styles.statusContainer} ${styles.red}`}>
-                  <strong>Status: </strong>
-                  <div className={styles.statusButton}>
-                    <FontAwesomeIcon icon={faTimes} />
-                    {"Cancelado pelo aluno"}
-                  </div>
-                </div>
-              </div>
-            )}
+            <Stepper stepsStatus={stepsStatus} />
             {role === "Estudante" &&
               details.status_display === "Solicitação criada" && (
                 <div className={styles.centered}>
@@ -545,18 +558,18 @@ const Details = () => {
                   <div className={styles.modalButtons}>
                     <button
                       className={styles.confirmButton}
+                      onClick={closeCancelModal}
+                    >
+                      Não
+                    </button>
+                    <button
+                      className={styles.cancelButton}
                       onClick={() => {
                         createStep("CANCELED");
                         closeCancelModal();
                       }}
                     >
                       Sim
-                    </button>
-                    <button
-                      className={styles.cancelButton}
-                      onClick={closeCancelModal}
-                    >
-                      Não
                     </button>
                   </div>
                 </div>
@@ -611,15 +624,6 @@ const Details = () => {
                                       onClick={() => handleDownloadAttachment(attachment.id)}
                                       tooltip="Visualizar Anexo"
                                       style={{ marginRight: "8px" }}
-                                    />
-                                    <Button
-                                      icon="pi pi-trash"
-                                      className="p-button-sm p-button-danger p-button-outlined"
-                                      onClick={async () => {
-                                        await handleDeleteAttachment(attachment.id);
-                                        await fetchDetails();
-                                      }}
-                                      tooltip="Excluir Anexo"
                                     />
                                   </div>
                                 </div>
@@ -705,7 +709,7 @@ const Details = () => {
                     </>
                   )}
                 </div>
-                {details.status_display !== "Cancelado" && (
+                {details.status_display !== "Cancelado pelo Aluno" ? (
                   <div className={styles.actionColumn}>
                     <div
                       className={`${styles.statusContainer} ${styles[getStatusProps(0).color]}`}
@@ -728,6 +732,15 @@ const Details = () => {
                           />
                         </div>
                       )}
+                  </div>
+                ) : (
+                  <div className={styles.actionColumn}>
+                    <div className={`${styles.statusContainer} ${styles.red}`}>
+                      <strong>Status: </strong>
+                      <div className={styles.statusButton}>
+                        {"Cancelado pelo aluno"}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -946,8 +959,9 @@ const Details = () => {
                                 name="prova"
                                 mode="basic"
                                 auto={false}
-                                accept="application/pdf,image/png,image/jpeg"
-                                maxFileSize={5000000}
+                                accept="application/pdf"
+                                maxFileSize={50000000}
+                                disabled={loading}
                                 label="Upload da prova"
                                 className="p-button-sm p-button-outlined"
                                 style={{
@@ -957,6 +971,22 @@ const Details = () => {
                                 }}
                                 onSelect={(e) => onFileSelect(e)}
                               />
+                              <div
+                                key={testAttachment.id}
+                                className={styles.attachmentItem}
+                              >
+                                <div className={styles.attachmentItemContent}>
+                                  <span>{testAttachment.file_name}</span>
+                                  <Button
+                                    icon="pi pi-download"
+                                    className="p-button-sm p-button-outlined"
+                                    onClick={() =>
+                                      handleDownloadAttachment(testAttachment.id)
+                                    }
+                                    tooltip="Visualizar Prova"
+                                  />
+                                </div>
+                              </div>
                             </>
                           ) :
                             testAttachment && testAttachment.id ? (
@@ -1031,14 +1061,16 @@ const Details = () => {
                           details.scheduling_date)) && (
                         <div className={styles.actionButtons}>
                           <Button
-                            label="Aprovar"
+                            label="Deferir"
                             icon="pi pi-check"
+                            disabled={loading}
                             onClick={() => openModal("Analisado pelo Professor")}
                             className={styles.pButtonSuccess}
                           />
                           <Button
-                            label="Rejeitar"
+                            label="Indeferir"
                             icon="pi pi-times"
+                            disabled={loading}
                             onClick={() => openModal("Rejeitado pelo Professor")}
                             className={styles.pButtonDanger}
                           />
@@ -1101,17 +1133,17 @@ const Details = () => {
                       role === "Coordenador" && currentResponsible && (
                         <div className={styles.actionButtons}>
                           <Button
-                            label="Aprovar"
+                            label="Homologar"
                             icon="pi pi-check"
                             onClick={() => openModal("Homologado pelo Coordenador")}
                             className={styles.pButtonSuccess}
                           />
-                          <Button
+                          {(getStatusProps(1).isApproved) && <Button
                             label="Retornar"
                             icon="pi pi-arrow-left"
                             onClick={() => openModal("Retornado pelo Coordenador")}
                             className={styles.pButtonReturn}
-                          />
+                          />}
                           <Button
                             label="Rejeitar"
                             icon="pi pi-times"
@@ -1132,7 +1164,7 @@ const Details = () => {
                 getStep5Status().includes(value.status_display),
               ) && (
               <div className={styles.analysis}>
-                <h1 className={styles.center_title}>Divulgação do Ensino</h1>
+                {approvalStatus === "Deferido" ? <h1 className={styles.center_title}>Registro do Ensino</h1> : <h1 className={styles.center_title}>Solicitação Finalizada</h1>}
                 <div className={styles.columns}>
                  <div className={styles.infoColumn}>
                     <p className={styles.info}>
