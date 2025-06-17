@@ -9,7 +9,7 @@ async function CreateRecognitionForm(data) {
     return apiClient.post('/forms/recognition-forms/', data)
 }
 
-function DownloadAttachment(attachmentId) {
+async function DownloadAttachment(attachmentId) {
     const url = `${baseURL}/forms/attachments/${attachmentId}/`;
     window.open(url, '_blank');
 }
