@@ -7,13 +7,14 @@ import { courseListReduced } from "@/services/CourseService";
 import { noticeListAll } from "@/services/NoticeService";
 import { useRequestFilters } from "@/hooks/useRequestFilters";
 import { useAuth } from "@/context/AuthContext";
-import { faPlus, faSearch, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSearch, faChevronLeft, faChevronRight, faFileCsv, faEye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { InputText } from "primereact/inputtext";
 import Filter from "@/components/FilterField/filterField";
-import { getStatusStepIndex, getSucceeded, getPending, getFailed, steps, filterStatus } from "@/app/requests/status";
+import { getStatusStepIndex, steps, getFinished, pendingStatus } from "@/app/requests/status";
 import Toast from "@/utils/toast";
+import { exportToCsv } from '@/utils/csvExporter';
 
 export default function Requests() {
   const { user } = useAuth();
@@ -38,6 +39,7 @@ export default function Requests() {
     selectedNotice,
     selectedCourse,
     selectedDiscipline,
+    selectedOutcome,
     itemsPerPage
   } = filters;
   useEffect(() => {
@@ -97,14 +99,21 @@ export default function Requests() {
 
   const filtered = mergedRequests
     .filter(i => i.student_name.toLowerCase().includes(search.toLowerCase()))
+    .filter(item => {
+      if (!selectedOutcome) return true;
+      const { approval_status } = item;
+      const filterTitle = selectedOutcome.title;
+      if (filterTitle === 'Pendente') {
+        return approval_status !== 'Deferido' && approval_status !== 'Indeferido';
+      }
+      return approval_status === filterTitle;
+    })
     .filter(i => !selectedStep || getStatusStepIndex(i.status_display) === selectedStep.id)
     .filter(i =>
       !selectedStatus ||
-      (selectedStatus.title === 'Sucesso'
-        ? getSucceeded().includes(i.status_display)
-        : selectedStatus.title === 'Pendente'
-          ? getPending().includes(i.status_display)
-          : getFailed().includes(i.status_display)
+      (selectedStatus.title === 'Finalizado'
+        ? getFinished().includes(i.status_display)
+        : !getFinished().includes(i.status_display)
       )
     )
     .filter(i => !selectedDiscipline || i.discipline_name === selectedDiscipline.title);
@@ -122,13 +131,48 @@ export default function Requests() {
     setCurrentPage(1);
   };
 
+  const handleExportCSV = () => {
+    const dataToExport = filtered.map(item => {
+      const professorStep = Array.from(item.steps).findLast(
+        step => step.status === 'A_PROF' || step.status === 'RJ_PROF'
+      );
+      const coordinatorStep = Array.from(item.steps).findLast(
+        step => step.status === 'COORD'
+      );
+
+      return {
+        'Estudante': item.student_name || '-',
+        'Tipo': item.type === 'knowledge' ? 'Certificação de Conhecimento (CC)' : 'Aproveitamento de Estudos (AE)',
+        'Disciplina': item.discipline_name || '-',
+        'Data de Criação': new Date(item.create_date).toLocaleString('pt-BR'),
+        'Status': item.status_display || '-',
+        'Resultado': item.approval_status || 'Pendente',
+        'Coordenador em Análise': coordinatorStep?.responsible?.name || '-',
+        'Professor Analisador': professorStep?.responsible?.name || '-',
+        'Feedback do Professor': professorStep?.feedback || '-',
+      };
+    });
+    exportToCsv(dataToExport, `solicitacoes_filtradas_${new Date().toISOString().slice(0, 10)}.csv`);
+  };
+
+  const getRowClass = (status) => {
+    if (status === 'Deferido') return styles.rowSuccess;
+    if (status === 'Indeferido') return styles.rowFailure;
+    return '';
+  };
+
   if (loading) return <LoadingSpinner />;
   if (error) return <div>Erro: {error}</div>;
 
   const noticeOptions = notices.map(n => ({ id: n.id, title: n.number }));
   const courseOptions = courses.map(c => ({ id: c.id, title: c.name }));
   const stepOptions = steps.map(s => ({ id: s.index, title: s.label }));
-  const statusOptions = filterStatus.map(s => ({ id: s, title: s }));
+  const statusOptions = pendingStatus.map(s => ({ id: s, title: s }));
+  const outcomeOptions = [
+    { id: 'deferido', title: 'Deferido' },
+    { id: 'indeferido', title: 'Indeferido' },
+    { id: 'pendente', title: 'Pendente' }
+  ];
   const disciplineOptions = disciplines.map(d => ({ id: d, title: d }));
   const perPageList = perPageOptions.map(n => ({ id: n, title: n === 0 ? 'Todos' : n.toString() }));
 
@@ -151,61 +195,66 @@ export default function Requests() {
   return (
     <div className={styles.contentWrapper}>
       <div className={styles.tableWrapper}>
-        <div className={styles.searchWrapper}>
-          <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
-          <InputText
-            className={styles.nameFilter}
-            value={search}
-            onChange={e => handleFilterChange('search', e.target.value)}
-            placeholder="Buscar por nome..."
-          />
-        </div>
         <div className={styles.filtersContainer}>
+          <div className={styles.searchWrapper}>
+            <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
+            <InputText
+              className={styles.nameFilter}
+              value={search}
+              onChange={e => handleFilterChange('search', e.target.value)}
+              placeholder="Buscar por nome..."
+            />
+          </div>
+          <Filter
+            optionList={outcomeOptions}
+            label="Resultado"
+            value={selectedOutcome || null}
+            onChange={(e, v) => handleFilterChange('selectedOutcome', v)}
+            width={180}
+          />
           <Filter
             optionList={stepOptions}
             label="Etapas"
-            value={selectedStep}
+            value={selectedStep || null}
             onChange={(e, v) => handleFilterChange('selectedStep', v)}
           />
-
           <Filter
             optionList={statusOptions}
             label="Situação"
-            value={selectedStatus}
+            value={selectedStatus || null}
             onChange={(e, v) => handleFilterChange('selectedStatus', v)}
             width={180}
           />
-
           <Filter
             optionList={noticeOptions}
             label="Editais"
-            value={selectedNotice}
+            value={selectedNotice || null}
             onChange={(e, v) => handleFilterChange('selectedNotice', v)}
             width={180}
           />
-
           <Filter
             optionList={courseOptions}
             label="Cursos"
-            value={selectedCourse}
+            value={selectedCourse || null}
             onChange={(e, v) => handleFilterChange('selectedCourse', v)}
             width={390}
           />
-
           <Filter
             optionList={disciplineOptions}
             label="Disciplinas"
-            value={selectedDiscipline}
+            value={selectedDiscipline || null}
             onChange={(e, v) => handleFilterChange('selectedDiscipline', v)}
           />
-
           <Filter
             optionList={perPageList}
             label="Itens"
             width={100}
-            value={perPageList.find(o => o.id === itemsPerPage)}
+            value={perPageList.find(o => o.id === itemsPerPage) || null}
             onChange={(e, v) => handleFilterChange('itemsPerPage', v ? v.id : 10)}
           />
+          <button className={styles.exportButton} onClick={handleExportCSV} title="Exportar dados filtrados para CSV">
+            <FontAwesomeIcon icon={faFileCsv} /> Exportar CSV
+          </button>
         </div>
         <div className={styles.tableSection}>
           <table className={styles.table}>
@@ -218,7 +267,7 @@ export default function Requests() {
               {displayed.length === 0
                 ? <tr><td colSpan="7">Sem resultados</td></tr>
                 : displayed.map(item => (
-                  <tr key={item.id}>
+                  <tr key={item.id} className={getRowClass(item.approval_status)}>
                     <td>{item.student_name || '-'}</td>
                     <td>{item.type === 'knowledge' ? 'CC' : 'AE'}</td>
                     <td>{item.discipline_name || '-'}</td>
@@ -229,8 +278,8 @@ export default function Requests() {
                     <td>{Array.from(item.steps).pop()?.responsible?.name || '-'}</td>
                     <td>{item.status_display || '-'}</td>
                     <td>
-                      <button className={styles.button} onClick={() => handleDetailsClick(item)}>
-                        Detalhes
+                      <button className={styles.iconButton} onClick={() => handleDetailsClick(item)} title="Ver detalhes">
+                        <FontAwesomeIcon icon={faEye} />
                       </button>
                     </td>
                   </tr>

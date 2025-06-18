@@ -8,6 +8,7 @@ export const useRequestFilters = (initialFilters = {}) => {
     selectedNotice: null,
     selectedCourse: null,
     selectedDiscipline: null,
+    selectedOutcome: null,
     itemsPerPage: 10,
     ...initialFilters
   });
@@ -20,15 +21,15 @@ export const useRequestFilters = (initialFilters = {}) => {
   }, []);
 
   useEffect(() => {
-  const savedFilters = localStorage.getItem('requestFilters');
-  if (savedFilters) {
-    setFilters(JSON.parse(savedFilters));
-  }
-}, []);
+    const savedFilters = localStorage.getItem('requestFilters');
+    if (savedFilters) {
+      setFilters(JSON.parse(savedFilters));
+    }
+  }, []);
 
-useEffect(() => {
-  localStorage.setItem('requestFilters', JSON.stringify(filters));
-}, [filters]);
+  useEffect(() => {
+    localStorage.setItem('requestFilters', JSON.stringify(filters));
+  }, [filters]);
 
   return {
     filters,

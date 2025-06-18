@@ -34,6 +34,11 @@ export const filterStatus = [
     "Falha"
 ]
 
+export const pendingStatus = [
+    "Pendente",
+    "Finalizado"
+]
+
 export function getEnumIndexByValue(value) {
     return StatusEnum.indexOf(value);
 }
@@ -50,7 +55,11 @@ export function getFailed() {
 
 export function getPending() {
     return ["Solicitação criada", "Em análise do Coordenador", "Em análise do Professor", "Em homologação do Coordenador",
-        "Retornado pelo Coordenador", "Em aguardo para divulgação", "Retornado pelo Ensino"]
+        "Retornado pelo Coordenador", "Em aguardo para divulgação", "Retornado pelo Ensino"];
+}
+
+export function getFinished() {
+    return ["Cancelado pelo Aluno", "Finalizado e divulgado"];
 }
 
 export function getStatusStepIndex(status) {
