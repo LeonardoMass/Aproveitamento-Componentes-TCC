@@ -15,6 +15,7 @@ import {
   faSave,
   faTimes,
   faAsterisk,
+  faSync
 } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "primereact/button";
 import {
@@ -35,8 +36,11 @@ import { TextField } from "@mui/material";
 import Modal from "@/components/Modal/ModalRequest/modal";
 import { FileUpload } from "primereact/fileupload";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const Details = () => {
+  const pageRef = useRef(null);
   const [details, setDetails] = useState(null);
   const [stepsStatus, setStepsStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -86,29 +90,6 @@ const Details = () => {
   const [testAttachment, setTestAttachment] = useState(null);
   const [approvalStatus, setApprovalStatus] = useState("");
 
-  const [uploadAttachmentLines, setUploadAttachmentLines] = useState([]);
-  const attachmentIdCounterRef = useRef(1);
-
-  const addAttachmentLine = () => {
-    attachmentIdCounterRef.current += 1;
-    setUploadAttachmentLines((prev) => [
-      ...prev,
-      { id: attachmentIdCounterRef.current, file: null },
-    ]);
-  };
-
-  const removeAttachmentLine = (lineId) => {
-    setUploadAttachmentLines((prev) => prev.filter((line) => line.id !== lineId));
-  };
-
-  const handleAttachmentFileSelect = async (lineId, event) => {
-    const file = event.files && event.files.length > 0 ? event.files[0] : null;
-    if (file) {
-      await handleSave("test_attachment", file);
-      setUploadAttachmentLines((prev) => prev.filter((line) => line.id !== lineId));
-      await fetchDetails();
-    }
-  };
 
   const fetchDetails = async () => {
     try {
@@ -294,9 +275,9 @@ const Details = () => {
       fb = feedback.toString();
     }
     createStep(getStatus(status), fb).then((value) => {
-      if (getSucceeded().includes(status) && status !== "Finalizado e divulgado") {
+      if (getSucceeded().includes(status) && status !== "Finalizado") {
         if (status == "Homologado pelo Coordenador" && (!getStatusProps(1).isApproved || !getStatusProps(2).isApproved)) {
-          createStep(getStatus("Finalizado e divulgado"), "A solicitação foi indeferida");
+          createStep(getStatus("Finalizado"), "A solicitação foi indeferida");
           handleSave("approval_status", "Indeferido");
           setApprovalStatus("Indeferido");
         } else {
@@ -307,6 +288,7 @@ const Details = () => {
             setApprovalStatus("Deferido");
           }
         }
+        if (status == "Homologado pelo Coordenador") setTimeout(() => { generatePdf() }, 500);
       }
       if (getFailed().includes(status)) {
 
@@ -317,8 +299,9 @@ const Details = () => {
         if (status == "Rejeitado pelo Coordenador") {
           const index = getEnumIndexByValue(status) + 2;
           createStep(getStatus(StatusEnum[index]), "A solicitação foi indeferida pelo coordenador").then((value) => {
-            createStep(getStatus("Finalizado e divulgado"), "A solicitação foi indeferida pelo coordenador");
+            createStep(getStatus("Finalizado"), "A solicitação foi indeferida pelo coordenador");
           });
+          generatePdf();
         }
         if (status == "Cancelado pelo Coordenador") {
           const index = getEnumIndexByValue(status) + 5;
@@ -396,14 +379,14 @@ const Details = () => {
     }
   };
 
-  const handleSave = async (field, file) => {
+  const handleSave = async (field, param) => {
     try {
       setLoading(true);
       let response;
 
-      if (field === "test_attachment") {
+      if (field === "test_attachment" || field === "attachment") {
         const formData = new FormData();
-        formData.append(field, file);
+        formData.append(field, param);
 
         response = await apiClient.patch(
           `${baseURL}/forms/${type}/${id}/`,
@@ -436,7 +419,7 @@ const Details = () => {
             updatedData = { scheduling_date: editedSchedulingDate };
             break;
           case "approval_status":
-            updatedData = { approval_status: file };
+            updatedData = { approval_status: param };
             break;
         }
         console.log("updatedData", updatedData);
@@ -532,9 +515,69 @@ const Details = () => {
     handleSave("test_attachment", e.files[0]);
   };
 
+  const generatePdf = async (savePage = false) => {
+    const input = pageRef.current;
+    if (!input) return;
+
+    try {
+
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+      });
+
+      const CROP_LEFT_PX = 50 * window.devicePixelRatio;
+      const CROP_RIGHT_PX = 20 * window.devicePixelRatio;
+      const CROP_TOP_PX = 0;
+      const CROP_BOTTOM_PX = 0;
+
+      const cropX = CROP_LEFT_PX;
+      const cropY = CROP_TOP_PX;
+      const croppedWidth = canvas.width - CROP_LEFT_PX - CROP_RIGHT_PX;
+      const croppedHeight = canvas.height - CROP_TOP_PX - CROP_BOTTOM_PX;
+
+      const croppedCanvas = document.createElement('canvas');
+      croppedCanvas.width = croppedWidth;
+      croppedCanvas.height = croppedHeight;
+      const croppedCtx = croppedCanvas.getContext('2d');
+      croppedCtx.drawImage(canvas, cropX, cropY, croppedWidth, croppedHeight, 0, 0, croppedWidth, croppedHeight);
+
+      const imgData = croppedCanvas.toDataURL('image/png', 1.0);
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const ratio = imgProps.height / imgProps.width;
+      const imgHeightInPdf = pdfWidth * ratio;
+
+      let heightLeft = imgHeightInPdf;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightInPdf);
+      heightLeft -= pdfHeight;
+      while (heightLeft > 0) {
+        position = position - pdfHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeightInPdf);
+        heightLeft -= pdfHeight;
+      }
+      const tipo = type === "knowledge-certifications" ? "CC" : "AE";
+      const fileName = `ficha-${tipo}-${details.discipline_name}-${details.student_name}.pdf`;
+      const pdfBlob = pdf.output('blob');
+      const pdfFile = new File([pdfBlob], fileName, { type: 'application/pdf' });
+      savePage ? await handleSave("attachment", pdfFile) : pdf.save(fileName);
+
+    } catch (error) {
+      console.error("Erro ao gerar ou enviar o PDF:", error);
+      toast.error("Ocorreu um erro ao gerar ou enviar o PDF.");
+    }
+  };
+
   return (
     <div>
-      <div className={styles.container}>
+      <div ref={pageRef} className={styles.container}>
         <h1 className={styles.center_title}>{requestType()}</h1>
         {details ? (
           <div>
@@ -861,6 +904,10 @@ const Details = () => {
                   <h1 className={styles.center_title}>Análise do Professor</h1>
                   <div className={styles.columns}>
                     <div className={styles.infoColumn}>
+                      <p className={styles.info}>
+                        <strong>Professor: </strong>
+                        {professor || "Pendente"}
+                      </p>
                       {type === "knowledge-certifications" &&
                         !details.scheduling_date &&
                         currentResponsible && (
@@ -1005,6 +1052,7 @@ const Details = () => {
                                     <Button
                                       icon="pi pi-upload"
                                       className="p-button-sm p-button-outlined"
+                                      disabled={loading}
                                       label={testAttachment && testAttachment.id ? "" : "Upload da prova"}
                                       tooltip={testAttachment && testAttachment.id ? "Upload de nova prova" : ""}
                                       onClick={() => document.getElementById('file-upload').click()}
@@ -1092,6 +1140,10 @@ const Details = () => {
                   <div className={styles.columns}>
                     <div className={styles.infoColumn}>
                       <p className={styles.info}>
+                        <strong>Coordenador: </strong>
+                        {coordinatorResponsible || "Pendente"}
+                      </p>
+                      <p className={styles.info}>
                         <strong>Parecer: </strong>
                         {coordinatorSecondFeedback || "Pendente"}
                       </p>
@@ -1127,8 +1179,7 @@ const Details = () => {
                           </div>
                         </div>
                       )}
-                      {(details.status_display ===
-                        "Em homologação do Coordenador" ||
+                      {(details.status_display === "Em homologação do Coordenador" ||
                         details.status_display === "Retornado pelo Ensino") &&
                         role === "Coordenador" && currentResponsible && (
                           <div className={styles.actionButtons}>
@@ -1163,7 +1214,7 @@ const Details = () => {
               .find((value) =>
                 getStep5Status().includes(value.status_display),
               ) && (
-                <div className={styles.analysis}>
+                <div className={styles.analysis} data-html2canvas-ignore="true">
                   {approvalStatus === "Deferido" ? <h1 className={styles.center_title}>Registro do Ensino</h1> : <h1 className={styles.center_title}>Solicitação Finalizada</h1>}
                   <div className={styles.columns}>
                     <div className={styles.infoColumn}>
@@ -1202,12 +1253,12 @@ const Details = () => {
                         </div>
                       )}
                       {role === "Ensino" &&
-                        details.status_display === "Em aguardo para divulgação" && (
+                        details.status_display === "Etapa de Registro do Ensino" && (
                           <div className={styles.actionButtons}>
                             <Button
-                              label="Aprovar"
+                              label="Finalizar Solicitação"
                               icon="pi pi-check"
-                              onClick={() => openModal("Finalizado e divulgado")}
+                              onClick={() => openModal("Finalizado")}
                               className={styles.pButtonSuccess}
                             />
                             <Button
@@ -1226,13 +1277,27 @@ const Details = () => {
         ) : (
           <div>Nenhum detalhe disponível</div>
         )}
-        <Button
-          label="Voltar"
-          icon="pi pi-arrow-left"
-          onClick={handleBack}
-          className={styles.backButton}
-        />
       </div>
+      <Button
+        label="Voltar"
+        icon="pi pi-arrow-left"
+        onClick={handleBack}
+        className={styles.backButton}
+      />
+      <Button
+        icon={<FontAwesomeIcon icon={faSave} />} 
+        onClick={() => generatePdf()}
+        tooltip="Salvar Página"
+        tooltipOptions={{ position: 'left' }}
+        className={styles.generateButton}
+      />
+      <Button
+        icon={<FontAwesomeIcon icon={faSync} />} 
+        onClick={() => fetchDetails()}
+        tooltip="Recarregar Dados"
+        tooltipOptions={{ position: 'left' }}
+        className={styles.reloadButton}
+      />
       {isModalOpen && (
         <Modal
           status={status}

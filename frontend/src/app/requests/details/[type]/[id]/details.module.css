@@ -339,6 +339,42 @@
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.5);
 }
 
+.generateButton {
+    position: fixed;
+    top: 40%;
+    right: 5%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.reloadButton {
+    position: fixed;
+    top: 30%;
+    right: 5%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
 /* style para o modal de confirmação de cancelamento da Solicitação */
 .modalBackdrop {
     position: fixed;

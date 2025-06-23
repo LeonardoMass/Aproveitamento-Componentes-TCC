@@ -23,10 +23,10 @@ class RequestStatus(models.TextChoices):
     RETURNED_BY_COORDINATOR = "R_COORD", "Retornado pelo Coordenador"
     REJECTED_BY_COORDINATOR = "RJ_COORD", "Rejeitado pelo Coordenador"
     APPROVED_BY_COORDINATOR = "AP_COORD", "Homologado pelo Coordenador"
-    IN_APPROVAL_BY_CRE = "IN_AP_CRE", "Em aguardo para divulgação"
+    IN_APPROVAL_BY_CRE = "IN_AP_CRE", "Etapa de Registro do Ensino"
     RETURNED_BY_CRE = "R_CRE", "Retornado pelo Ensino"
     REJECTED_BY_CRE = "RJ_CRE", "Rejeitado pelo Ensino"
-    APPROVED_BY_CRE = "AP_CRE", "Finalizado e divulgado"
+    APPROVED_BY_CRE = "AP_CRE", "Finalizado"
 
     def get_request_status_by_string(value):
         for status in RequestStatus.values:

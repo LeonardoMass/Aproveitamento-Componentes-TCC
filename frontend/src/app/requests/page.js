@@ -40,8 +40,10 @@ export default function Requests() {
     selectedCourse,
     selectedDiscipline,
     selectedOutcome,
+    selectedType,
     itemsPerPage
   } = filters;
+
   useEffect(() => {
     async function loadMeta() {
       setLoading(true);
@@ -99,6 +101,7 @@ export default function Requests() {
 
   const filtered = mergedRequests
     .filter(i => i.student_name.toLowerCase().includes(search.toLowerCase()))
+    .filter(i => !selectedType || i.type === selectedType.id)
     .filter(item => {
       if (!selectedOutcome) return true;
       const { approval_status } = item;
@@ -164,6 +167,10 @@ export default function Requests() {
   if (loading) return <LoadingSpinner />;
   if (error) return <div>Erro: {error}</div>;
 
+  const typeOptions = [
+    { id: 'knowledge', title: 'Certificação de Conhecimento' },
+    { id: 'recognition', title: 'Aproveitamento de Estudos' }
+  ];
   const noticeOptions = notices.map(n => ({ id: n.id, title: n.number }));
   const courseOptions = courses.map(c => ({ id: c.id, title: c.name }));
   const stepOptions = steps.map(s => ({ id: s.index, title: s.label }));
@@ -206,11 +213,11 @@ export default function Requests() {
             />
           </div>
           <Filter
-            optionList={outcomeOptions}
-            label="Resultado"
-            value={selectedOutcome || null}
-            onChange={(e, v) => handleFilterChange('selectedOutcome', v)}
-            width={180}
+            optionList={typeOptions}
+            label="Tipo"
+            value={selectedType || null}
+            onChange={(e, v) => handleFilterChange('selectedType', v)}
+            width={250}
           />
           <Filter
             optionList={stepOptions}
@@ -219,31 +226,38 @@ export default function Requests() {
             onChange={(e, v) => handleFilterChange('selectedStep', v)}
           />
           <Filter
-            optionList={statusOptions}
-            label="Situação"
-            value={selectedStatus || null}
-            onChange={(e, v) => handleFilterChange('selectedStatus', v)}
-            width={180}
+            optionList={outcomeOptions}
+            label="Resultado"
+            value={selectedOutcome || null}
+            onChange={(e, v) => handleFilterChange('selectedOutcome', v)}
+            width={170}
           />
           <Filter
             optionList={noticeOptions}
             label="Editais"
             value={selectedNotice || null}
             onChange={(e, v) => handleFilterChange('selectedNotice', v)}
-            width={180}
+            width={160}
           />
           <Filter
             optionList={courseOptions}
             label="Cursos"
             value={selectedCourse || null}
             onChange={(e, v) => handleFilterChange('selectedCourse', v)}
-            width={390}
+            width={300}
           />
           <Filter
             optionList={disciplineOptions}
             label="Disciplinas"
             value={selectedDiscipline || null}
             onChange={(e, v) => handleFilterChange('selectedDiscipline', v)}
+          />
+          <Filter
+            optionList={statusOptions}
+            label="Situação"
+            value={selectedStatus || null}
+            onChange={(e, v) => handleFilterChange('selectedStatus', v)}
+            width={160}
           />
           <Filter
             optionList={perPageList}

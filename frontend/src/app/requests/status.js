@@ -13,10 +13,10 @@ export const StatusEnum = Object.freeze([
     "Retornado pelo Coordenador",
     "Rejeitado pelo Coordenador",
     "Homologado pelo Coordenador",
-    "Em aguardo para divulgação",
+    "Etapa de Registro do Ensino",
     "Retornado pelo Ensino",
     "Rejeitado pelo Ensino",
-    "Finalizado e divulgado",
+    "Finalizado",
 ]);
 
 export const steps = [
@@ -24,7 +24,7 @@ export const steps = [
     {index: 1, label: 'Análise do Coordenador'},
     {index: 2, label: 'Análise do Professor'},
     {index: 3, label: 'Homologação do Coordenador'},
-    {index: 4, label: 'Aguardando divulgação'}
+    {index: 4, label: 'Etapas Finais'}
 ]
 
 
@@ -45,7 +45,7 @@ export function getEnumIndexByValue(value) {
 
 export function getSucceeded() {
     return ["Encaminhado para o Coordenador", "Analisado pelo Coordenador", "Analisado pelo Professor",
-        "Homologado pelo Coordenador", "Finalizado e divulgado"];
+        "Homologado pelo Coordenador", "Finalizado"];
 }
 
 export function getFailed() {
@@ -55,11 +55,11 @@ export function getFailed() {
 
 export function getPending() {
     return ["Solicitação criada", "Em análise do Coordenador", "Em análise do Professor", "Em homologação do Coordenador",
-        "Retornado pelo Coordenador", "Em aguardo para divulgação", "Retornado pelo Ensino"];
+        "Retornado pelo Coordenador", "Etapa de Registro do Ensino", "Retornado pelo Ensino"];
 }
 
 export function getFinished() {
-    return ["Cancelado pelo Aluno", "Finalizado e divulgado"];
+    return ["Cancelado pelo Aluno", "Finalizado"];
 }
 
 export function getStatusStepIndex(status) {
@@ -88,11 +88,11 @@ export function getStep4Status() {
 }
 
 export function getStep5Status() {
-    return ["Em aguardo para divulgação", "Rejeitado pelo Ensino", "Finalizado e divulgado"]
+    return ["Etapa de Registro do Ensino", "Rejeitado pelo Ensino", "Finalizado"]
 }
 
 export function getStep6Status() {
-    return ["Finalizado e divulgado"]
+    return ["Finalizado"]
 }
 
 export function getStatus(status) {
@@ -125,13 +125,13 @@ export function getStatus(status) {
             return "RJ_COORD";
         case "Homologado pelo Coordenador":
             return "AP_COORD";
-        case "Em aguardo para divulgação":
+        case "Etapa de Registro do Ensino":
             return "IN_AP_CRE";
         case "Retornado pelo Ensino":
             return "R_CRE";
         case "Rejeitado pelo Ensino":
             return "RJ_CRE";
-        case "Finalizado e divulgado":
+        case "Finalizado":
             return "AP_CRE";
     }
 }

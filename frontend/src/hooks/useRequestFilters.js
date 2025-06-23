@@ -9,6 +9,7 @@ export const useRequestFilters = (initialFilters = {}) => {
     selectedCourse: null,
     selectedDiscipline: null,
     selectedOutcome: null,
+    selectedType: null,
     itemsPerPage: 10,
     ...initialFilters
   });

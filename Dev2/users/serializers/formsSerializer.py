@@ -230,7 +230,7 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Status inválido")
         return value
 
-    def handle_file_uploads(self, instance, student):
+    def handle_file_uploads(self, instance, student, upload = False):
         request = self.context.get('request')
         if not request:
             return
@@ -250,13 +250,14 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             file_id = drive_service.upload_file(attachment_file, student.drive_folder_id)
             if not file_id:
                 raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
-            Attachment.objects.create(
-                id=file_id,
-                file_name=attachment_file.name,
-                content_type=attachment_file.content_type,
-                recognition_form=instance,
-                is_test_attachment=False
-            )
+            if not upload:
+                Attachment.objects.create(
+                    id=file_id,
+                    file_name=attachment_file.name,
+                    content_type=attachment_file.content_type,
+                    recognition_form=instance,
+                    is_test_attachment=False
+                )
 
     def create(self, validated_data):
         # Verifica se existe um Notice (edital) aberto
@@ -295,6 +296,8 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
         for field, value in validated_data.items():
             setattr(instance, field, value)
         instance.save()
+        student = get_object_or_404(Student, id=instance.student_id)
+        self.handle_file_uploads(instance, student, True)
         return instance
 
 
@@ -310,7 +313,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     student_course = serializers.CharField(source='student.course', read_only=True)
     attachments = AttachmentSerializer(many=True, read_only=True)
     steps = StepSerializer(many=True, read_only=True)
-    test_attachment = serializers.FileField(required=False, read_only=False, allow_null=True)#AttachmentSerializer
+    test_attachment = serializers.FileField(required=False, read_only=False, allow_null=True)
 
     class Meta:
         model = KnowledgeCertification
@@ -394,7 +397,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Status de aprovação inválido")
         return value
 
-    def handle_file_uploads(self, instance, student):
+    def handle_file_uploads(self, instance, student, upload = False):
         request = self.context.get('request')
         if not request:
             return
@@ -416,13 +419,14 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
                 file_id = drive_service.upload_file(attachment_file, student.drive_folder_id)
                 if not file_id:
                     raise serializers.ValidationError("Falha ao enviar arquivo para o Google Drive")
-                Attachment.objects.create(
-                    id=file_id,
-                    file_name=attachment_file.name,
-                    content_type=attachment_file.content_type,
-                    certification_form=instance,
-                    is_test_attachment=False
-                )
+                if not upload: 
+                    Attachment.objects.create(
+                        id=file_id,
+                        file_name=attachment_file.name,
+                        content_type=attachment_file.content_type,
+                        certification_form=instance,
+                        is_test_attachment=False
+                    )
 
         if test_attachment_file:
             newly_uploaded_drive_id = drive_service.upload_file(test_attachment_file, student.drive_folder_id)
@@ -479,5 +483,5 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             setattr(instance, field, value)
         instance.save()
         student = get_object_or_404(Student, id=instance.student_id)
-        self.handle_file_uploads(instance, student)
+        self.handle_file_uploads(instance, student, True)
         return instance

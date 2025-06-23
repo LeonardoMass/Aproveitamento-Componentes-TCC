@@ -30,7 +30,7 @@
 }
 
 .nameFilter {
-  min-width: 500px;
+  min-width: 350px;
 }
 
 .searchWrapper :global(.p-inputtext) {
@@ -39,7 +39,7 @@
   height: 50px;
   border: 1px solid rgb(196, 196, 196);
   border-radius: 5px;
-  font-size: 14px;
+  font-size: 15px;
   box-sizing: border-box;
 }
 
@@ -213,4 +213,11 @@
 .addButton:hover {
   transform: scale(1.1);
   background-color: #268a34;
+}
+
+.table th:nth-child(2) {
+  width: 4%;
+}
+.table td:nth-child(2) {
+  text-align: center;
 }
