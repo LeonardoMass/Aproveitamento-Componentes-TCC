@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./usersList.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash, faEye, faSearch, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faSearch, faToggleOn, faToggleOff } from "@fortawesome/free-solid-svg-icons";
 import Filter from "@/components/FilterField/filterField";
 import { useUserFilters } from "@/hooks/useUserFilters";
 import AuthService from "@/services/AuthService";
@@ -183,11 +183,11 @@ const UsersList = () => {
                             <FontAwesomeIcon icon={faPenToSquare} />
                           </button>
                           <button
-                            className={styles.deleteButton}
+                            className={`${styles.deleteButton} ${u.is_active ? styles.activateButton : styles.deactivateButton}`}
                             onClick={() => updateActivity(u.id)}
                             title="Inativar/Ativar"
                           >
-                            <FontAwesomeIcon icon={u.is_active ? faTrash : faEye} />
+                            <FontAwesomeIcon icon={u.is_active ? faToggleOn : faToggleOff} />
                           </button>
                         </div>
                       </>

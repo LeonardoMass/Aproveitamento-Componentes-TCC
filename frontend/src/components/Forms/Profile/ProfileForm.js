@@ -107,7 +107,8 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
         const fetchCourses = async () => {
             try {
                 const data = await courseList();
-                setCourses(data);
+                const activeCourses = data.filter(c => c.is_active);
+                setCourses(activeCourses);
             } catch (err) {
                 console.log(err);
             }

@@ -24,11 +24,9 @@ const CertificationRequestForm = () => {
   const [ppc, setPpc] = useState([]);
   const [disciplineId, setDisciplineId] = useState("");
   const [disciplines, setDisciplines] = useState([]);
-  const [notices, setNotices] = useState([]);
   const [selectedNotice, setSelectedNotice] = useState("");
   const [status] = useState("CR");
   const { user } = useAuth();
-  const [courses, setCourses] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
 
   const idCounterRef = useRef(1);
@@ -42,7 +40,8 @@ const CertificationRequestForm = () => {
         setSelectedCourse(course);
         const ppcsData = await ppcList({ course_id: course.id });
         console.log("PPCs:", ppcsData);
-        setPpc(ppcsData);
+        const activePpcs = ppcsData.filter(ppc => ppc.is_active);
+        setPpc(activePpcs);
       } catch (err) {
         console.log(err);
       }
@@ -53,9 +52,9 @@ const CertificationRequestForm = () => {
   useEffect(() => {
     const fetchNotices = async () => {
       try {
+        setIsCreating(true);
         const noticeData = await noticeListAll();
         console.log(noticeData);
-        setNotices(noticeData.results);
         const currentNotice = noticeData.results
           .filter(
             (notice) =>
@@ -70,6 +69,8 @@ const CertificationRequestForm = () => {
         setSelectedNotice(currentNotice || null);
       } catch (error) {
         console.error("Erro ao buscar notices:", error);
+      } finally {
+        setIsCreating(false);
       }
     };
 
@@ -79,13 +80,19 @@ const CertificationRequestForm = () => {
   const handlePpcChange = async (e) => {
     const selectedPpcId = e.target.value;
     setSelectedPpc(selectedPpcId);
-
-    const selectedPpcObj = ppc.find((item) => item.id === selectedPpcId);
-    if (selectedPpcObj && selectedPpcObj.disciplines && selectedPpcObj.disciplines.length > 0) {
-      const disciplineDetails = await getDisciplineByArrayIds(selectedPpcObj.disciplines, true);
-      setDisciplines(disciplineDetails);
-    } else {
-      setDisciplines([]);
+    try {
+      setIsCreating(true);
+      const selectedPpcObj = ppc.find((item) => item.id === selectedPpcId);
+      if (selectedPpcObj && selectedPpcObj.disciplines && selectedPpcObj.disciplines.length > 0) {
+        const disciplineDetails = await getDisciplineByArrayIds(selectedPpcObj.disciplines, true);
+        setDisciplines(disciplineDetails);
+      } else {
+        setDisciplines([]);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar disciplinas ppc:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -219,10 +226,14 @@ const CertificationRequestForm = () => {
         </div>
         <div className={styles.typeContainer}>
           <label className={styles.textForm}>PPC</label>
-          <select value={selectedPpc} onChange={handlePpcChange} className={styles.selectForm} required>
+          <select
+            value={selectedPpc}
+            onChange={handlePpcChange}
+            className={styles.selectForm}
+            disabled={!selectedCourse || isCreating}
+            required>
             <option value="">Selecione um PPC</option>
             {ppc
-              .sort((a, b) => a.name.localeCompare(b.name))
               .map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
@@ -240,12 +251,11 @@ const CertificationRequestForm = () => {
             value={disciplineId}
             onChange={(e) => setDisciplineId(e.target.value)}
             className={styles.selectForm}
-            disabled={!selectedCourse}
+            disabled={!selectedPpc || isCreating}
             required
           >
             <option value="">Selecione uma disciplina</option>
             {disciplines
-              .sort((a, b) => a.name.localeCompare(b.name))
               .map((discipline) => (
                 <option key={discipline.id} value={discipline.id}>
                   {discipline.name}
@@ -331,10 +341,10 @@ const CertificationRequestForm = () => {
           </div>
         </div>
         <div className={styles.formBtnContainer}>
-          <Button variant="cancel" 
-          className={styles.cancelButton} 
-          onClick={handleCancel}
-          disabled={isCreating}>
+          <Button variant="cancel"
+            className={styles.cancelButton}
+            onClick={handleCancel}
+            disabled={isCreating}>
             Cancelar
           </Button>
           <Button

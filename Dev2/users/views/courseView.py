@@ -183,29 +183,34 @@ class UpdateCourseAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteCourseAPIView(APIView):
+class ChangeStateCourseAPIView(APIView):
 
     permission_classes = [IsAuthenticated]
     user_service = UserService()
 
-    def delete(self, request, course_id, *args, **kwargs):
+    def put(self, request, course_id, *args, **kwargs):
         usuario = request.user
-
         if not self.user_service.userAutorizedEnsino(usuario):
             return Response(
-                {"detail": "Usuário não autorizado"},
+                {"detail": "Você não tem permissão para executar esta ação."},
                 status=status.HTTP_403_FORBIDDEN
             )
-
         try:
-            # Busca o curso pelo ID
             course = Course.objects.get(id=course_id)
-            # Deleta o curso
-            course.delete()
-            return Response({"message": "Course deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+            course.is_active = not course.is_active 
+            course.save()
+
+            if course.is_active: 
+                return Response({"detail": "Curso foi ativado."},
+                status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": "Curso foi inativado."},
+                status=status.HTTP_200_OK)
+
         except Course.DoesNotExist:
-            # Retorna erro caso o curso não seja encontrado
-            return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Curso não encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"detail": f"Ocorreu um erro inesperado: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CourseProfessorsView(APIView):

@@ -1,13 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
 import styles from "./discipline.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenToSquare, faTrash, faEye, faSearch, faPlus, faSave } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faToggleOff, faToggleOn, faEye, faSearch, faPlus, faSave } from "@fortawesome/free-solid-svg-icons";
 import DisciplineService from "@/services/DisciplineService";
 import Toast from "@/utils/toast";
 import { useAuth } from "@/context/AuthContext";
@@ -37,9 +35,8 @@ const Discipline = () => {
     const fetchDisciplines = async () => {
       try {
         const data = await DisciplineService.DisciplineList();
-        const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
-        setDisciplines(sortedData);
-        setFilteredDisciplines(sortedData);
+        setDisciplines(data);
+        setFilteredDisciplines(data);
       } catch (err) {
         console.error(err);
       }
@@ -118,9 +115,8 @@ const Discipline = () => {
       }
 
       const updatedData = await DisciplineService.DisciplineList();
-      const sortedData = updatedData.sort((a, b) => a.name.localeCompare(b.name));
-      setDisciplines(sortedData);
-      setFilteredDisciplines(applySearchFilter(sortedData));
+      setDisciplines(updatedData);
+      setFilteredDisciplines(applySearchFilter(updatedData));
       closeModal();
     } catch (err) {
       setToastMessage({ type: "error", text: "Erro ao salvar disciplina!" });
@@ -151,7 +147,7 @@ const Discipline = () => {
           );
         }
         const freshData = await DisciplineService.DisciplineList();
-        updatedDisciplinesList = freshData.sort((a, b) => a.name.localeCompare(b.name));
+        updatedDisciplinesList = freshData;
       }
       setDisciplines(updatedDisciplinesList);
       setFilteredDisciplines(applySearchFilter(updatedDisciplinesList));
@@ -218,11 +214,11 @@ const Discipline = () => {
                           <FontAwesomeIcon icon={faPenToSquare} />
                         </button>
                         <button
-                          className={styles.deleteButton}
+                          className={`${styles.deleteButton} ${discipline.is_active ? styles.activateButton : styles.deactivateButton}`}
                           onClick={() => handleDelete(discipline.id)}
                           title="Inativar/Excluir"
                         >
-                          <FontAwesomeIcon icon={faTrash} />
+                          <FontAwesomeIcon icon={discipline.is_active ? faToggleOn : faToggleOff} size="sm" />
                         </button>
                       </>
                     )}

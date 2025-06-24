@@ -49,4 +49,4 @@ class Disciplines(models.Model):
     class Meta:
         verbose_name = "Discipline"
         verbose_name_plural = "Disciplines"
-        ordering = ['name', 'is_active']
+        ordering = ['-is_active', 'name']

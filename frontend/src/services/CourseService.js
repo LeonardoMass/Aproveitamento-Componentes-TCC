@@ -1,4 +1,5 @@
 import { apiClient } from "@/libs/api";
+import { handleApiResponse } from "@/libs/apiResponseHandler";
 
 const courseList = async () => {
   return await apiClient.get("courses/list/").then((response) => response.data);
@@ -55,4 +56,15 @@ const courseListReduced = async (params = { reduced: true }) => {
   }
 };
 
-export { courseList, courseCreate, courseEdit, getCourseById, courseListByName, courseListReduced };
+const changeStateCourse = async (courseId) => {
+    try {
+      const response = await apiClient.put(`courses/state/${courseId}`);
+      handleApiResponse(response);
+      return response.data;
+    } catch(error) {
+      console.error("Error state course by ID:", error);
+      return [];
+    };
+};
+
+export { courseList, courseCreate, courseEdit, getCourseById, courseListByName, courseListReduced, changeStateCourse };

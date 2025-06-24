@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faEye, faSearch, faEdit, faProjectDiagram } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faEye, faSearch, faEdit, faProjectDiagram, faToggleOn, faToggleOff } from "@fortawesome/free-solid-svg-icons";
 import styles from "./course.module.css";
 import ModalCourse from "@/components/Modal/ModalCourse/modal";
 import ModalPpcDisciplineList from "@/components/Modal/ModalCourse/disciplineList/modal";
 import ModalPpcSelector from "@/components/Modal/ModalCourse/ppcSelector/modal";
-import { courseList } from "@/services/CourseService";
+import { courseList, changeStateCourse } from "@/services/CourseService";
 import { useAuth } from "@/context/AuthContext";
 import { ppcList } from "@/services/PpcService";
 import { InputText } from 'primereact/inputtext';
@@ -21,12 +21,15 @@ const Course = () => {
   const [ppcSelectorModal, setPpcSelectorModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [ppcsForSelector, setPpcsForSelector] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
   const fetchCoursesAndSetState = async () => {
+    setIsLoading(true);
     try {
       const data = await courseList();
-      const coursesArray = Array.isArray(data) ? data : ['Cursos não encontrados'];
+      const coursesArray = Array.isArray(data) ? data : [];
+      console.log(data);
       setCourses(coursesArray);
       if (searchTerm) {
         const filtered = coursesArray.filter((course) =>
@@ -40,6 +43,8 @@ const Course = () => {
       console.error("Erro ao buscar cursos:", err);
       setCourses([]);
       setFilteredCourses([]);
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -110,6 +115,18 @@ const Course = () => {
     }
   };
 
+  const handleStateChange = async (courseId) => {
+    setIsLoading(true);
+    try {
+        await changeStateCourse(courseId);
+        await fetchCoursesAndSetState();
+    } catch (error) {
+        console.error("Erro ao alterar estado do curso:", error);
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
   const userType = user.type;
   const userId = user.id;
 
@@ -146,7 +163,7 @@ const Course = () => {
           <tbody>
             {Array.isArray(filteredCourses) && filteredCourses.length > 0 ? (
               filteredCourses.map((course) => (
-                <tr key={course.id}>
+                <tr key={course.id} className={!course.is_active ? styles.inactiveRow : ''}>
                   <td>{course.name ?? "N/A"}</td>
                   <td>
                     {course.coordinator
@@ -159,18 +176,18 @@ const Course = () => {
                         className={`${styles.actionButton} ${styles.viewButton}`}
                         onClick={(e) => { e.stopPropagation(); openPpcDisciplineModal(course); }}
                         title="Visualizar Disciplinas (do 1º PPC)"
+                        disabled={isLoading}
                       >
                         <FontAwesomeIcon icon={faEye} size="sm" />
-                        <span>Disciplinas</span>
                       </button>
                       {(userType === "Ensino" || (userType === "Coordenador" && course.coordinator?.id === userId)) && (
                         <button
                           className={`${styles.actionButton} ${styles.managePpcButton}`}
                           onClick={(e) => { e.stopPropagation(); openPpcSelectorModal(course); }}
                           title="Gerenciar PPCs do Curso"
+                          disabled={isLoading}
                         >
                           <FontAwesomeIcon icon={faProjectDiagram} size="sm" />
-                          <span>PPCs</span>
                         </button>
                       )}
                       {(userType === "Ensino" || (userType === "Coordenador" && course.coordinator?.id === userId)) && (
@@ -178,9 +195,19 @@ const Course = () => {
                           className={`${styles.actionButton} ${styles.editButton}`}
                           onClick={(e) => { e.stopPropagation(); openModalForEdit(course); }}
                           title="Editar Curso"
+                          disabled={isLoading}
                         >
                           <FontAwesomeIcon icon={faEdit} size="sm" />
-                          <span>Editar</span>
+                        </button>
+                      )}
+                      {(userType === "Ensino") && (
+                        <button
+                          className={`${styles.actionButton} ${course.is_active ? styles.activateButton : styles.deactivateButton}`}
+                          onClick={(e) => { e.stopPropagation(); handleStateChange(course.id); }}
+                          title={course.is_active ? "Desativar Curso" : "Ativar Curso"}
+                          disabled={isLoading}
+                        >
+                          <FontAwesomeIcon icon={course.is_active ? faToggleOn : faToggleOff} size="sm" />
                         </button>
                       )}
                     </div>

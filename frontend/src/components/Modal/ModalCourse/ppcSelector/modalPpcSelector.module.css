@@ -1,101 +1,182 @@
 .modalOverlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); display: flex;
-    justify-content: center; align-items: center; z-index: 1050;
-  }
-  
-  .modalContent {
-    background-color: #fff; padding: 25px; border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); width: 90%;
-    max-width: 500px; max-height: 70vh; overflow-y: auto;
-    display: flex; flex-direction: column;
-  }
-  
-  .modalContent h2 {
-    margin-top: 0; margin-bottom: 20px; color: #333;
-    text-align: center; font-size: 1.4rem;
-  }
-  
-  .infoText {
-    text-align: center; color: #666; margin: 20px 0; font-style: italic;
-  }
-  
-  .ppcList {
-    list-style: none; padding: 0; margin: 0 0 20px 0;
-  }
-  
-  .ppcItem {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.modalContent {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+  font-size: 1.4rem;
+}
+
+.createSection {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed #ccc;
+}
+
+.sectionTitle {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.createForm {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.createInput {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.createInput.inputError {
+    border-color: #e74c3c;
+}
+
+.createButtonInternal {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 12px 10px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .ppcItem:last-child {
-    border-bottom: none;
-  }
-  
-  .ppcItem span {
-    color: #444;
+    gap: 5px;
+    padding: 10px 15px;
+    flex-shrink: 0;
+}
+
+.listTitle {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.infoText {
+  text-align: center;
+  color: #666;
+  margin: 20px 0;
+  font-style: italic;
+}
+
+.ppcList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+}
+
+.ppcItem {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s ease;
+  gap: 15px;
+}
+
+.ppcItem:last-child {
+  border-bottom: none;
+}
+
+.ppcItem:hover {
+   background-color: #f9f9f9;
+}
+
+.inactivePpcItem {
+  opacity: 0.7;
+  color: #888;
+  background-color: #f0f0f0;
+  font-style: italic;
+}
+
+.ppcList .inactivePpcItem:hover {
+  background-color: #e0e0e0;
+}
+
+.inactivePpcItem .ppcName {
+    color: #888;
+}
+
+.ppcName {
     font-weight: 500;
-  }
-  
-  .editLink {
-    color: #3498db;
-    text-decoration: none;
-    font-size: 0.9rem;
-    padding: 5px 10px;
-    border: 1px solid #3498db;
-    border-radius: 4px;
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
-  
-  .editLink:hover {
-    background-color: #3498db;
-    color: #fff;
-  }
-  
-  .addAction {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px dashed #ccc;
-      text-align: center;
-  }
-  
-  /* .addAction button { ... } */
-  
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+}
 
-  .createForm {
+.ppcActions {
     display: flex;
-    justify-content: space-between;
-  }
-
-  .createInput {
-    width: 70%;
-    padding-left: 10px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
     align-items: center;
-  }
+    gap: 10px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
 
-  .modalActions {
-    display: flex;
-    justify-content: center;
-  }
+.editLink {
+  color: #3498db;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 5px 10px;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
 
-  .closeButton {
-    padding: 10px 20px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    align-self: flex-end;
-    margin-top: 15px;
-  }
-  
-  .closeButton:hover {
-    background-color: #5a6268;
-  }
+.editLink:hover:not([disabled]) {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.editLink[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #ccc;
+    color: #888;
+    background-color: #eee;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.errorText {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+}

@@ -6,9 +6,7 @@ from users.models import Course
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    coordinator_id = serializers.PrimaryKeyRelatedField(
-        queryset=Servant.objects.all(), required=False, allow_null=True
-    )
+    coordinator_id = serializers.PrimaryKeyRelatedField(queryset=Servant.objects.all(), required=False, allow_null=True)
     coordinator = ServantSerializer(read_only=True, allow_null=True)
     professors = ServantSerializer(many=True, read_only=True)
     professor_ids = serializers.PrimaryKeyRelatedField(
@@ -28,6 +26,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "professor_ids",
             "coordinator",
             "coordinator_id",
+            'is_active',
         ]
 
     def update(self, instance, validated_data):
@@ -43,4 +42,5 @@ class ReducedCourseSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
+            'is_active',
         ]

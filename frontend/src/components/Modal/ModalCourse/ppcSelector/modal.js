@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './modalPpcSelector.module.css';
-import { ppcCreate } from '@/services/PpcService';
+import { ppcCreate, ppcEdit } from '@/services/PpcService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSpinner, faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
 import Button from "@/components/ButtonDefault/button";
@@ -9,18 +9,18 @@ import Button from "@/components/ButtonDefault/button";
 const ModalPpcSelector = ({ course, ppcs, onClose, onPpcCreated }) => {
 
     const [newPpcName, setNewPpcName] = useState("");
-    const [isCreating, setIsCreating] = useState(false);
-    const [createError, setCreateError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
 
     if (!course) return null;
 
     const handleCreatePpc = async () => {
         if (!newPpcName.trim()) {
-            setCreateError("O nome do PPC não pode ser vazio.");
+            setError("O nome do PPC não pode ser vazio.");
             return;
         }
-        setIsCreating(true);
-        setCreateError("");
+        setIsLoading(true);
+        setError("");
         try {
             await ppcCreate({
                 name: newPpcName.trim(),
@@ -30,10 +30,28 @@ const ModalPpcSelector = ({ course, ppcs, onClose, onPpcCreated }) => {
             if (onPpcCreated) {
                 onPpcCreated();
             }
-        } catch (error) {
-             console.error("Erro ao criar PPC:", error);
+        } catch (err) {
+            console.error("Erro ao criar PPC:", err);
+            setError("Erro ao criar PPC.");
         } finally {
-            setIsCreating(false);
+            setIsLoading(false);
+        }
+    };
+
+    const handleState = async (ppc) => {
+        setIsLoading(true);
+        setError('');
+
+        try {
+            await ppcEdit(ppc.id, { is_active: !ppc.is_active });
+            if (onPpcCreated) {
+                onPpcCreated();
+            }
+        } catch (err) {
+            console.error("Erro ao alterar estado do PPC:", err);
+            setError("Falha ao alterar estado do PPC. Verifique os dados e tente novamente.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -48,29 +66,29 @@ const ModalPpcSelector = ({ course, ppcs, onClose, onPpcCreated }) => {
                         <input
                             type="text"
                             value={newPpcName}
-                            onChange={(e) => { setNewPpcName(e.target.value); setCreateError(''); }}
+                            onChange={(e) => { setNewPpcName(e.target.value); setError(''); }}
                             placeholder="Nome do novo PPC (Ex: PPC 2025.2)"
-                            className={`${styles.createInput} ${createError ? styles.inputError : ''}`}
-                            disabled={isCreating}
+                            className={`${styles.createInput} ${error && error.includes('nome') ? styles.inputError : ''}`}
+                            disabled={isLoading}
                             aria-label="Nome do novo PPC"
                         />
                         <Button
                             variant="save"
                             onClick={handleCreatePpc}
-                            disabled={isCreating || !newPpcName.trim()}
+                            disabled={isLoading || !newPpcName.trim()}
                             className={styles.createButtonInternal}
                         >
-                            {isCreating ? (
-                                <FontAwesomeIcon icon={faSpinner} spin size="sm" fixedWidth/>
+                            {isLoading ? (
+                                <FontAwesomeIcon icon={faSpinner} spin size="sm" fixedWidth />
                             ) : (
-                                <FontAwesomeIcon icon={faPlus} size="sm" fixedWidth/>
+                                <FontAwesomeIcon icon={faPlus} size="sm" fixedWidth />
                             )}
-                            <span>{isCreating ? " Criando" : " Criar"}</span>
+                            <span>{isLoading ? " Processando" : " Criar"}</span>
                         </Button>
                     </div>
-                    {createError && (
+                    {error && (
                         <p className={styles.errorText}>
-                            <FontAwesomeIcon icon={faExclamationCircle} /> {createError}
+                            <FontAwesomeIcon icon={faExclamationCircle} /> {error}
                         </p>
                     )}
                 </div>
@@ -82,11 +100,24 @@ const ModalPpcSelector = ({ course, ppcs, onClose, onPpcCreated }) => {
                     ) : (
                         <ul className={styles.ppcList}>
                             {ppcs.map(ppc => (
-                                <li key={ppc.id} className={styles.ppcItem}>
-                                    <span className={styles.ppcName}>{ppc.name || `PPC ${ppc.id.substring(0,8)}`}</span>
-                                    <Link href={`/courses/ppc/${ppc.id}`} className={styles.editLink} title="Editar disciplinas deste PPC">
-                                        Editar Disciplinas
-                                    </Link>
+                                <li
+                                    key={ppc.id}
+                                    className={`${styles.ppcItem} ${!ppc.is_active ? styles.inactivePpcItem : ''}`}
+                                >
+                                    <span className={styles.ppcName}>{ppc.name || `PPC ${ppc.id.substring(0, 8)}`}</span>
+                                    <div className={styles.ppcActions}>
+                                        <Link href={`/courses/ppc/${ppc.id}`} className={styles.editLink} title="Editar disciplinas deste PPC">
+                                            Editar Disciplinas
+                                        </Link>
+                                        <Button
+                                            className={styles.editLink}
+                                            title={`Alterar estado deste PPC para ${ppc.is_active ? 'Inativo' : 'Ativo'}`}
+                                            onClick={() => handleState(ppc)}
+                                            disabled={isLoading}
+                                        >
+                                            {ppc.is_active ? 'Desativar' : 'Ativar'}
+                                        </Button>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -94,7 +125,7 @@ const ModalPpcSelector = ({ course, ppcs, onClose, onPpcCreated }) => {
                 </div>
 
                 <div className={styles.modalActions}>
-                    <Button variant="close" onClick={onClose} disabled={isCreating}>
+                    <Button variant="close" onClick={onClose} disabled={isLoading}>
                         Fechar
                     </Button>
                 </div>

@@ -28,4 +28,5 @@ class AbstractUser(PolymorphicModel):
 
     class Meta:
         abstract = False
+        ordering = ['-is_active', 'name']
 

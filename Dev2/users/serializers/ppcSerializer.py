@@ -18,7 +18,7 @@ class PpcSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ppc
-        fields = ["id", "name", "course", "course_id", "disciplines", "discipline_ids"]
+        fields = ["id", "name", "course", "course_id", "disciplines", "discipline_ids", 'is_active']
         read_only_fields = ["id"]
 
     def validate_name(self, value):

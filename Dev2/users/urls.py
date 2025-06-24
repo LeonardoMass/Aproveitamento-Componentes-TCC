@@ -6,7 +6,7 @@ from .views.disciplineView import discipline_detail , discipline_list_create, di
 from .views.noticeView import NoticeListCreateView, NoticeDetailView
 from .views.courseView import (ListCoursesAPIView, CreateCourseAPIView,
                                 RetrieveCourseByIdAPIView, UpdateCourseAPIView,
-                                DeleteCourseAPIView, SearchCourseByNameAPIView, CourseProfessorsView)
+                                ChangeStateCourseAPIView, SearchCourseByNameAPIView, CourseProfessorsView)
 from .views.formsView import (
     RecognitionOfPriorLearningListCreateView, RecognitionOfPriorLearningDetailView,
     KnowledgeCertificationListCreateView, KnowledgeCertificationDetailView, AttachmentDownloadView, StepCreateView, RecognitionAndCertificationListView, check_notice_open
@@ -28,7 +28,7 @@ urlpatterns = [
     path('courses/create/', CreateCourseAPIView.as_view(), name='create_course'),
     path('courses/read/<uuid:course_id>/', RetrieveCourseByIdAPIView.as_view(), name='read_course_by_id'),
     path('courses/update/<uuid:course_id>', UpdateCourseAPIView.as_view(), name='update_course'),
-    path('courses/delete/<uuid:course_id>', DeleteCourseAPIView.as_view(), name='delete_course'),
+    path('courses/state/<uuid:course_id>', ChangeStateCourseAPIView.as_view(), name='change_state_course'),
     path('courses/search/', SearchCourseByNameAPIView.as_view(), name='search_course_by_name'),
     path('courses/professors/<int:coordinator_id>', CourseProfessorsView.as_view(), name='professors'),
     path('forms/steps/', StepCreateView.as_view(), name='step-create'),
