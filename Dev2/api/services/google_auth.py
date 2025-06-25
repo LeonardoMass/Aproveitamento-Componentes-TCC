@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
-from .. import settings
+from django.conf import settings
 from uuid import uuid4
 
 # Classe que realiza a autenticação com o Google
