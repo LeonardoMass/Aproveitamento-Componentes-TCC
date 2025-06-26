@@ -316,7 +316,7 @@ const CertificationRequestForm = () => {
               <FileUpload
                 name="singleAttachment"
                 mode="basic"
-                accept="application/pdf,image/png,image/jpeg"
+                accept="application/pdf"
                 maxFileSize={500000000}
                 chooseLabel="Selecionar arquivo"
                 className={styles.fileInput}

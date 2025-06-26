@@ -288,7 +288,7 @@ const Details = () => {
             setApprovalStatus("Deferido");
           }
         }
-        if (status == "Homologado pelo Coordenador") setTimeout(() => { generatePdf() }, 500);
+        if (status == "Homologado pelo Coordenador") setTimeout(() => { generatePdf(true) }, 500);
       }
       if (getFailed().includes(status)) {
 
