@@ -1,5 +1,5 @@
 from googleapiclient.discovery import build
-from api import settings
+from django.conf import settings
 from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
 
 from tempfile import NamedTemporaryFile
