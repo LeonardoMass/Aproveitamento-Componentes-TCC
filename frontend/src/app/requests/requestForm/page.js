@@ -307,9 +307,9 @@ const CertificationRequestForm = () => {
         )}
         <div className={styles.typeContainer}>
           {requestType === "certificacao" ? (
-            <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 3.2.1, alinea "b" do Edital.</label>
+            <label htmlFor="anexos" className={styles.textForm}>{'Anexe os comprovantes, conforme item 3.2.1, alinea "b" do Edital.'}</label>
           ) : (
-            <label htmlFor="anexos" className={styles.textForm}>Anexe os comprovantes, conforme item 2.2.1, alinea "b" do Edital.</label>
+            <label htmlFor="anexos" className={styles.textForm}>{'Anexe os comprovantes, conforme item 2.2.1, alinea "b" do Edital.'}</label>
           )}
           {uploadLines.map((line) => (
             <div key={line.id} style={{ display: "flex", alignItems: "center" }}>

@@ -5,7 +5,7 @@ import { Button } from 'primereact/button';
 import { useState } from "react";
 
 
-const profilePage = () => {
+const ProfilePage = () => {
   const { user } = useAuth();
   const isStudent = user?.type === 'Estudante';
   console.log(user);
@@ -54,4 +54,4 @@ const profilePage = () => {
   );
 };
 
-export default profilePage;
+export default ProfilePage;
