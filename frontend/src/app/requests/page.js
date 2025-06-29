@@ -102,14 +102,10 @@ export default function Requests() {
   const filtered = mergedRequests
     .filter(i => i.student_name.toLowerCase().includes(search.toLowerCase()))
     .filter(i => !selectedType || i.type === selectedType.id)
-    .filter(item => {
+    .filter(i => {
       if (!selectedOutcome) return true;
-      const { approval_status } = item;
-      const filterTitle = selectedOutcome.title;
-      if (filterTitle === 'Pendente') {
-        return approval_status !== 'Deferido' && approval_status !== 'Indeferido';
-      }
-      return approval_status === filterTitle;
+      const { approval_status } = i;
+      return approval_status === selectedOutcome.title;
     })
     .filter(i => !selectedStep || getStatusStepIndex(i.status_display) === selectedStep.id)
     .filter(i =>
@@ -148,11 +144,12 @@ export default function Requests() {
         'Tipo': item.type === 'knowledge' ? 'Certificação de Conhecimento (CC)' : 'Aproveitamento de Estudos (AE)',
         'Disciplina': item.discipline_name || '-',
         'Data de Criação': new Date(item.create_date).toLocaleString('pt-BR'),
-        'Status': item.status_display || '-',
         'Resultado': item.approval_status || 'Pendente',
-        'Coordenador em Análise': coordinatorStep?.responsible?.name || '-',
-        'Professor Analisador': professorStep?.responsible?.name || '-',
+        'Coordenador': coordinatorStep?.responsible?.name || '-',
+        'Professor': professorStep?.responsible?.name || '-',
         'Feedback do Professor': professorStep?.feedback || '-',
+        'Status': item.status_display || '-',
+        'Edital': item.notice_number || '-',
       };
     });
     exportToCsv(dataToExport, `solicitacoes_filtradas_${new Date().toISOString().slice(0, 10)}.csv`);
@@ -178,7 +175,8 @@ export default function Requests() {
   const outcomeOptions = [
     { id: 'deferido', title: 'Deferido' },
     { id: 'indeferido', title: 'Indeferido' },
-    { id: 'pendente', title: 'Pendente' }
+    { id: 'pendente', title: 'Pendente' },
+    { id: 'cancelado', title: 'Cancelado' },
   ];
   const disciplineOptions = disciplines.map(d => ({ id: d, title: d }));
   const perPageList = perPageOptions.map(n => ({ id: n, title: n === 0 ? 'Todos' : n.toString() }));
@@ -274,7 +272,14 @@ export default function Requests() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Estudante</th><th>Tipo</th><th>Disciplina</th><th>Criação</th><th>Responsável</th><th>Status</th><th>Ações</th>
+                <th>Estudante</th>
+                <th>Tipo</th>
+                <th>Disciplina</th>
+                <th>Criação</th>
+                <th>Responsável</th>
+                <th>Status</th>
+                <th>Edital</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -291,6 +296,7 @@ export default function Requests() {
                     </td>
                     <td>{Array.from(item.steps).pop()?.responsible?.name || '-'}</td>
                     <td>{item.status_display || '-'}</td>
+                    <td>{item.notice_number|| '-'}</td>
                     <td>
                       <button className={styles.iconButton} onClick={() => handleDetailsClick(item)} title="Ver detalhes">
                         <FontAwesomeIcon icon={faEye} />

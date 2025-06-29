@@ -22,13 +22,12 @@ const NavBar = () => {
 
   useEffect(() => {
     const routeToIndexMap = {
-      "/home": 0,
-      "/requests": 1,
-      "/notice": 2,
-      "/courses": 3,
-      "/discipline": 4,
-      "/requests/requestForm": 5,
-      "/usersList": 6,
+      "/requests": 0,
+      "/notice": 1,
+      "/courses": 2,
+      "/discipline": 3,
+      "/requests/requestForm": 4,
+      "/usersList": 5,
     };
     if (routeToIndexMap.hasOwnProperty(pathname)) {
       setActiveIndex(routeToIndexMap[pathname]);
@@ -91,11 +90,6 @@ const NavBar = () => {
 
   const menuItems = [
     {
-      label: "Home",
-      icon: "pi pi-home",
-      command: () => (window.location.href = `/home`),
-    },
-    {
       label: "Solicitações",
       icon: "pi pi-envelope",
       command: () => (window.location.href = `/requests`),
@@ -104,16 +98,6 @@ const NavBar = () => {
       label: "Editais",
       icon: "pi pi-file",
       command: () => (window.location.href = `/notice`),
-    },
-    {
-      label: "Cursos",
-      icon: "pi pi-book",
-      command: () => (window.location.href = `/courses`),
-    },
-    {
-      label: "Disciplinas",
-      icon: "pi pi-list",
-      command: () => (window.location.href = `/discipline`),
     },
     ...(user?.type === "Estudante" && notice
       ? [
@@ -124,8 +108,18 @@ const NavBar = () => {
         },
       ]
       : []),
-    ...(user?.type === "Coordenador" || user?.type === "Ensino"
+    ...(user?.type !== "Estudante"
       ? [
+        {
+          label: "Cursos",
+          icon: "pi pi-book",
+          command: () => (window.location.href = `/courses`),
+        },
+        {
+          label: "Disciplinas",
+          icon: "pi pi-list",
+          command: () => (window.location.href = `/discipline`),
+        },
         {
           label: "Usuários",
           icon: "pi pi-users",

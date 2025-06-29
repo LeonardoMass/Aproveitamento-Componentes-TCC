@@ -69,11 +69,6 @@ const Details = () => {
   const [creFeedback, setCreFeedback] = useState("");
   const [endRequest, setEndRequest] = useState("");
   const [editedTestScore, setEditedTestScore] = useState("");
-  const [hasChangesKnowledge, setHasChangesKnowledge] = useState(false);
-  const [hasChangesWorkload, setHasChangesWorkload] = useState(false);
-  const [hasChangesStudiedWorkload, setHasChangesStudiedWorkload] =
-    useState(false);
-  const [hasChangesTestScore, setHasChangesTestScore] = useState(false);
   const [disableReactivity, setDisableReactivity] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -238,6 +233,10 @@ const Details = () => {
       if (status === "PROF") {
         body.responsible_id = Number(selectedProfessor);
       }
+      if (status == "CANCELED") {
+        handleSave("approval_status", "Cancelado");
+        setApprovalStatus("Cancelado");
+      }
 
       const response = await apiClient.post(
         `${baseURL}/forms/steps/`,
@@ -318,22 +317,6 @@ const Details = () => {
     await RequestService.DownloadAttachment(attachmentId);
   };
 
-  const handleDeleteAttachment = async (attachmentId) => {
-    await RequestService.DeleteAttachment(attachmentId);
-  };
-
-  const handleEditToggleKnowledge = () => {
-    setIsEditingKnowledge(!isEditingKnowledge);
-    setDisableReactivity(!isEditingKnowledge);
-  };
-  const handleEditToggleCourseWorkload = () => {
-    setisEditingCourseWorkload(!isEditingCourseWorkload);
-    setDisableReactivity(!isEditingCourseWorkload);
-  };
-  const handleEditToggleCourseStudiedWorkload = () => {
-    setIsEditingCourseStudiedWorkload(!isEditingCourseStudiedWorkload);
-    setDisableReactivity(!isEditingCourseStudiedWorkload);
-  };
   const handleEditToggleTestScore = () => {
     setIsEditingTestScore(!isEditingTestScore);
     setDisableReactivity(!isEditingTestScore);
@@ -578,9 +561,9 @@ const Details = () => {
   return (
     <div>
       <div ref={pageRef} className={styles.container}>
-        <h1 className={styles.center_title}>{requestType()}</h1>
         {details ? (
           <div>
+            <h1 className={styles.center_title}>{`${requestType()} - ${details?.notice_number || ''}`}</h1>
             <Stepper stepsStatus={stepsStatus} />
             {role === "Estudante" &&
               details.status_display === "Solicitação criada" && (

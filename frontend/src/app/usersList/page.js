@@ -158,7 +158,9 @@ const UsersList = () => {
                 <th>Email</th>
                 <th>Curso</th>
                 <th>Estado</th>
-                <th>Ações</th>
+                {user?.type === 'Ensino' && (
+                  <th>Ações</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -170,8 +172,8 @@ const UsersList = () => {
                   <td>{u.email ?? "N/A"}</td>
                   <td>{u.course ?? "N/A"}</td>
                   <td>{u.is_active ? "Ativo" : "Inativo"}</td>
-                  <td>
-                    {user?.type === 'Ensino' && (
+                  {user?.type === 'Ensino' && (
+                    <td>
                       <>
                         <div className={styles.actions}>
                           <button
@@ -191,8 +193,8 @@ const UsersList = () => {
                           </button>
                         </div>
                       </>
-                    )}
-                  </td>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

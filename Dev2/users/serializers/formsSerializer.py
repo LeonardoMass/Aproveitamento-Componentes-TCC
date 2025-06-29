@@ -161,13 +161,14 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
     student_email = serializers.SerializerMethodField()
     student_matricula = serializers.CharField(source='student.matricula', read_only=True)
     student_course = serializers.CharField(source='student.course', read_only=True)
+    notice_number = serializers.CharField(source='notice.number', read_only=True)
     attachments = AttachmentSerializer(many=True, read_only=True)
     steps = StepSerializer(many=True, read_only=True)
 
     class Meta:
         model = RecognitionOfPriorLearning
         fields = [
-            'id', 'course_workload', 'course_studied_workload', 'previous_course', 'notice', 'discipline', 'course',
+            'id', 'course_workload', 'course_studied_workload', 'previous_course', 'notice', 'notice_number', 'discipline', 'course',
             'discipline_name', 'discipline_workload', 'create_date', 'status_display', 'attachments', 'student_id', 'student', 'student',
             'student_name', 'student_email', 'student_matricula', 'student_course', 'steps', 'approval_status'
         ]
@@ -311,6 +312,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     student_email = serializers.SerializerMethodField()
     student_matricula = serializers.CharField(source='student.matricula', read_only=True)
     student_course = serializers.CharField(source='student.course', read_only=True)
+    notice_number = serializers.CharField(source='notice.number', read_only=True)
     attachments = AttachmentSerializer(many=True, read_only=True)
     steps = StepSerializer(many=True, read_only=True)
     test_attachment = serializers.FileField(required=False, read_only=False, allow_null=True)
@@ -318,7 +320,7 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = KnowledgeCertification
         fields = [
-            'id', 'previous_knowledge', 'discipline_workload', 'scheduling_date', 'test_score', 'notice', 'discipline', 'course',
+            'id', 'previous_knowledge', 'discipline_workload', 'scheduling_date', 'test_score', 'notice', 'notice_number', 'discipline', 'course',
             'discipline_name', 'create_date', 'status_display', 'attachments', 'student_id', 'student',
             'student_name', 'student_email', 'student_matricula', 'student_course', 'steps', 'test_attachment', 'approval_status'
         ]

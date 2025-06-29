@@ -117,6 +117,7 @@ class ApprovalStatus(models.TextChoices):
     PENDING = 'Pendente', 'Pendente'
     APPROVED = 'Deferido', 'Deferido'
     REJECTED = 'Indeferido', 'Indeferido'
+    CANCELED = 'Cancelado', 'Cancelado'
 
 class Attachment(models.Model):
     id = models.CharField(primary_key=True,max_length=100, editable=False)

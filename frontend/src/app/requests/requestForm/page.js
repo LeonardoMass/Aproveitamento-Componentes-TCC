@@ -328,6 +328,7 @@ const CertificationRequestForm = () => {
                 type="button"
                 className={styles.xButton}
                 style={{ marginLeft: "0.5rem", marginBottom: "1 rem" }}
+                disabled={isCreating}
                 onClick={() => removeUploadLine(line.id)}
               >
                 X
@@ -335,9 +336,9 @@ const CertificationRequestForm = () => {
             </div>
           ))}
           <div className={styles.addButtonContainer}>
-            <button type="button" onClick={addUploadLine} className={styles.addButton}>
+            <Button type="button" onClick={addUploadLine} className={styles.addButton} disabled={isCreating}>
               <i className="pi pi-plus" style={{ fontSize: "1.5rem", color: "#ffff" }}></i>
-            </button>
+            </Button>
           </div>
         </div>
         <div className={styles.formBtnContainer}>
