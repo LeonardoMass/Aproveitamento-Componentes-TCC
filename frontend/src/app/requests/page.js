@@ -55,13 +55,6 @@ export default function Requests() {
         setCourses(fetchedCourses);
         const allNotices = noticeRes.results || [];
         setNotices(allNotices);
-        if (allNotices.length > 0 && !selectedNotice) {
-          const defaultNotice = {
-            id: allNotices[0].id,
-            title: allNotices[0].number
-          };
-          updateFilter('selectedNotice', defaultNotice);
-        }
         setMetaLoaded(true);
       } catch (e) {
         setError(e.message);
