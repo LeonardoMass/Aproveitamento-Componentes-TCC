@@ -98,6 +98,7 @@ const Details = () => {
       if (response.status !== 200) throw new Error("Erro ao buscar detalhes");
       const data = await response.data;
       setDetails(data);
+      console.log(data);
       setTestDate(
         data.scheduling_date
           ? moment(data.scheduling_date).tz("America/Sao_Paulo")
@@ -492,7 +493,7 @@ const Details = () => {
 
   const getStatusProps = (step) => {
     let status = stepsStatus[step];
-
+    console.log(status);
     if (status) status = status.status_display;
     if (getFailed().includes(status)) {
       if (status === "Cancelado pelo Coordenador") return { color: "red", icon: faTimes, label: "Cancelado", isApproved: false };
