@@ -276,7 +276,7 @@ const Discipline = () => {
                       <td className={styles.detailValue}>{modalState.data?.main_objetive || "N/A"}</td>
                     </tr>
                     <tr>
-                      <td className={styles.detailLabel}><strong>Status:</strong></td>
+                      <td className={styles.detailLabel}><strong>Estado:</strong></td>
                       <td className={styles.detailValue}>
                         <span className={`${styles.statusIndicator} ${modalState.data?.is_active ? styles.active : styles.inactive}`}>
                           {modalState.data?.is_active ? "Ativa" : "Inativa"}

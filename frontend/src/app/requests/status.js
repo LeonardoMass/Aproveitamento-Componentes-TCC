@@ -59,7 +59,7 @@ export function getPending() {
 }
 
 export function getFinished() {
-    return ["Cancelado pelo Aluno", "Finalizado"];
+    return ["Cancelado pelo Aluno", "Finalizado", "Cancelado pelo Coordenador"];
 }
 
 export function getStatusStepIndex(status) {

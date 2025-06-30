@@ -69,6 +69,11 @@ const Details = () => {
   const [creFeedback, setCreFeedback] = useState("");
   const [endRequest, setEndRequest] = useState("");
   const [editedTestScore, setEditedTestScore] = useState("");
+  const [hasChangesKnowledge, setHasChangesKnowledge] = useState(false);
+  const [hasChangesWorkload, setHasChangesWorkload] = useState(false);
+  const [hasChangesStudiedWorkload, setHasChangesStudiedWorkload] =
+    useState(false);
+  const [hasChangesTestScore, setHasChangesTestScore] = useState(false);
   const [disableReactivity, setDisableReactivity] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -124,17 +129,26 @@ const Details = () => {
       );
 
       const step2Feedback = getStepStatus(data.steps, getStep2Status);
-      const step3Feedback = getStepStatus(data.steps, getStep3Status);
-      const step4Feedback = getStepStatus(data.steps, getStep4Status);
+      let step3Feedback = getStepStatus(data.steps, getStep3Status);
+      let step4Feedback = getStepStatus(data.steps, getStep4Status);
       const step5Feedback = getStepStatus(data.steps, getStep5Status);
       const step6Date = getStepStatus(data.steps, getStep6Status);
 
       if (step2Feedback) {
+        const coordinatorStep = Array.from(data.steps).findLast(
+          step => step.status === 'COORD'
+        );
         setCoordinatorFeedback(step2Feedback.feedback);
-        setCoordinatorResponsible(step2Feedback.responsible.name);
-        setStep2FinalStepDate(step2Feedback.final_step_date);
+        setCoordinatorResponsible(coordinatorStep.responsible.name);
+        setStep2FinalStepDate(coordinatorStep.final_step_date);
       }
       if (step3Feedback) {
+        if (step3Feedback.status_display == "Retornado pelo Coordenador") {
+          step4Feedback = step3Feedback;
+          step3Feedback = Array.from(data.steps).findLast(
+            step => step.status === 'A_PROF' || step.status === 'RJ_PROF'
+          );
+        }
         setProfessor(step3Feedback.responsible.name);
         setProfessorFeedback(step3Feedback.feedback);
         setStep3FinalStepDate(step3Feedback.final_step_date);
@@ -296,15 +310,14 @@ const Details = () => {
           createStep(getStatus(StatusEnum[index]), "Pendente");
         }
         if (status == "Rejeitado pelo Coordenador") {
-          const index = getEnumIndexByValue(status) + 2;
-          createStep(getStatus(StatusEnum[index]), "A solicitação foi indeferida pelo coordenador").then((value) => {
-            createStep(getStatus("Finalizado"), "A solicitação foi indeferida pelo coordenador");
-          });
-          generatePdf();
+          createStep(getStatus("Finalizado"), "A solicitação foi indeferida pelo coordenador");
+          handleSave("approval_status", "Indeferido");
+          setApprovalStatus("Indeferido");
+          setTimeout(() => { generatePdf(true) }, 500);
         }
         if (status == "Cancelado pelo Coordenador") {
-          const index = getEnumIndexByValue(status) + 5;
-          createStep(getStatus(StatusEnum[index]), "Pendente");
+          handleSave("approval_status", "Cancelado");
+          setApprovalStatus("Cancelado");
         }
       }
 
@@ -315,6 +328,18 @@ const Details = () => {
 
   const handleDownloadAttachment = async (attachmentId) => {
     await RequestService.DownloadAttachment(attachmentId);
+  };
+  const handleEditToggleKnowledge = () => {
+    setIsEditingKnowledge(!isEditingKnowledge);
+    setDisableReactivity(!isEditingKnowledge);
+  };
+  const handleEditToggleCourseWorkload = () => {
+    setisEditingCourseWorkload(!isEditingCourseWorkload);
+    setDisableReactivity(!isEditingCourseWorkload);
+  };
+  const handleEditToggleCourseStudiedWorkload = () => {
+    setIsEditingCourseStudiedWorkload(!isEditingCourseStudiedWorkload);
+    setDisableReactivity(!isEditingCourseStudiedWorkload);
   };
 
   const handleEditToggleTestScore = () => {
@@ -470,6 +495,7 @@ const Details = () => {
 
     if (status) status = status.status_display;
     if (getFailed().includes(status)) {
+      if (status === "Cancelado pelo Coordenador") return { color: "red", icon: faTimes, label: "Cancelado", isApproved: false };
       return { color: "red", icon: faTimes, label: "Rejeitado", isApproved: false };
     } else if (getSucceeded().includes(status)) {
       if (status === "Encaminhado para o Coordenador") {
@@ -483,6 +509,9 @@ const Details = () => {
       }
       return { color: "green", icon: faCheck, label: "Aprovado", isApproved: true };
     } else {
+      if (status === "Retornado pelo Coordenador") {
+        return { color: "yellow", icon: faClock, label: "Retornado pelo coordenador", isApproved: false };
+      }
       return { color: "yellow", icon: faClock, label: "Pendente", isApproved: false };
     }
   };
@@ -740,7 +769,7 @@ const Details = () => {
                     <div
                       className={`${styles.statusContainer} ${styles[getStatusProps(0).color]}`}
                     >
-                      <strong>Status: </strong>
+                      <strong>Estado: </strong>
                       <div className={styles.statusButton}>
                         <FontAwesomeIcon icon={getStatusProps(0).icon} />
                         {getStatusProps(0).label}
@@ -762,7 +791,7 @@ const Details = () => {
                 ) : (
                   <div className={styles.actionColumn}>
                     <div className={`${styles.statusContainer} ${styles.red}`}>
-                      <strong>Status: </strong>
+                      <strong>Estado: </strong>
                       <div className={styles.statusButton}>
                         {"Cancelado pelo aluno"}
                       </div>
@@ -812,7 +841,7 @@ const Details = () => {
                       ) : (
                         <p className={styles.info}>
                           <strong>Professor designado: </strong>
-                          {professor || ""}
+                          {professor || "-"}
                         </p>
                       )}
                       <p className={styles.info}>
@@ -844,7 +873,7 @@ const Details = () => {
                         <div
                           className={`${styles.statusContainer} ${styles[getStatusProps(1).color]}`}
                         >
-                          <strong>Status: </strong>
+                          <strong>Estado: </strong>
                           <div className={styles.statusButton}>
                             <FontAwesomeIcon icon={getStatusProps(1).icon} />
                             {getStatusProps(1).label}
@@ -865,7 +894,7 @@ const Details = () => {
                               />
                             )}
                             <Button
-                              label="Rejeitar"
+                              label="Cancelar solicitação"
                               icon="pi pi-times"
                               onClick={() =>
                                 openModal("Cancelado pelo Coordenador")
@@ -1075,7 +1104,7 @@ const Details = () => {
                         <div
                           className={`${styles.statusContainer} ${styles[getStatusProps(2).color]}`}
                         >
-                          <strong>Status: </strong>
+                          <strong>Estado: </strong>
                           <div className={styles.statusButton}>
                             <FontAwesomeIcon icon={getStatusProps(2).icon} />
                             {getStatusProps(2).label}
@@ -1155,7 +1184,7 @@ const Details = () => {
                         <div
                           className={`${styles.statusContainer} ${styles[getStatusProps(3).color]}`}
                         >
-                          <strong>Status: </strong>
+                          <strong>Estado: </strong>
                           <div className={styles.statusButton}>
                             <FontAwesomeIcon icon={getStatusProps(3).icon} />
                             {getStatusProps(3).label}
@@ -1228,7 +1257,7 @@ const Details = () => {
                         <div
                           className={`${styles.statusContainer} ${styles[getStatusProps(4).color]}`}
                         >
-                          <strong>Status: </strong>
+                          <strong>Estado: </strong>
                           <div className={styles.statusButton}>
                             <FontAwesomeIcon icon={getStatusProps(4).icon} />
                             {getStatusProps(4).label}
@@ -1243,12 +1272,6 @@ const Details = () => {
                               icon="pi pi-check"
                               onClick={() => openModal("Finalizado")}
                               className={styles.pButtonSuccess}
-                            />
-                            <Button
-                              label="Retornar"
-                              icon="pi pi-arrow-left"
-                              onClick={() => openModal("Retornado pelo Ensino")}
-                              className={styles.pButtonReturn}
                             />
                           </div>
                         )}
@@ -1268,14 +1291,14 @@ const Details = () => {
         className={styles.backButton}
       />
       <Button
-        icon={<FontAwesomeIcon icon={faSave} />} 
+        icon={<FontAwesomeIcon icon={faSave} />}
         onClick={() => generatePdf()}
         tooltip="Salvar Página"
         tooltipOptions={{ position: 'left' }}
         className={styles.generateButton}
       />
       <Button
-        icon={<FontAwesomeIcon icon={faSync} />} 
+        icon={<FontAwesomeIcon icon={faSync} />}
         onClick={() => fetchDetails()}
         tooltip="Recarregar Dados"
         tooltipOptions={{ position: 'left' }}

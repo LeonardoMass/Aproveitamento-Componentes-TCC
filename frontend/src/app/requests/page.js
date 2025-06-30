@@ -141,7 +141,7 @@ export default function Requests() {
         'Coordenador': coordinatorStep?.responsible?.name || '-',
         'Professor': professorStep?.responsible?.name || '-',
         'Feedback do Professor': professorStep?.feedback || '-',
-        'Status': item.status_display || '-',
+        'Estado': item.status_display || '-',
         'Edital': item.notice_number || '-',
       };
     });
@@ -270,7 +270,7 @@ export default function Requests() {
                 <th>Disciplina</th>
                 <th>Criação</th>
                 <th>Responsável</th>
-                <th>Status</th>
+                <th>Estado</th>
                 <th>Edital</th>
                 <th>Ações</th>
               </tr>

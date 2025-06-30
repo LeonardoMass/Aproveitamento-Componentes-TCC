@@ -100,6 +100,8 @@ class StepSerializer(serializers.ModelSerializer):
         # Se cancelado pelo aluno não haverá servidor responsável
         elif status == RequestStatus.CANCELED:
             data['responsible_id'] = None
+        elif status == RequestStatus.CANCELED_BY_COORDINATOR:
+            data['responsible_id'] = None
 
         elif status == RequestStatus.APPROVED_BY_CRE:
             data['responsible_id'] = None
@@ -212,6 +214,8 @@ class RecognitionOfPriorLearningSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("course_workload deve ser um número inteiro válido.")
         if self.instance and self.abstract_user.id != self.instance.student_id:
             raise serializers.ValidationError("Apenas o aluno que fez a requisição pode alterar esse campo")
+        if not (0 <= value <= 100):
+            raise serializers.ValidationError("A nota deve estar entre 0 e 100.")
         return value
 
     def validate_course_studied_workload(self, value):
@@ -390,8 +394,8 @@ class KnowledgeCertificationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Apenas o professor pode alterar a nota")
         if not isinstance(value, Decimal):
             raise serializers.ValidationError("A avaliação deve ser um número válido.")
-        if not (0 <= value <= 10):
-            raise serializers.ValidationError("A avaliação deve estar entre 0 e 10.")
+        if not (0 <= value <= 100):
+            raise serializers.ValidationError("A avaliação deve estar entre 0 e 100.")
         return value
 
     def validate_approval_status(self, value):

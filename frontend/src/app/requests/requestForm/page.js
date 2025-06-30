@@ -12,6 +12,7 @@ import { getDisciplineByArrayIds } from "@/services/DisciplineService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { ppcList } from "@/services/PpcService";
+import { toast } from 'react-toastify';
 
 const CertificationRequestForm = () => {
   const [requestType, setRequestType] = useState("");
@@ -173,6 +174,8 @@ const CertificationRequestForm = () => {
       }
     } catch (error) {
       console.error("Erro ao enviar o formulário:", error);
+      let erro = Object.values(error.response.data)
+      toast.error(erro[0][0]);
     } finally {
       setIsCreating(false);
     }
