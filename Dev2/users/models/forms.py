@@ -203,5 +203,8 @@ class Step(models.Model):
         blank=True
     )
 
+    class Meta:
+            ordering = ['initial_step_date']
+
     def __str__(self):
         return f"Step {self.id} - {self.status}"
