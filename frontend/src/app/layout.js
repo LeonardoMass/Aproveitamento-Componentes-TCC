@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import NavBar from "@/components/ui/NavBar";
 import { PrimeReactProvider } from "primereact/api";
 import { Footer } from "@/components/layout/Footer/footer";
+import WidgetVLibras from "@/libs/VLibras"
 import "./layout.css";
 
 // export const metadata = {
@@ -20,7 +21,10 @@ export default function RootLayout({ children }) {
         <PrimeReactProvider>
           <AuthProvider>
             <NavBar />
-            <div style={{ minHeight: "500px" }}>{children}</div>
+            <div style={{ minHeight: "500px" }}>
+              {children}
+              <WidgetVLibras/>
+            </div>
             <Footer />
           </AuthProvider>
         </PrimeReactProvider>
