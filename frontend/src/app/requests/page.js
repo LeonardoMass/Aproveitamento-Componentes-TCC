@@ -271,6 +271,7 @@ export default function Requests() {
                 <th>Criação</th>
                 <th>Responsável</th>
                 <th>Estado</th>
+                <th>Resultado</th>
                 <th>Edital</th>
                 <th>Ações</th>
               </tr>
@@ -289,6 +290,7 @@ export default function Requests() {
                     </td>
                     <td>{Array.from(item.steps).pop()?.responsible?.name || '-'}</td>
                     <td>{item.status_display || '-'}</td>
+                    <td>{item.approval_status}</td>
                     <td>{item.notice_number|| '-'}</td>
                     <td>
                       <button className={styles.iconButton} onClick={() => handleDetailsClick(item)} title="Ver detalhes">

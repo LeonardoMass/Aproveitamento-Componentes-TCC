@@ -496,22 +496,15 @@ const Details = () => {
     if (status) status = status.status_display;
     if (getFailed().includes(status)) {
       if (status === "Cancelado pelo Coordenador") return { color: "red", icon: faTimes, label: "Cancelado", isApproved: false };
+      if (status === "Rejeitado pelo Professor") return { color: "red", icon: faTimes, label: "Indeferido", isApproved: false };
       return { color: "red", icon: faTimes, label: "Rejeitado", isApproved: false };
     } else if (getSucceeded().includes(status)) {
-      if (status === "Encaminhado para o Coordenador") {
-        return { color: "green", icon: faCheck, label: "Encaminhado", isApproved: true };
-      }
-      if (status === "Analisado pelo Professor") {
-        return { color: "green", icon: faCheck, label: "Deferido", isApproved: true };
-      }
-      if (status === "Homologado pelo Coordenador") {
-        return { color: "green", icon: faCheck, label: "Homologado", isApproved: true };
-      }
+      if (status === "Encaminhado para o Coordenador") return { color: "green", icon: faCheck, label: "Encaminhado", isApproved: true };
+      if (status === "Analisado pelo Professor") return { color: "green", icon: faCheck, label: "Deferido", isApproved: true };
+      if (status === "Homologado pelo Coordenador") return { color: "green", icon: faCheck, label: "Homologado", isApproved: true };
       return { color: "green", icon: faCheck, label: "Aprovado", isApproved: true };
     } else {
-      if (status === "Retornado pelo Coordenador") {
-        return { color: "yellow", icon: faClock, label: "Retornado pelo coordenador", isApproved: false };
-      }
+      if (status === "Retornado pelo Coordenador") return { color: "yellow", icon: faClock, label: "Retornado pelo coordenador", isApproved: false };
       return { color: "yellow", icon: faClock, label: "Pendente", isApproved: false };
     }
   };
