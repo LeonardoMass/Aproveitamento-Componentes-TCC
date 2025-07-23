@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import styles from "./requests.module.css";
 import RequestService, { checkIfNoticeIsOpen } from "@/services/RequestService";
 import { courseListReduced } from "@/services/CourseService";
-import { sendEmailReminder, sendReminderResume} from "@/services/EmailService";
+import { sendEmailReminder, sendReminderResume } from "@/services/EmailService";
 import { noticeListAll } from "@/services/NoticeService";
 import { useRequestFilters } from "@/hooks/useRequestFilters";
 import { useAuth } from "@/context/AuthContext";
@@ -190,7 +190,7 @@ export default function Requests() {
     const isNoticeOpen = await checkIfNoticeIsOpen();
     if (isNoticeOpen) window.location.href = "/requests/requestForm";
     else {
-      toast.info("Não há edital aberto no momento." )
+      toast.info("Não há edital aberto no momento.")
     }
   };
 
@@ -220,18 +220,18 @@ export default function Requests() {
     setShowEmailModal(false);
   };
 
-  const handleConfirmSendEmail = async ()  => {
+  const handleConfirmSendEmail = async () => {
     if (!selectedRequestForEmail) return;
-     try {
-        const response = await sendEmailReminder(selectedRequestForEmail);
-        handleApiResponse(response); 
+    try {
+      let response = await sendEmailReminder(selectedRequestForEmail);
+      handleApiResponse(response);
     } catch (error) {
-        handleApiResponse(error);
+      handleApiResponse(error);
     } finally {
-        handleCloseEmailModal();
+      handleCloseEmailModal();
     }
   };
-  
+
   const handleOpenBulkEmailModal = () => {
     setShowBulkEmailModal(true);
   };
@@ -239,11 +239,16 @@ export default function Requests() {
   const handleCloseBulkEmailModal = () => {
     setShowBulkEmailModal(false);
   };
-  
+
   const handleConfirmSendBulkEmail = async () => {
-    toast.info("Função de envio em massa será implementada aqui.");
-    sendReminderResume();
-    handleCloseBulkEmailModal();
+    try {
+      let response = await sendReminderResume();
+      handleApiResponse(response);
+    } catch (error) {
+      handleApiResponse(error);
+    } finally {
+      handleCloseBulkEmailModal();
+    }
   };
 
   return (
@@ -326,9 +331,9 @@ export default function Requests() {
             )}
 
             {user.type === 'Ensino' && (
-              <button 
+              <button
                 className={styles.exportButton}
-                onClick={handleOpenBulkEmailModal} 
+                onClick={handleOpenBulkEmailModal}
                 title="Notificar todos os responsáveis com solicitações pendentes"
               >
                 <FontAwesomeIcon icon={faBullhorn} /> Notificar Pendentes
@@ -432,7 +437,7 @@ export default function Requests() {
           <div className={styles.modalContent}>
             <h3>Confirmar Envio de Lembretes em Massa</h3>
             <p>
-              Esta ação enviará um e-mail com um resumo das solicitações pendentes para todos os responsáveis nas etapas "Análise do Coordenador", "Análise do Professor" e "Homologação do Coordenador". Deseja continuar?
+              Esta ação enviará um e-mail com um resumo das solicitações pendentes para todos os responsáveis nas etapas <strong>Análise do Coordenador</strong>, <strong>Análise do Professor</strong> e <strong>Homologação do Coordenador</strong>. Deseja continuar?
             </p>
             <div className={styles.modalButtons}>
               <button
