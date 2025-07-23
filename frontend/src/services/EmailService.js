@@ -2,11 +2,11 @@ import { apiClient } from "@/libs/api";
 import { handleApiResponse } from "@/libs/apiResponseHandler";
 
 export const sendEmailReminder = async (requestToEmail) => {
-  try {
-    const response = await apiClient.post("/gmail/send-reminder", requestToEmail);
-    return response;
-  } catch (error) {
-    handleApiResponse(error);
-    throw error;
-  }
+  const response = await apiClient.post("/email/send-reminder", requestToEmail);
+  return response;
+};
+
+export const sendReminderResume = async () => {
+  const response = await apiClient.get("/email/send-reminder-resume");
+  return response;
 };

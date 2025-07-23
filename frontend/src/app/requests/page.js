@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import styles from "./requests.module.css";
 import RequestService, { checkIfNoticeIsOpen } from "@/services/RequestService";
 import { courseListReduced } from "@/services/CourseService";
-import { sendEmailReminder } from "@/services/EmailService";
+import { sendEmailReminder, sendReminderResume} from "@/services/EmailService";
 import { noticeListAll } from "@/services/NoticeService";
 import { useRequestFilters } from "@/hooks/useRequestFilters";
 import { useAuth } from "@/context/AuthContext";
-import { faPlus, faSearch, faChevronLeft, faChevronRight, faFileCsv, faEye, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSearch, faChevronLeft, faChevronRight, faFileCsv, faEye, faEnvelope, faBullhorn } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { InputText } from "primereact/inputtext";
@@ -33,6 +33,7 @@ export default function Requests() {
   const [metaLoaded, setMetaLoaded] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedRequestForEmail, setSelectedRequestForEmail] = useState(null);
+  const [showBulkEmailModal, setShowBulkEmailModal] = useState(false);
   const {
     search,
     selectedStep,
@@ -94,7 +95,10 @@ export default function Requests() {
   }, [metaLoaded, selectedNotice, selectedCourse]);
 
   const filtered = mergedRequests
-    .filter(i => i.student_name.toLowerCase().includes(search.toLowerCase()))
+    .filter(i => {
+      if (user.type === 'Estudante') return true;
+      return i.student_name.toLowerCase().includes(search.toLowerCase());
+    })
     .filter(i => !selectedType || i.type === selectedType.id)
     .filter(i => {
       if (!selectedOutcome) return true;
@@ -111,7 +115,7 @@ export default function Requests() {
     )
     .filter(i => !selectedDiscipline || i.discipline_name === selectedDiscipline.title);
 
-  const total = filtered.length;
+  const total = (filtered.length == 0) ? 1 : filtered.length;
   const perPage = itemsPerPage || total;
   const pages = Math.ceil(total / perPage);
   const displayed = filtered.slice(
@@ -218,29 +222,62 @@ export default function Requests() {
 
   const handleConfirmSendEmail = async ()  => {
     if (!selectedRequestForEmail) return;
+     try {
+        const response = await sendEmailReminder(selectedRequestForEmail);
+        handleApiResponse(response); 
+    } catch (error) {
+        handleApiResponse(error);
+    } finally {
+        handleCloseEmailModal();
+    }
+  };
+  
+  const handleOpenBulkEmailModal = () => {
+    setShowBulkEmailModal(true);
+  };
 
-    console.log("Iniciando envio de e-mail para a solicitação ID:", selectedRequestForEmail);
-    const currentResponsible = Array.from(selectedRequestForEmail.steps).pop()?.responsible;
-    console.log("Responsável atual:", currentResponsible?.email);
-    const response = await sendEmailReminder(selectedRequestForEmail);
-    console.log("Resposta do envio de e-mail:", response);
-    handleApiResponse(response); 
-    handleCloseEmailModal();
+  const handleCloseBulkEmailModal = () => {
+    setShowBulkEmailModal(false);
+  };
+  
+  const handleConfirmSendBulkEmail = async () => {
+    toast.info("Função de envio em massa será implementada aqui.");
+    sendReminderResume();
+    handleCloseBulkEmailModal();
   };
 
   return (
     <div className={styles.contentWrapper}>
       <div className={styles.tableWrapper}>
         <div className={styles.filtersContainer}>
-          <div className={styles.searchWrapper}>
-            <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
-            <InputText
-              className={styles.nameFilter}
-              value={search}
-              onChange={e => handleFilterChange('search', e.target.value)}
-              placeholder="Buscar por nome..."
-            />
-          </div>
+          {user.type !== 'Estudante' && (
+            <>
+              <div className={styles.searchWrapper}>
+                <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
+                <InputText
+                  className={styles.nameFilter}
+                  value={search}
+                  onChange={e => handleFilterChange('search', e.target.value)}
+                  placeholder="Buscar por nome..."
+                />
+              </div>
+              <Filter
+                optionList={courseOptions}
+                label="Cursos"
+                value={selectedCourse || null}
+                onChange={(e, v) => handleFilterChange('selectedCourse', v)}
+                width={300}
+              />
+              <Filter
+                optionList={statusOptions}
+                label="Situação"
+                value={selectedStatus || null}
+                onChange={(e, v) => handleFilterChange('selectedStatus', v)}
+                width={160}
+              />
+            </>
+          )}
+
           <Filter
             optionList={typeOptions}
             label="Tipo"
@@ -269,24 +306,10 @@ export default function Requests() {
             width={160}
           />
           <Filter
-            optionList={courseOptions}
-            label="Cursos"
-            value={selectedCourse || null}
-            onChange={(e, v) => handleFilterChange('selectedCourse', v)}
-            width={300}
-          />
-          <Filter
             optionList={disciplineOptions}
             label="Disciplinas"
             value={selectedDiscipline || null}
             onChange={(e, v) => handleFilterChange('selectedDiscipline', v)}
-          />
-          <Filter
-            optionList={statusOptions}
-            label="Situação"
-            value={selectedStatus || null}
-            onChange={(e, v) => handleFilterChange('selectedStatus', v)}
-            width={160}
           />
           <Filter
             optionList={perPageList}
@@ -295,9 +318,23 @@ export default function Requests() {
             value={perPageList.find(o => o.id === itemsPerPage) || null}
             onChange={(e, v) => handleFilterChange('itemsPerPage', v ? v.id : 10)}
           />
-          <button className={styles.exportButton} onClick={handleExportCSV} title="Exportar dados filtrados para CSV">
-            <FontAwesomeIcon icon={faFileCsv} /> Exportar CSV
-          </button>
+          <div className={styles.actionButtonsContainer}>
+            {user.type !== 'Estudante' && (
+              <button className={styles.exportButton} onClick={handleExportCSV} title="Exportar dados filtrados para CSV">
+                <FontAwesomeIcon icon={faFileCsv} /> Exportar CSV
+              </button>
+            )}
+
+            {user.type === 'Ensino' && (
+              <button 
+                className={styles.exportButton}
+                onClick={handleOpenBulkEmailModal} 
+                title="Notificar todos os responsáveis com solicitações pendentes"
+              >
+                <FontAwesomeIcon icon={faBullhorn} /> Notificar Pendentes
+              </button>
+            )}
+          </div>
         </div>
         <div className={styles.tableSection}>
           <table className={styles.table}>
@@ -316,7 +353,7 @@ export default function Requests() {
             </thead>
             <tbody>
               {displayed.length === 0
-                ? <tr><td colSpan="7">Sem resultados</td></tr>
+                ? <tr><td colSpan="9">Sem resultados</td></tr>
                 : displayed.map(item => (
                   <tr key={item.id} className={getRowClass(item.approval_status)}>
                     <td>{item.student_name || '-'}</td>
@@ -382,6 +419,31 @@ export default function Requests() {
               <button
                 className={styles.modalConfirmButton}
                 onClick={handleConfirmSendEmail}
+              >
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkEmailModal && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalContent}>
+            <h3>Confirmar Envio de Lembretes em Massa</h3>
+            <p>
+              Esta ação enviará um e-mail com um resumo das solicitações pendentes para todos os responsáveis nas etapas "Análise do Coordenador", "Análise do Professor" e "Homologação do Coordenador". Deseja continuar?
+            </p>
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.modalDeclineButton}
+                onClick={handleCloseBulkEmailModal}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.modalConfirmButton}
+                onClick={handleConfirmSendBulkEmail}
               >
                 Enviar
               </button>

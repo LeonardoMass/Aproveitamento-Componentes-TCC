@@ -17,7 +17,8 @@ class GoogleAuthView(APIView):
     def get(self, request):
         try:
             return self.googleAuthService.request_authorization(request)
-        except Exception:
+        except Exception as e:
+            print(e)
             return redirect(settings.AUTH_ERROR_FRONTEND_URL)
 
 
@@ -37,7 +38,8 @@ class GoogleAuthCallbackView(APIView):
             token, created = Token.objects.get_or_create(user=user)
 
             return redirect(settings.AUTH_FRONTEND_URL.format(token=token.key, data=str(encoded_data)))
-        except Exception:
+        except Exception as e:
+            print(e)
             return redirect(settings.AUTH_ERROR_FRONTEND_URL)
 
 class initBackEnd(APIView):

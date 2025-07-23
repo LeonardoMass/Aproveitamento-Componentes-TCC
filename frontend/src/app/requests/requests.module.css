@@ -300,3 +300,10 @@
     background-color: #c82333;
     transform: translateY(-2px);
 }
+
+.actionButtonsContainer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto;
+}
