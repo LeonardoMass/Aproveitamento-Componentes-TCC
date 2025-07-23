@@ -30,10 +30,14 @@ google_scope_str = os.environ.get('GOOGLE_OAUTH2_SCOPE', '')
 GOOGLE_OAUTH2_SCOPE = [scope.strip() for scope in google_scope_str.split(',') if scope.strip()]
 
 GOOGLE_DRIVE_FOLDER_ID = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
-google_drive_creds_json_str = os.environ.get('GOOGLE_DRIVE_CREDENTIALS_JSON', '{}')
-GOOGLE_DRIVE_CREDENTIALS_JSON = json.loads(google_drive_creds_json_str)
+google_service_creds_json_str = os.environ.get('GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_JSON', '{}')
+GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_JSON = json.loads(google_service_creds_json_str)
 google_drive_scope_str = os.environ.get('GOOGLE_DRIVE_OAUTH2_SCOPE', '')
 GOOGLE_DRIVE_OAUTH2_SCOPE = [scope.strip() for scope in google_drive_scope_str.split(',') if scope.strip()]
+
+GMAIL_SENDER_CLIENT_ID = os.environ.get('GMAIL_SENDER_CLIENT_ID')
+GMAIL_SENDER_CLIENT_SECRET = os.environ.get('GMAIL_SENDER_CLIENT_SECRET')
+GMAIL_SENDER_REFRESH_TOKEN = os.environ.get('GMAIL_SENDER_REFRESH_TOKEN')
 
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG

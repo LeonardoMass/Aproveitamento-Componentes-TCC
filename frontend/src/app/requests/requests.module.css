@@ -226,3 +226,77 @@
 .table td:nth-child(2) {
   text-align: center;
 }
+.table td:nth-child(9) {
+  text-align: center;
+  display: flex; 
+  justify-content: center;
+  gap: 8px;
+}
+
+.modalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 25px 30px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    max-width: 450px;
+    width: 90%;
+}
+
+.modalContent h3 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    color: #333;
+}
+
+.modalContent p {
+    margin-bottom: 25px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.modalButtons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+}
+
+.modalConfirmButton, .modalDeclineButton {
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.modalConfirmButton {
+    background-color: #28a745; /* Verde para confirmar */
+}
+.modalConfirmButton:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.modalDeclineButton {
+    background-color: #d9534f; /* Vermelho para cancelar/declinar */
+}
+.modalDeclineButton:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}

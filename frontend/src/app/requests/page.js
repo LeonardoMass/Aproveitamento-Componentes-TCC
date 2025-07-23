@@ -1,20 +1,22 @@
 "use client";
+import { toast } from 'react-toastify';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./requests.module.css";
 import RequestService, { checkIfNoticeIsOpen } from "@/services/RequestService";
 import { courseListReduced } from "@/services/CourseService";
+import { sendEmailReminder } from "@/services/EmailService";
 import { noticeListAll } from "@/services/NoticeService";
 import { useRequestFilters } from "@/hooks/useRequestFilters";
 import { useAuth } from "@/context/AuthContext";
-import { faPlus, faSearch, faChevronLeft, faChevronRight, faFileCsv, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSearch, faChevronLeft, faChevronRight, faFileCsv, faEye, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { InputText } from "primereact/inputtext";
 import Filter from "@/components/FilterField/filterField";
 import { getStatusStepIndex, steps, getFinished, pendingStatus } from "@/app/requests/status";
-import Toast from "@/utils/toast";
 import { exportToCsv } from '@/utils/csvExporter';
+import { handleApiResponse } from "@/libs/apiResponseHandler";
 
 export default function Requests() {
   const { user } = useAuth();
@@ -29,9 +31,8 @@ export default function Requests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [metaLoaded, setMetaLoaded] = useState(false);
-  const [toast, setToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState({});
-  const closeToast = () => setToast(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedRequestForEmail, setSelectedRequestForEmail] = useState(null);
   const {
     search,
     selectedStep,
@@ -185,9 +186,46 @@ export default function Requests() {
     const isNoticeOpen = await checkIfNoticeIsOpen();
     if (isNoticeOpen) window.location.href = "/requests/requestForm";
     else {
-      setToast(true);
-      setToastMessage({ type: 'info', text: 'Não há edital aberto no momento, aguarde.' });
+      toast.info("Não há edital aberto no momento." )
     }
+  };
+
+  const shouldShowEmailButton = (request) => {
+    if (!user || !request) return false;
+
+    const { type: userType } = user;
+    const { status_display } = request;
+
+    if (userType === 'Ensino' &&
+      (status_display === 'Em homologação do Coordenador' || status_display === 'Em análise do Coordenador')) {
+      return true;
+    }
+    if (userType === 'Coordenador' && status_display === 'Em análise do Professor') {
+      return true;
+    }
+    return false;
+  };
+
+  const handleOpenEmailModal = (request) => {
+    setSelectedRequestForEmail(request);
+    setShowEmailModal(true);
+  };
+
+  const handleCloseEmailModal = () => {
+    setSelectedRequestForEmail(null);
+    setShowEmailModal(false);
+  };
+
+  const handleConfirmSendEmail = async ()  => {
+    if (!selectedRequestForEmail) return;
+
+    console.log("Iniciando envio de e-mail para a solicitação ID:", selectedRequestForEmail);
+    const currentResponsible = Array.from(selectedRequestForEmail.steps).pop()?.responsible;
+    console.log("Responsável atual:", currentResponsible?.email);
+    const response = await sendEmailReminder(selectedRequestForEmail);
+    console.log("Resposta do envio de e-mail:", response);
+    handleApiResponse(response); 
+    handleCloseEmailModal();
   };
 
   return (
@@ -291,8 +329,17 @@ export default function Requests() {
                     <td>{Array.from(item.steps).pop()?.responsible?.name || '-'}</td>
                     <td>{item.status_display || '-'}</td>
                     <td>{item.approval_status}</td>
-                    <td>{item.notice_number|| '-'}</td>
+                    <td>{item.notice_number || '-'}</td>
                     <td>
+                      {shouldShowEmailButton(item) && (
+                        <button
+                          className={styles.iconButton}
+                          onClick={() => handleOpenEmailModal(item)}
+                          title="Enviar notificação por e-mail"
+                        >
+                          <FontAwesomeIcon icon={faEnvelope} />
+                        </button>
+                      )}
                       <button className={styles.iconButton} onClick={() => handleDetailsClick(item)} title="Ver detalhes">
                         <FontAwesomeIcon icon={faEye} />
                       </button>
@@ -320,7 +367,28 @@ export default function Requests() {
           </button>
         </div>
       )}
-      {toast && <Toast type={toastMessage.type} close={closeToast}>{toastMessage.text}</Toast>}
+      {showEmailModal && (
+        <div className={styles.modalBackdrop}>
+          <div className={styles.modalContent}>
+            <h3>Confirmar Envio de Lembrete</h3>
+            <p>Enviar um e-mail notificando {Array.from(selectedRequestForEmail.steps).pop()?.responsible.name} desta solicitação?</p>
+            <div className={styles.modalButtons}>
+              <button
+                className={styles.modalDeclineButton}
+                onClick={handleCloseEmailModal}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.modalConfirmButton}
+                onClick={handleConfirmSendEmail}
+              >
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

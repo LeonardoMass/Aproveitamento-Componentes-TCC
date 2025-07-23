@@ -9,7 +9,7 @@ import io
 class GoogleDriveService:
     def __init__(self):
         self.credentials = service_account.Credentials.from_service_account_info(
-            settings.GOOGLE_DRIVE_CREDENTIALS_JSON,
+            settings.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS_JSON,
             scopes=settings.GOOGLE_DRIVE_OAUTH2_SCOPE
         )
         self.service = build('drive', 'v3', credentials=self.credentials)
