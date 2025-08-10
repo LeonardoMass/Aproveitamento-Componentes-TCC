@@ -9,7 +9,7 @@ import { sendEmailReminder, sendReminderResume } from "@/services/EmailService";
 import { noticeListAll } from "@/services/NoticeService";
 import { useRequestFilters } from "@/hooks/useRequestFilters";
 import { useAuth } from "@/context/AuthContext";
-import { faPlus, faSearch, faFileCsv, faEye, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSearch, faFileCsv, faEye, faEnvelope, faBullhorn } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Pagination from "@/components/ui/Pagination/pagination";
