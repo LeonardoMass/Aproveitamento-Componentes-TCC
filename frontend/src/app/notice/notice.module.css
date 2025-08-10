@@ -230,33 +230,6 @@
   margin-top: 2px;
 }
 
-.paginationContainer {
-  margin-top: 32px;
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  align-items: center;
-}
-
-.pageButton {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-size: 0.95rem;
-  background-color: #5299f7;
-  cursor: pointer;
-  transition: background-color 0.2s ease, cursor 0.2s ease;
-}
-
-.pageButtonDisabled {
-  background-color: gray;
-  cursor: not-allowed;
-}
-
 .lastNoticeSection {
   width: 100%;
   display: flex;

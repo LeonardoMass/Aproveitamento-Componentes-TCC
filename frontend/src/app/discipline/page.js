@@ -11,6 +11,8 @@ import Toast from "@/utils/toast";
 import { useAuth } from "@/context/AuthContext";
 import { handleApiResponse } from "@/libs/apiResponseHandler";
 import Button from "@/components/ButtonDefault/button";
+import Pagination from '@/components/ui/Pagination/pagination';
+import { usePagination } from '@/hooks/usePagination';
 
 const Discipline = () => {
   const [disciplines, setDisciplines] = useState([]);
@@ -62,6 +64,13 @@ const Discipline = () => {
     );
     setFilteredDisciplines(filtered);
   };
+
+  const {
+    currentPage,
+    setCurrentPage,
+    paginatedData: displayedDisciplines,
+    totalPages
+  } = usePagination(filteredDisciplines, 10);
 
   const openModal = (mode, discipline = null) => {
     setModalState({
@@ -127,30 +136,10 @@ const Discipline = () => {
   const handleDelete = async (id) => {
     try {
       const response = await DisciplineService.DeleteDiscipline(id);
-      console.log("Delete Response:", response);
       handleApiResponse(response);
-      let updatedDisciplinesList = [...disciplines];
-
-      if (response.status === 204) {
-        updatedDisciplinesList = disciplines.filter(d => d.id !== id);
-      }
-      if (response.status === 200 && response.data?.detail) {
-        let message = response.data.detail;
-        if (message.includes("inativada")) {
-          updatedDisciplinesList = disciplines.map(d =>
-            d.id === id ? { ...d, is_active: false } : d
-          );
-        }
-        if (message.includes("ativa")) {
-          updatedDisciplinesList = disciplines.map(d =>
-            d.id === id ? { ...d, is_active: true } : d
-          );
-        }
-        const freshData = await DisciplineService.DisciplineList();
-        updatedDisciplinesList = freshData;
-      }
-      setDisciplines(updatedDisciplinesList);
-      setFilteredDisciplines(applySearchFilter(updatedDisciplinesList));
+      const freshData = await DisciplineService.DisciplineList();
+      setDisciplines(freshData);
+      setFilteredDisciplines(applySearchFilter(freshData));
     } catch (err) {
       console.error("Delete Error:", err);
     }
@@ -189,46 +178,58 @@ const Discipline = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredDisciplines.map((discipline) => (
-              <tr key={discipline.id} className={!discipline.is_active ? styles.inactiveRow : ''}>
-                <td>{discipline.name}</td>
-                <td>{discipline.workload}</td>
-                <td>{discipline.main_objetive || "N/A"}</td>
-                <td>
-                  <div className={styles.actions}>
-                    <button
-                      className={styles.actionButton}
-                      onClick={() => openModal('view', discipline)}
-                      title="Visualizar"
-                    >
-                      <FontAwesomeIcon icon={faEye} />
-                    </button>
-                    {user.user.type === "Ensino" && (
-                      <>
-                        <button
-                          className={styles.editButton}
-                          onClick={() => openModal('edit', discipline)}
-                          title="Editar"
-                          disabled={!discipline.is_active}
-                        >
-                          <FontAwesomeIcon icon={faPenToSquare} />
-                        </button>
-                        <button
-                          className={`${styles.deleteButton} ${discipline.is_active ? styles.activateButton : styles.deactivateButton}`}
-                          onClick={() => handleDelete(discipline.id)}
-                          title="Inativar/Excluir"
-                        >
-                          <FontAwesomeIcon icon={discipline.is_active ? faToggleOn : faToggleOff} size="sm" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
+            {displayedDisciplines.length > 0 ? (
+              displayedDisciplines.map((discipline) => (
+                <tr key={discipline.id} className={!discipline.is_active ? styles.inactiveRow : ''}>
+                  <td>{discipline.name}</td>
+                  <td>{discipline.workload}</td>
+                  <td>{discipline.main_objetive || "N/A"}</td>
+                  <td>
+                    <div className={styles.actions}>
+                      <button
+                        className={styles.actionButton}
+                        onClick={() => openModal('view', discipline)}
+                        title="Visualizar"
+                      >
+                        <FontAwesomeIcon icon={faEye} />
+                      </button>
+                      {user.user.type === "Ensino" && (
+                        <>
+                          <button
+                            className={styles.editButton}
+                            onClick={() => openModal('edit', discipline)}
+                            title="Editar"
+                            disabled={!discipline.is_active}
+                          >
+                            <FontAwesomeIcon icon={faPenToSquare} />
+                          </button>
+                          <button
+                            className={`${styles.deleteButton} ${discipline.is_active ? styles.activateButton : styles.deactivateButton}`}
+                            onClick={() => handleDelete(discipline.id)}
+                            title="Inativar/Excluir"
+                          >
+                            <FontAwesomeIcon icon={discipline.is_active ? faToggleOn : faToggleOff} size="sm" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4">Nenhuma disciplina encontrada.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       {user.user.type === "Ensino" && (
         <div className={styles.addButtonContainer}>

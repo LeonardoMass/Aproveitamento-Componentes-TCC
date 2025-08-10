@@ -9,9 +9,10 @@ import { sendEmailReminder } from "@/services/EmailService";
 import { noticeListAll } from "@/services/NoticeService";
 import { useRequestFilters } from "@/hooks/useRequestFilters";
 import { useAuth } from "@/context/AuthContext";
-import { faPlus, faSearch, faChevronLeft, faChevronRight, faFileCsv, faEye, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSearch, faFileCsv, faEye, faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Pagination from "@/components/ui/Pagination/pagination";
 import { InputText } from "primereact/inputtext";
 import Filter from "@/components/FilterField/filterField";
 import { getStatusStepIndex, steps, getFinished, pendingStatus } from "@/app/requests/status";
@@ -112,12 +113,9 @@ export default function Requests() {
     .filter(i => !selectedDiscipline || i.discipline_name === selectedDiscipline.title);
 
   const total = filtered.length;
-  const perPage = itemsPerPage || total;
-  const pages = Math.ceil(total / perPage);
-  const displayed = filtered.slice(
-    (currentPage - 1) * perPage,
-    (currentPage - 1) * perPage + perPage
-  );
+  const pages = Math.max(1, itemsPerPage > 0 ? Math.ceil(total / itemsPerPage) : 1);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const displayed = itemsPerPage > 0 ? filtered.slice(startIndex, startIndex + itemsPerPage) : filtered;
 
   const handleFilterChange = (filterName, value) => {
     updateFilter(filterName, value);
@@ -216,15 +214,10 @@ export default function Requests() {
     setShowEmailModal(false);
   };
 
-  const handleConfirmSendEmail = async ()  => {
+  const handleConfirmSendEmail = async () => {
     if (!selectedRequestForEmail) return;
-
-    console.log("Iniciando envio de e-mail para a solicitação ID:", selectedRequestForEmail);
-    const currentResponsible = Array.from(selectedRequestForEmail.steps).pop()?.responsible;
-    console.log("Responsável atual:", currentResponsible?.email);
     const response = await sendEmailReminder(selectedRequestForEmail);
-    console.log("Resposta do envio de e-mail:", response);
-    handleApiResponse(response); 
+    handleApiResponse(response);
     handleCloseEmailModal();
   };
 
@@ -316,7 +309,7 @@ export default function Requests() {
             </thead>
             <tbody>
               {displayed.length === 0
-                ? <tr><td colSpan="7">Sem resultados</td></tr>
+                ? <tr><td colSpan="9">Sem resultados</td></tr>
                 : displayed.map(item => (
                   <tr key={item.id} className={getRowClass(item.approval_status)}>
                     <td>{item.student_name || '-'}</td>
@@ -351,15 +344,11 @@ export default function Requests() {
           </table>
         </div>
       </div>
-      <div className={styles.pagination}>
-        <button className={styles.paginationButton} disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>
-          <FontAwesomeIcon icon={faChevronLeft} />
-        </button>
-        <span className={styles.paginationInfo}>{currentPage} de {pages}</span>
-        <button className={styles.paginationButton} disabled={currentPage === pages} onClick={() => setCurrentPage(p => p + 1)}>
-          <FontAwesomeIcon icon={faChevronRight} />
-        </button>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={pages}
+        onPageChange={setCurrentPage}
+      />
       {user.type === 'Estudante' && (
         <div className={styles.addButtonContainer}>
           <button onClick={handleRequestFormRedirect} className={styles.addButton}>

@@ -32,7 +32,7 @@ const RegisterPage = () => {
         return 'Servidor';
     }
     return (
-        <FormProfile user={user} onCancel={() => window.location.href = `/profile`} />
+        <FormProfile user={user} onCancel={() => { localStorage.removeItem('token'); window.location.href = `/auth`; }} />
     );
 }
 

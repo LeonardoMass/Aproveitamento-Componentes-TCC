@@ -1,0 +1,71 @@
+.paginationContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.navButton,
+.pageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  color: #374151;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+  font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.navButton {
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.pageButton {
+  min-width: 40px;
+  height: 40px;
+  padding: 8px;
+}
+
+.navButton:hover:not(:disabled),
+.pageButton:hover:not(:disabled) {
+  background-color: #216e33;
+  border-color: #9ca3af;
+}
+
+.navButton:disabled,
+.pageButton:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+  background-color: #f9fafb;
+}
+
+.pageNumbers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pageButton.active {
+  background-color: #28a745;
+  color: #ffffff;
+  border-color: #28a745;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.ellipsis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #6b7280;
+}

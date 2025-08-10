@@ -1,6 +1,6 @@
 "use client";
 import { toast } from 'react-toastify';
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styles from "./usersList.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faSearch, faToggleOn, faToggleOff } from "@fortawesome/free-solid-svg-icons";
@@ -11,6 +11,8 @@ import FormProfile from "@/components/Forms/Profile/ProfileForm";
 import { InputText } from "primereact/inputtext";
 import { useAuth } from "@/context/AuthContext";
 import { handleApiResponse } from "@/libs/apiResponseHandler";
+import Pagination from '@/components/ui/Pagination/pagination';
+import { usePagination } from '@/hooks/usePagination';
 
 const UsersList = () => {
   const { user } = useAuth();
@@ -22,10 +24,6 @@ const UsersList = () => {
   const {
     search,
     setSearch,
-    showActive,
-    setShowActive,
-    showInactive,
-    setShowInactive,
     selectedStatus,
     setSelectedStatus,
     selectedCourse,
@@ -34,6 +32,13 @@ const UsersList = () => {
     setSelectedRole,
     applyFilters,
   } = useUserFilters(users, setFilteredUsers);
+
+  const {
+    currentPage,
+    setCurrentPage,
+    paginatedData: displayedUsers,
+    totalPages
+  } = usePagination(filteredUsers, 10);
 
   const handleFilterKeyDown = useCallback((event) => {
     if (event.key === 'Enter') {
@@ -164,17 +169,17 @@ const UsersList = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((u) => (
-                <tr key={u.id} className={!u.is_active ? styles.inactiveRow : ''}>
-                  <td>{u.name ?? "N/A"}</td>
-                  <td>{u.type ?? "N/A"}</td>
-                  <td>{u.matricula ?? u.siape ?? "N/A"}</td>
-                  <td>{u.email ?? "N/A"}</td>
-                  <td>{u.course ?? "N/A"}</td>
-                  <td>{u.is_active ? "Ativo" : "Inativo"}</td>
-                  {user?.type === 'Ensino' && (
-                    <td>
-                      <>
+              {displayedUsers.length > 0 ? (
+                displayedUsers.map((u) => (
+                  <tr key={u.id} className={!u.is_active ? styles.inactiveRow : ''}>
+                    <td>{u.name ?? "N/A"}</td>
+                    <td>{u.type ?? "N/A"}</td>
+                    <td>{u.matricula ?? u.siape ?? "N/A"}</td>
+                    <td>{u.email ?? "N/A"}</td>
+                    <td>{u.course ?? "N/A"}</td>
+                    <td>{u.is_active ? "Ativo" : "Inativo"}</td>
+                    {user?.type === 'Ensino' && (
+                      <td>
                         <div className={styles.actions}>
                           <button
                             className={styles.editButton}
@@ -192,13 +197,24 @@ const UsersList = () => {
                             <FontAwesomeIcon icon={u.is_active ? faToggleOn : faToggleOff} />
                           </button>
                         </div>
-                      </>
-                    </td>
-                  )}
+                      </td>
+                    )}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={user?.type === 'Ensino' ? 7 : 6}>Nenhum usuário encontrado.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
+        </div>
+        <div className={styles.paginationWrapper}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
       {editingUser && (

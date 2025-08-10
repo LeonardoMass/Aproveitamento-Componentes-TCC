@@ -1,6 +1,6 @@
 'use client'
 import { InputText } from 'primereact/inputtext';
-import { Button } from 'primereact/button';
+import Button from "@/components/ButtonDefault/button";
 import { Dropdown } from 'primereact/dropdown';
 import { useState, useEffect } from 'react';
 import styles from './ProfileForm.module.css';
@@ -75,7 +75,7 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
                 if (typeof onSave === 'function') {
                     onSave('success', text);
                 }
-                onCancel();
+                (admEditing) ? onCancel() : window.location.href = `/requests`;
             }
         } catch (error) {
             console.error('Erro ao enviar os dados:', error);
@@ -229,8 +229,8 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
                 </>
             )}
             <div className="flex space-x-36">
-                <Button className={styles.submitButton} label="Voltar" type="button" onClick={onCancel} />
-                <Button className={styles.submitButton} label="Salvar" type="submit" />
+                <Button variant='cancel' onClick={onCancel} className={styles.submitButton}>Voltar</Button>
+                <Button variant='save' type='submit' className={styles.submitButton}>Salvar</Button>
             </div>
         </form>
     );

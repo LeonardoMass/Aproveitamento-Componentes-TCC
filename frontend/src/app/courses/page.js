@@ -175,7 +175,7 @@ const Course = () => {
                       <button
                         className={`${styles.actionButton} ${styles.viewButton}`}
                         onClick={(e) => { e.stopPropagation(); openPpcDisciplineModal(course); }}
-                        title="Visualizar Disciplinas (do 1º PPC)"
+                        title="Visualizar Disciplinas"
                         disabled={isLoading}
                       >
                         <FontAwesomeIcon icon={faEye} size="sm" />

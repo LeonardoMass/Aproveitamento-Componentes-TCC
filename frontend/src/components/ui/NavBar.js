@@ -64,11 +64,6 @@ const NavBar = () => {
       label: "Opções",
       items: [
         {
-          label: "Perfil",
-          icon: "pi pi-user",
-          command: () => (window.location.href = `/profile`),
-        },
-        {
           label: "Alterar dados",
           icon: "pi pi-cog",
           command: () => (window.location.href = `/register`),
@@ -216,7 +211,7 @@ const NavBar = () => {
       />
       <Toaster position="top-center" reverseOrder={false} />
       <div className="flex items-center justify-between max-w-screen-xlg px-20 py-8 mx-auto">
-        <Link href={isUserAuth ? "/profile" : "/auth"} className="pl-12">
+        <Link href={isUserAuth ? "/requests" : "/auth"} className="pl-12">
           <Image
             src="/ifrs.png"
             alt="IFRS Logo"

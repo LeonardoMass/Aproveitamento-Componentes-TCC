@@ -12,8 +12,9 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { useAuth } from "@/context/AuthContext";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { InputText } from "primereact/inputtext";
+import Pagination from '@/components/ui/Pagination/pagination';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 5;
 
 const Notice = () => {
   const { user } = useAuth();
@@ -211,27 +212,11 @@ const Notice = () => {
             <span>Novo Edital</span>
           </button>
         </div>
-        <div className={styles.paginationContainer}>
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`${styles.pageButton} ${currentPage === 1 ? styles.pageButtonDisabled : ""
-              }`}
-          >
-            Anterior
-          </button>
-          <span>
-            Página {currentPage} de {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`${styles.pageButton} ${currentPage === totalPages ? styles.pageButtonDisabled : ""
-              }`}
-          >
-            Próxima
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
         {modalOpen && <ModalNotice onClose={handleCloseModal} editData={editData} response={handleModalResponse} />}
         {toastVisible && (
           <Toast type={toastMessage.type} close={handleCloseToast}>
