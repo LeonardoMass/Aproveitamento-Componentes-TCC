@@ -55,9 +55,6 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
             return;
         }
         try {
-
-            console.log('Dados enviados:', userData);
-
             const formData = new FormData();
             formData.append('name', userData.name);
             formData.append('email', userData.email);
@@ -110,7 +107,7 @@ const FormProfile = ({ user = false, onCancel, admEditing = false, onSave }) => 
                 const activeCourses = data.filter(c => c.is_active);
                 setCourses(activeCourses);
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
         };
         fetchCourses();

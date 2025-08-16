@@ -7,12 +7,12 @@ import styles from "./discipline.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare, faToggleOff, faToggleOn, faEye, faSearch, faPlus, faSave } from "@fortawesome/free-solid-svg-icons";
 import DisciplineService from "@/services/DisciplineService";
-import Toast from "@/utils/toast";
 import { useAuth } from "@/context/AuthContext";
 import { handleApiResponse } from "@/libs/apiResponseHandler";
 import Button from "@/components/ButtonDefault/button";
 import Pagination from '@/components/ui/Pagination/pagination';
 import { usePagination } from '@/hooks/usePagination';
+import { toast } from 'react-toastify';
 
 const Discipline = () => {
   const [disciplines, setDisciplines] = useState([]);
@@ -29,8 +29,6 @@ const Discipline = () => {
     syllabus: "",
     main_objetive: ""
   });
-  const [toast, setToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState({});
   const user = useAuth();
 
   useEffect(() => {
@@ -109,8 +107,7 @@ const Discipline = () => {
 
   const handleSave = async () => {
     if (!formData.name || !formData.workload || !formData.syllabus || !formData.main_objetive) {
-      setToastMessage({ type: "warning", text: "Preencha todos os campos obrigatórios!" });
-      setToast(true);
+      toast.info("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
     try {
@@ -128,9 +125,8 @@ const Discipline = () => {
       setFilteredDisciplines(applySearchFilter(updatedData));
       closeModal();
     } catch (err) {
-      setToastMessage({ type: "error", text: "Erro ao salvar disciplina!" });
+      toast.error("Erro ao salvar disciplina!");
     }
-    setToast(true);
   };
 
   const handleDelete = async (id) => {
@@ -352,11 +348,6 @@ const Discipline = () => {
         </div>
       )}
 
-      {toast && (
-        <Toast type={toastMessage.type} close={() => setToast(false)}>
-          {toastMessage.text}
-        </Toast>
-      )}
     </div>
   );
 };

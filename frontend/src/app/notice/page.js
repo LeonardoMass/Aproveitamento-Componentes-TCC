@@ -6,13 +6,13 @@ import styles from "./notice.module.css";
 import ModalNotice from "@/components/Modal/ModalNotice/page";
 import { noticeList, noticeListAll } from "@/services/NoticeService";
 import { formatDate } from "@/hooks/formatDate";
-import Toast from "@/utils/toast";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { useAuth } from "@/context/AuthContext";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { InputText } from "primereact/inputtext";
 import Pagination from '@/components/ui/Pagination/pagination';
+import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -26,8 +26,6 @@ const Notice = () => {
   const [editData, setEditData] = useState(null);
   const [lastNotice, setLastNotice] = useState(null);
   const [allNotices, setAllNotices] = useState(null);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState({});
   const [expand, setExpand] = useState(false);
 
   const fetchNotices = useCallback(async (page, search) => {
@@ -36,8 +34,7 @@ const Notice = () => {
       setNotices(data.results);
       setTotalPages(Math.ceil(data.count / ITEMS_PER_PAGE));
     } catch {
-      setToastVisible(true);
-      setToastMessage({ type: "error", text: "Falha ao carregar editais." });
+      toast.error("Falha ao carregar editais.");
     }
   }, []);
 
@@ -52,8 +49,7 @@ const Notice = () => {
         setAllNotices(data.results);
         setLastNotice(data.results[0] || null);
       } catch {
-        setToastVisible(true);
-        setToastMessage({ type: "error", text: "Não foi possível buscar os editais." });
+        toast.error("Não foi possível buscar os editais.");
       }
     };
     loadAll();
@@ -104,9 +100,6 @@ const Notice = () => {
     setModalOpen(false);
   };
 
-  const handleCloseToast = () => {
-    setToastVisible(false);
-  };
 
   const handleModalResponse = (responseType) => {
     const messages = {
@@ -114,11 +107,7 @@ const Notice = () => {
       create: "Edital criado com sucesso!",
       error: "Erro ao enviar os dados. Tente novamente.",
     };
-    setToastVisible(true);
-    setToastMessage({
-      type: responseType === "error" ? "error" : "success",
-      text: messages[responseType],
-    });
+    (responseType === "error" ? toast.error(messages[responseType]) : toast.success(messages[responseType]));
     if (responseType === "edit" || responseType === "create") {
       fetchNotices(currentPage, filter);
     }
@@ -218,11 +207,6 @@ const Notice = () => {
           onPageChange={handlePageChange}
         />
         {modalOpen && <ModalNotice onClose={handleCloseModal} editData={editData} response={handleModalResponse} />}
-        {toastVisible && (
-          <Toast type={toastMessage.type} close={handleCloseToast}>
-            {toastMessage.text}
-          </Toast>
-        )}
       </div>
     );
   }

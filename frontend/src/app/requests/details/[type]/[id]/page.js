@@ -164,7 +164,6 @@ const Details = () => {
         role === "Coordenador" &&
         data.status_display === "Em análise do Coordenador"
       ) {
-        console.log("user id - " + user.id);
         const professorsResponse = await apiClient.get(
           `${baseURL}/courses/professors/${user.id}`,
         );
@@ -173,7 +172,6 @@ const Details = () => {
 
         const professorsData = await professorsResponse.data;
         setAvailableProfessors(professorsData);
-        console.log("professors data - " + professorsData);
       }
       const stepAtual = data.steps.find(step => step.current === true);
       if (stepAtual && stepAtual.responsible) {
@@ -322,7 +320,6 @@ const Details = () => {
       }
 
     });
-    console.log("Feedback enviado:", feedback);
     closeModal();
   };
 
@@ -430,7 +427,6 @@ const Details = () => {
             updatedData = { approval_status: param };
             break;
         }
-        console.log("updatedData", updatedData);
         response = await apiClient.patch(
           `${baseURL}/forms/${type}/${id}/`,
           updatedData,

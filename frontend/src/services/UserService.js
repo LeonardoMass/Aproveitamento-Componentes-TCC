@@ -11,7 +11,6 @@ export default function GetUsers() {
     const fetchUsers = async () => {
       try {
         const response = await AuthService.UserList();
-        console.log(response);
 
         setUsers(response.data);
       } catch (err) {

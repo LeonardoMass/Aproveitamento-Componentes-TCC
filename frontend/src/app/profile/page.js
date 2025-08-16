@@ -8,7 +8,6 @@ import { useState } from "react";
 const ProfilePage = () => {
   const { user } = useAuth();
   const isStudent = user?.type === 'Estudante';
-  console.log(user);
   return (
     <div className={styles.container}>
       <div className={styles.left}>

@@ -3,11 +3,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 
-from users.models.forms import KnowledgeCertification, RecognitionOfPriorLearning
+from users.models.forms import KnowledgeCertification, RecognitionOfPriorLearning, ApprovalStatus
 from ..models.discipline import Disciplines
 from ..serializers.disciplineSerializer import DisciplineSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.services.user import UserService
+from ..models import Student
 
 
 @api_view(['GET', 'POST'])
@@ -99,6 +100,7 @@ def discipline_list_by_ids(request):
     try:
         discipline_ids = request.data.get('ids', [])
         active_param = request.data.get('active', None)
+        ongoing_discipline_param = request.data.get('ongoingDiscipline', None)
 
         if not discipline_ids:
             return Response({"detail": "Nenhum ID fornecido."}, status=status.HTTP_400_BAD_REQUEST)
@@ -113,6 +115,29 @@ def discipline_list_by_ids(request):
 
         if active_param is not None:
             disciplines = disciplines.filter(is_active=active_param)
+
+        if ongoing_discipline_param is not None:
+            try:
+                student = Student.objects.get(user=request.user)
+                statuses_to_check = [
+                    ApprovalStatus.PENDING,
+                    ApprovalStatus.APPROVED,
+                    ApprovalStatus.REJECTED
+                ]
+                recognition_discipline_ids = RecognitionOfPriorLearning.objects.filter(
+                    student=student,
+                    approval_status__in=statuses_to_check
+                ).values_list('discipline_id', flat=True)
+
+                certification_discipline_ids = KnowledgeCertification.objects.filter(
+                    student=student,
+                    approval_status__in=statuses_to_check
+                ).values_list('discipline_id', flat=True)
+
+                excluded_discipline_ids = set(list(recognition_discipline_ids) + list(certification_discipline_ids))
+                disciplines = disciplines.exclude(id__in=excluded_discipline_ids)
+            except Student.DoesNotExist:
+                pass
 
         serializer = DisciplineSerializer(disciplines, many=True)
         return Response(serializer.data)

@@ -55,7 +55,7 @@ async function DeleteDiscipline(uuid) {
     });
 }
 
-export const getDisciplineByArrayIds = async (disciplineIds, active = null) => {
+export const getDisciplineByArrayIds = async (disciplineIds, active = null, ongoingDiscipline = null) => {
   if (!disciplineIds || disciplineIds.length === 0) {
     return [];
   }
@@ -66,6 +66,9 @@ export const getDisciplineByArrayIds = async (disciplineIds, active = null) => {
 
     if (active !== null) {
       payload.active = active;
+    }
+    if (ongoingDiscipline !== null) {
+      payload.ongoingDiscipline = ongoingDiscipline;
     }
     const response = await apiClient.post('/api/disciplines/get-by-ids/', payload);
     return response.data;

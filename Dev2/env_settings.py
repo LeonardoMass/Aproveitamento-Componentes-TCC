@@ -1,3 +1,5 @@
+# crie uma .env para o backend e um .env.local para frontend
+
 SECRET_KEY='django-insecure-x7wl+2b2u.....3!4&(rk3wfnuh'
 DEBUG=True
 DATABASE_URL='sqlite:///banco.sqlite3'

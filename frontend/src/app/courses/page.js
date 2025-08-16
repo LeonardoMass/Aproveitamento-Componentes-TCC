@@ -29,7 +29,6 @@ const Course = () => {
     try {
       const data = await courseList();
       const coursesArray = Array.isArray(data) ? data : [];
-      console.log(data);
       setCourses(coursesArray);
       if (searchTerm) {
         const filtered = coursesArray.filter((course) =>

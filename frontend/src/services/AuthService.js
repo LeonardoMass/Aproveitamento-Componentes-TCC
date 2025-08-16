@@ -22,7 +22,6 @@ async function UpdateActivity(id) {
 
 const getUserById = async (userId) => {
     const response = await apiClient.get(`/users/retrieve/${userId}/`);
-    console.log(`[AuthService] Dados recebidos para ID ${userId}:`, response.data);
     return response.data;
 };
 

@@ -37,14 +37,12 @@ const CertificationRequestForm = () => {
     const fetchCourses = async () => {
       try {
         const course = await courseListByName({ course_name: user.course });
-        console.log(course);
         setSelectedCourse(course);
         const ppcsData = await ppcList({ course_id: course.id });
-        console.log("PPCs:", ppcsData);
         const activePpcs = ppcsData.filter(ppc => ppc.is_active);
         setPpc(activePpcs);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
     fetchCourses();
@@ -55,7 +53,6 @@ const CertificationRequestForm = () => {
       try {
         setIsCreating(true);
         const noticeData = await noticeListAll();
-        console.log(noticeData);
         const currentNotice = noticeData.results
           .filter(
             (notice) =>
@@ -85,7 +82,7 @@ const CertificationRequestForm = () => {
       setIsCreating(true);
       const selectedPpcObj = ppc.find((item) => item.id === selectedPpcId);
       if (selectedPpcObj && selectedPpcObj.disciplines && selectedPpcObj.disciplines.length > 0) {
-        const disciplineDetails = await getDisciplineByArrayIds(selectedPpcObj.disciplines, true);
+        const disciplineDetails = await getDisciplineByArrayIds(selectedPpcObj.disciplines, true, true);
         setDisciplines(disciplineDetails);
       } else {
         setDisciplines([]);
@@ -102,18 +99,15 @@ const CertificationRequestForm = () => {
     setUploadLines((prevLines) =>
       prevLines.map((line) => (line.id === lineId ? { ...line, file: file } : line))
     );
-    console.log("Linhas de upload após seleção de arquivo:", uploadLines);
   };
 
   const addUploadLine = () => {
     idCounterRef.current += 1;
     setUploadLines((prevLines) => [...prevLines, { id: idCounterRef.current, file: null }]);
-    console.log("Linhas de upload após adição:", uploadLines);
   };
 
   const removeUploadLine = (lineId) => {
     setUploadLines((prevLines) => prevLines.filter((line) => line.id !== lineId));
-    console.log("Linhas de upload após remoção:", uploadLines);
   };
 
   const isFormValid =
@@ -143,8 +137,6 @@ const CertificationRequestForm = () => {
     formData.append("status", status);
     formData.append("student_id", user.id);
 
-    console.log("Status sendo enviado:", status);
-
     if (requestType === "certificacao") {
       formData.append("requestType", "certificacao");
       formData.append("previous_knowledge", previousKnowledge);
@@ -167,9 +159,7 @@ const CertificationRequestForm = () => {
         requestType === "certificacao"
           ? await RequestService.CreateKnowledgeCertification(formData)
           : await RequestService.CreateRecognitionForm(formData);
-      console.log("Resposta do servidor:", response);
       if (response.status === 201) {
-        console.log("Formulário enviado com sucesso!");
         window.location.href = `/requests/details/${formType}/${response.data.id}`;
       }
     } catch (error) {
@@ -182,8 +172,6 @@ const CertificationRequestForm = () => {
   };
 
   const handleCancel = () => {
-    console.log("Ação de cancelar.");
-    console.log("Linhas atuais de upload:", uploadLines);
     window.location.href = `/requests`
   };
 
@@ -310,9 +298,9 @@ const CertificationRequestForm = () => {
         )}
         <div className={styles.typeContainer}>
           {requestType === "certificacao" ? (
-            <label htmlFor="anexos" className={styles.textForm}>{'Anexe os comprovantes, conforme item 3.2.1, alinea "b" do Edital.'}</label>
+            <label htmlFor="anexos" className={styles.textForm}>{'Anexe os comprovantes, conforme descrito no edital para certificação.'}</label>
           ) : (
-            <label htmlFor="anexos" className={styles.textForm}>{'Anexe os comprovantes, conforme item 2.2.1, alinea "b" do Edital.'}</label>
+            <label htmlFor="anexos" className={styles.textForm}>{'Anexe os comprovantes, conforme descrito no edital para aproveitamento.'}</label>
           )}
           {uploadLines.map((line) => (
             <div key={line.id} style={{ display: "flex", alignItems: "center" }}>

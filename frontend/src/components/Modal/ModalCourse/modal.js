@@ -110,7 +110,6 @@ const ModalCourse = ({ onClose, editData = null, onCourseSaved }) => {
       formData.append("siape", updatedProf.siape);
       formData.append("servant_type", updatedProf.servant_type);
 
-      console.log(`Atualizando usuário ${idProf} para Coordenador...`);
       const response = await AuthService.UpdateUser(idProf, formData);
       return response;
     } catch (error) {
@@ -140,7 +139,6 @@ const ModalCourse = ({ onClose, editData = null, onCourseSaved }) => {
       formData.append('siape', updatedCoord.siape);
       formData.append('servant_type', updatedCoord.servant_type);
 
-      console.log(`Revertendo usuário ${coord.id} para Professor...`);
       const response = await AuthService.UpdateUser(coord.id, formData);
       return response;
     } catch (error) {
@@ -171,13 +169,11 @@ const ModalCourse = ({ onClose, editData = null, onCourseSaved }) => {
       let originalCoordinatorData = editData?.coordinator ?? null;
 
       if (originalCoordId !== newSelectedCoordId) {
-        console.log(`Mudança de Coordenador detectada: ${originalCoordId} -> ${newSelectedCoordId}`);
 
         if (newSelectedCoordId) {
           userToMakeCoordinator = availableProfessors.find(p => p.id === newSelectedCoordId);
 
           if (userToMakeCoordinator && userToMakeCoordinator.servant_type === 'Professor') {
-            console.log(`Promovendo Professor ${newSelectedCoordId} para Coordenador.`);
             const coord = await handleChangeProfessorToCoord(newSelectedCoordId);
           } else if (userToMakeCoordinator && userToMakeCoordinator.servant_type === 'Coordenador') {
             if (userToMakeCoordinator.id !== originalCoordId) {
@@ -189,31 +185,25 @@ const ModalCourse = ({ onClose, editData = null, onCourseSaved }) => {
         }
 
         if (originalCoordId && originalCoordinatorData) {
-          console.log(`Revertendo Coordenador original ${originalCoordId} para Professor.`);
           const professor = await handleChangeCoordToProfessor(originalCoordinatorData);
         }
       }
-      console.log("Enviando dados do curso para API:", courseDataPayload);
       let savedCourseResponse;
       if (editData) {
-        console.log(`Editando curso ID: ${editData.id}`);
         savedCourseResponse = await courseEdit(editData.id, courseDataPayload);
         handleApiResponse(savedCourseResponse);
       } else {
-        console.log("Criando novo curso.");
         savedCourseResponse = await courseCreate(courseDataPayload);
         handleApiResponse(savedCourseResponse);
       }
       const actualSavedCourse = savedCourseResponse?.data || savedCourseResponse;
 
       if (!editData && initialPpcName.trim() && actualSavedCourse?.id) {
-        console.log(`Tentando criar PPC inicial '${initialPpcName.trim()}' para o curso ID: ${actualSavedCourse.id}`);
         try {
           await ppcCreate({
             name: initialPpcName.trim(),
             course_id: actualSavedCourse.id,
           });
-          console.log("PPC inicial criado com sucesso.");
         } catch (ppcError) {
           console.error("Falha ao criar PPC inicial (curso JÁ foi salvo):", ppcError);
           alert(`Curso ${editData ? 'atualizado' : 'criado'} com sucesso, mas falha ao criar PPC inicial: ${ppcError?.response?.data?.detail || ppcError.message}`);

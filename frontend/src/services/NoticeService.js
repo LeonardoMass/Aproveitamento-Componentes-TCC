@@ -13,7 +13,6 @@ const noticeList = async ({ page = 1, pageSize = 10, search = "" }) => {
 
 const noticeListAll = async () => {
   const url = `notices/`; // Sem parâmetros de paginação
-  console.log("Fetching all notices from URL:", url); // Para depuração
   return await apiClient.get(url).then((response) => response.data);
 };
 
