@@ -11,42 +11,6 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write("Limpando dados antigos...")
         superuser = User.objects.create_superuser("admin", "admin@admin.com", "123")
-        student1 = User.objects.create_user(username='murilo@hotmail.com', first_name='murilo', email='murilo@hotmail.com',
-                                            password=None)
-        Student.objects.create(
-            user=student1,
-            name='murilo',
-            email='murilo@hotmail.com',
-            matricula="1994000401",
-            course="ADS"
-        )
-        stundent2 = User.objects.create_user(username='eduador@hotmail.com', first_name='eduador', email='eduador@hotmail.com',
-                                            password=None)
-        Student.objects.create(
-            user=stundent2,
-            name='eduardo',
-            email='eduardo@hotmail.com',
-            matricula="3212313",
-            course="ADS",
-            is_active=False
-        )
-        stundent3 = User.objects.create_user(username='aaa', first_name='bruno', email='bruno@hotmail.com', password=None)
-        Student.objects.create(
-            user= stundent3,
-            name='bruno',
-            email='bruno@gmail.com',
-            matricula="323123",
-            course="ADS",
-        )
-
-        stundent4 = User.objects.create_user(username='bbb', first_name='fernando', email='fernando@hotmail.com', password=None)
-        Student.objects.create(
-            user= stundent4,
-            name='fernando',
-            email='fernando@gmail.com',
-            matricula="323123",
-            course="ADS",
-        )
 
         teacher = User.objects.create_user(username='ricardo@hotmail.com', first_name='ricardo', email='ricardo@hotmail.com',
                                         password=None)
@@ -214,3 +178,38 @@ class Command(BaseCommand):
         ppc_course3.disciplines.add(discipline1, discipline2, discipline3)
         print("Cursos criados com sucesso!")
         self.stdout.write(self.style.SUCCESS('Banco de dados populado com sucesso!'))
+
+        student1 = User.objects.create_user(username='murilo@hotmail.com', first_name='murilo', email='murilo@hotmail.com',password=None)
+        Student.objects.create(
+            user=student1,
+            name='murilo',
+            email='murilo@hotmail.com',
+            matricula="1994000401",
+            course=course3
+        )
+        stundent2 = User.objects.create_user(username='eduador@hotmail.com', first_name='eduador', email='eduador@hotmail.com',password=None)
+        Student.objects.create(
+            user=stundent2,
+            name='eduardo',
+            email='eduardo@hotmail.com',
+            matricula="3212313",
+            course=course3,
+            is_active=False
+        )
+        stundent3 = User.objects.create_user(username='aaa', first_name='bruno', email='bruno@hotmail.com', password=None)
+        Student.objects.create(
+            user= stundent3,
+            name='bruno',
+            email='bruno@gmail.com',
+            matricula="323123",
+            course=course3,
+        )
+
+        stundent4 = User.objects.create_user(username='bbb', first_name='fernando', email='fernando@hotmail.com', password=None)
+        Student.objects.create(
+            user= stundent4,
+            name='fernando',
+            email='fernando@gmail.com',
+            matricula="323123",
+            course=course3,
+        )

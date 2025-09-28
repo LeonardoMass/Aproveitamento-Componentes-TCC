@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..serializers.user import CreateUserSerializer, UserPolymorphicSerializer
 from ..services.user import UserService
-from ..models import AbstractUser
+from ..models import AbstractUser, Course
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -48,7 +48,7 @@ class UpdateUserByIdView(APIView):
     user_service = UserService()
 
     def put(self, request, id):
-        
+
         user_autorized = self.user_service.userAutorized(request.user)
         serializer = CreateUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -66,7 +66,9 @@ class UpdateUserByIdView(APIView):
                 usuario.name = serializer.validated_data["name"]
                 if is_student:
                     usuario.matricula = serializer.validated_data["matricula"]
-                    usuario.course = serializer.validated_data["course"]
+                    course_name = serializer.validated_data["course"]
+                    if course_name:
+                        usuario.course = Course.objects.get(name=course_name)
                 else:
                     usuario.siape = serializer.validated_data["siape"]
                     usuario.servant_type = serializer.validated_data["servant_type"]

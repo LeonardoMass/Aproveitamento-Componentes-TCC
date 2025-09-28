@@ -14,6 +14,6 @@ crie um arquivo .env em Dev2/api
 use o arquivo env_settings.py de exemplo
 py manage.py makemigrations users
 py manage.py migrate
-py manage.py shell < script.py
+py manage.py seed_data
 py manage.py runserver
 ```

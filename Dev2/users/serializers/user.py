@@ -15,6 +15,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(UserSerializer):
 
+    course = serializers.CharField(source='course.name', read_only=True, allow_null=True)
+    course_id = serializers.UUIDField(source='course.id', read_only=True, allow_null=True)
     class Meta:
         model = Student
         fields = "__all__"
@@ -41,6 +43,7 @@ class CreateUserSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     matricula = serializers.CharField(required=False, allow_blank=True)
+    course_id = serializers.UUIDField(required=False, allow_null=True)
     course = serializers.CharField(required=False, allow_blank=True)
     is_student = serializers.BooleanField(default=False)
     siape = serializers.CharField(required=False, allow_blank=True)

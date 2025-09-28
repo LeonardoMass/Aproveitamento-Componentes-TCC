@@ -1,4 +1,4 @@
-from ..models import Student, Servant, AbstractUser
+from ..models import Student, Servant, Course
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -11,13 +11,20 @@ class UserService:
         print("Email User :", usuario.email)
         
         is_student = serializer.validated_data["is_student"]
+        course_instance = None
 
         if is_student:
+            course_name = serializer.validated_data["course"]
+            if course_name:
+                try:
+                    course_instance = Course.objects.get(name=course_name)
+                except Course.DoesNotExist:
+                    pass 
             try:
                 student = Student.objects.get(user=usuario)
                 student.name = serializer.validated_data["name"]
                 student.matricula = serializer.validated_data["matricula"]
-                student.course = serializer.validated_data["course"]
+                student.course = course_instance
                 student.save()
                 return student
             except Student.DoesNotExist:
@@ -25,7 +32,7 @@ class UserService:
                     name=serializer.validated_data["name"],
                     email=serializer.validated_data["email"],
                     matricula=serializer.validated_data["matricula"],
-                    course=serializer.validated_data["course"],
+                    course=course_instance,
                     user=usuario
                 )
         else:
